@@ -10,6 +10,7 @@
 package com.nexatv.launcher.ui.home
 
 import com.nexatv.launcher.data.AppEntry
+import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
 import io.mockk.coEvery
 import io.mockk.every
@@ -41,12 +42,24 @@ class HomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = mockk<InstalledAppsRepository>()
+    private val homeRole = mockk<HomeRoleRepository>()
+
+    @Test
+    fun `not default Home yields NeedsHomeRole state and skips discovery`() = runTest {
+        every { homeRole.isDefaultHome() } returns false
+
+        val viewModel = HomeViewModel(repository, homeRole)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value is HomeUiState.NeedsHomeRole)
+    }
 
     @Test
     fun `empty discovery yields Empty state`() = runTest {
+        every { homeRole.isDefaultHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
 
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, homeRole)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is HomeUiState.Empty)
@@ -54,10 +67,11 @@ class HomeViewModelTest {
 
     @Test
     fun `non-empty discovery yields Apps state with the loaded list`() = runTest {
+        every { homeRole.isDefaultHome() } returns true
         val apps = listOf(mockk<AppEntry>(), mockk<AppEntry>())
         coEvery { repository.loadApps() } returns apps
 
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, homeRole)
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -67,20 +81,22 @@ class HomeViewModelTest {
 
     @Test
     fun `initial state before dispatcher runs is Loading`() = runTest {
+        every { homeRole.isDefaultHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
 
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, homeRole)
 
         assertTrue(viewModel.state.value is HomeUiState.Loading)
     }
 
     @Test
     fun `launch delegates to repository and returns true on success`() = runTest {
+        every { homeRole.isDefaultHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
         val entry = mockk<AppEntry>()
         every { repository.launch(entry) } returns true
 
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, homeRole)
         advanceUntilIdle()
 
         assertTrue(viewModel.launch(entry))
@@ -88,11 +104,12 @@ class HomeViewModelTest {
 
     @Test
     fun `launch delegates to repository and returns false on failure`() = runTest {
+        every { homeRole.isDefaultHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
         val entry = mockk<AppEntry>()
         every { repository.launch(entry) } returns false
 
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, homeRole)
         advanceUntilIdle()
 
         assertFalse(viewModel.launch(entry))

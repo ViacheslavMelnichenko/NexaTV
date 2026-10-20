@@ -37,7 +37,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
@@ -54,17 +56,19 @@ private val TILE_MIN_WIDTH = 180.dp
 private val TILE_HEIGHT = 220.dp
 private const val ERROR_VISIBLE_MS = 3000L
 
-/** The M2 Home: render discovered apps in a D-pad-navigable grid and launch on OK. */
+/** The Home surface: the pre-Home prompt (FR-015) or, once NexaTV is Home, the D-pad app grid. */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 internal fun HomeScreen(
     state: HomeUiState,
     onLaunch: (AppEntry) -> Boolean,
+    onRequestHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
         when (state) {
             HomeUiState.Loading -> CenteredMessage(stringResource(R.string.home_loading))
+            HomeUiState.NeedsHomeRole -> PreHomePrompt(onRequestHome = onRequestHome)
             HomeUiState.Empty -> EmptyState()
             is HomeUiState.Apps -> AppGrid(apps = state.apps, onLaunch = onLaunch)
         }
@@ -168,6 +172,43 @@ private fun CenteredMessage(text: String) {
             color = NexaTheme.colors.onSurfaceMuted,
         )
     }
+}
+
+/**
+ * FR-015 / ADR-0006 pre-Home prompt: shown until NexaTV holds `ROLE_HOME`. A clear explanation plus a
+ * single focusable action that asks the system (reversibly) to make NexaTV the default Home.
+ */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun PreHomePrompt(onRequestHome: () -> Unit) {
+    val action = remember { FocusRequester() }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = NexaTheme.spacing.safeAreaHorizontal, vertical = NexaTheme.spacing.screenMargin),
+        verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(R.string.home_prompt_title),
+            style = MaterialTheme.typography.headlineMedium,
+            color = NexaTheme.colors.onSurface,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(R.string.home_prompt_body),
+            style = MaterialTheme.typography.bodyLarge,
+            color = NexaTheme.colors.onSurfaceMuted,
+            textAlign = TextAlign.Center,
+        )
+        Button(
+            onClick = onRequestHome,
+            modifier = Modifier.focusRequester(action),
+        ) {
+            Text(stringResource(R.string.home_prompt_action))
+        }
+    }
+    LaunchedEffect(Unit) { runCatching { action.requestFocus() } }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)

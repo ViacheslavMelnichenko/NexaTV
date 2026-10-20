@@ -7,6 +7,11 @@
     <string name="home_apps_title">Застосунки</string>
     <string name="home_loading">Завантаження застосунків…</string>
     <string name="home_empty_title">Поки немає застосунків</string>
-    <string name="home_empty_hint">Зробіть NexaTV типовим Home-застосунком, щоб побачити всі застосунки.</string>
+    <string name="home_empty_hint">На цьому телевізорі не знайдено застосунків для запуску.</string>
     <string name="home_launch_failed">Не вдалося відкрити %1$s</string>
+
+    <!-- Pre-Home prompt (M3 / FR-015 / ADR-0006) -->
+    <string name="home_prompt_title">Зробіть NexaTV своїм Home</string>
+    <string name="home_prompt_body">Зробіть NexaTV типовим Home-застосунком, щоб бачити всі застосунки й відкривати їх кнопкою HOME. Повернутися назад можна будь-коли в Налаштуваннях.</string>
+    <string name="home_prompt_action">Зробити типовим Home</string>
 </resources>

@@ -7,6 +7,11 @@
     <string name="home_apps_title">Apps</string>
     <string name="home_loading">Loading apps…</string>
     <string name="home_empty_title">No apps to show yet</string>
-    <string name="home_empty_hint">Set NexaTV as the default Home to see all your apps.</string>
+    <string name="home_empty_hint">No launchable apps were found on this TV.</string>
     <string name="home_launch_failed">Couldn\'t open %1$s</string>
+
+    <!-- Pre-Home prompt (M3 / FR-015 / ADR-0006) -->
+    <string name="home_prompt_title">Make NexaTV your Home</string>
+    <string name="home_prompt_body">Set NexaTV as the default Home to see all your apps and open them with the HOME button. You can switch back any time in Settings.</string>
+    <string name="home_prompt_action">Set as default Home</string>
 </resources>
