@@ -4,7 +4,7 @@
 
 # NexaTV License Analysis
 
-Scope note: This analysis assumes NexaTV is (or intends to be) an independent, permissively licensed project (MIT/Apache-2.0), consistent with the compatibility framing throughout the research corpus. "Compatible with NexaTV?" below is judged against that permissive-target assumption. Where the corpus is explicitly unsure, the value is marked `UNKNOWN`. No license types have been invented; only license identifiers that appear in the corpus are used.
+Scope note: NexaTV is licensed under **Apache-2.0** (owner decision 2026-10-20, resolving the ADR-0001 follow-up; `LICENSE` + `NOTICE` added at repo root). This analysis judges "Compatible with NexaTV?" against that permissive target, consistent with the compatibility framing throughout the research corpus. "Compatible with NexaTV?" below is judged against that permissive-target assumption. Where the corpus is explicitly unsure, the value is marked `UNKNOWN`. No license types have been invented; only license identifiers that appear in the corpus are used.
 
 ## 1. Summary Table
 

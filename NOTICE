@@ -3,8 +3,13 @@ Copyright 2026 Viacheslav Melnichenko
 
 This product is licensed under the Apache License, Version 2.0 (see the LICENSE file).
 
-NexaTV is a greenfield, independently developed Android TV launcher. Existing
-GPL-3.0 launchers (FLauncher, LTvLauncher, tv-launcher, …) are used only as
-clean-room design references per ADR-0001 — their code is NOT included in this
-work. Any third-party code that is actually incorporated will be recorded here
-and in docs/research/LICENSE_ANALYSIS.md with its own license and attribution.
+NexaTV is an independent, clean-room implementation. GPL-3.0 launchers (FLauncher,
+LTvLauncher, nielsvanvelzen/tv-launcher, …) were studied only as design references —
+no code from them is included (see docs/adr/ADR-0001-build-vs-fork.md and
+docs/research/LICENSE_ANALYSIS.md).
+
+Third-party components reused under permissive licenses are listed below as they are
+added. Each entry must also have a corresponding row in the Reuse Clearance Log in
+docs/research/LICENSE_ANALYSIS.md.
+
+  (none yet)
