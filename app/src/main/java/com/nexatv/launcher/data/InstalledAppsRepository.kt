@@ -36,14 +36,10 @@ class InstalledAppsRepository(context: Context) {
      * Icons are rasterized here (off the UI thread) so composition stays cheap (NFR-003).
      */
     suspend fun loadApps(): List<AppEntry> = withContext(Dispatchers.Default) {
-        launcherApps.profiles
+        val rawList = launcherApps.profiles
             .flatMap { user -> runCatching { launcherApps.getActivityList(null, user) }.getOrDefault(emptyList()) }
-            .asSequence()
-            .filter { it.applicationInfo.packageName != selfPackage }
             .map { it.toEntry() }
-            .distinctBy { it.component }
-            .sortedBy { it.label.lowercase() }
-            .toList()
+        orderInstalledApps(rawList, selfPackage)
     }
 
     /** Start an app's main activity. Returns false on failure (FR-003 keeps focus, shows a message). */
@@ -69,3 +65,15 @@ class InstalledAppsRepository(context: Context) {
         const val ICON_PX = 128
     }
 }
+
+/**
+ * Pure ordering seam for the installed-apps list: drops [selfPackage], de-duplicates by
+ * [AppEntry.component], and sorts case-insensitively by [AppEntry.label]. Extracted from
+ * [InstalledAppsRepository.loadApps] so the (Android-free) semantics are unit-testable.
+ */
+internal fun orderInstalledApps(apps: List<AppEntry>, selfPackage: String): List<AppEntry> =
+    apps.asSequence()
+        .filter { it.packageName != selfPackage }
+        .distinctBy { it.component }
+        .sortedBy { it.label.lowercase() }
+        .toList()
