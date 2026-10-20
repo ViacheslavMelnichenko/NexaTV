@@ -27,13 +27,15 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0003](./ADR-0003-cicd-signing-release.md) | CI/CD, signing, release & update/rollback | **Accepted** (2026-10-20) — GitHub Actions, tag-driven signed releases, single long-lived key + offline backup, manual sideload updates |
 | [ADR-0004](./ADR-0004-app-enumeration-visibility.md) | App enumeration & package visibility | **Accepted** (2026-10-20) — `LauncherApps.getActivityList` via ROLE_HOME, no `QUERY_ALL_PACKAGES` |
 | [ADR-0005](./ADR-0005-glass-translucency-technique.md) | "Glass" / translucency technique | **Accepted** (2026-10-20, measurement-gated) — pre-baked "fake glass" default; real-time blur opt-in, gated on-device |
-| [ADR-0006](./ADR-0006-home-role-registration.md) | HOME registration, pre-Home prompt & reversibility | **Accepted** (2026-10-20) — become Home via `RoleManager` role request; pre-Home prompt gates the grid; reversible, no boot receiver |
+| [ADR-0006](./ADR-0006-home-role-registration.md) | HOME registration, pre-Home prompt & reversibility | **Accepted** (2026-10-20) — pre-Home prompt gates the grid; reversible, no boot receiver. **Become-Home mechanism superseded by [ADR-0007](./ADR-0007-home-override-accessibility.md)** on Google TV firmware that blocks `ROLE_HOME` replacement |
+| [ADR-0007](./ADR-0007-home-override-accessibility.md) | Becoming HOME via an accessibility override | **Accepted** (2026-10-20, device-validated) — Google TV blocks third-party `ROLE_HOME`; `NexaOverrideService` raises NexaTV when the stock launcher appears; owner-enabled in Settings → Accessibility, reversible, stock launcher never disabled |
 
 ## Planned / potential ADRs (per `initial.md` §25)
 
 Resolved: Flutter vs. Kotlin/Compose (ADR-0002) · Application discovery strategy (ADR-0004) ·
 CI/CD, signing & release (ADR-0003) · "Glass"/translucency (ADR-0005) ·
-Launcher HOME strategy (ADR-0006 — registration & pre-Home prompt; reboot/crash-recovery verified on-device in M3).
+Launcher HOME strategy (ADR-0006 — registration & pre-Home prompt; ADR-0007 — accessibility override after
+on-device validation showed Google TV blocks `ROLE_HOME` replacement).
 
 Still open / potential:
 

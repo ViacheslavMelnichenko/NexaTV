@@ -109,6 +109,35 @@ Validating ADR-0006 on the real TCL surfaced two firmware behaviors that the ADR
     not tried. Open options to evaluate with the owner: launch NexaTV as a *secondary* launcher / remapped
     button, an OEM-specific setting, or revisiting FR-001 scope.
 
+## 3c. M3 accessibility-override — validated on-device (2026-10-20, ADR-0007)
+
+Since `ROLE_HOME` replacement is blocked (§3b), we prototyped and **validated** the Projectivy-style
+accessibility override (`NexaOverrideService`): a bound `AccessibilityService` that watches for the stock
+launcher coming to the foreground (what HOME triggers) and raises NexaTV over it. All rows are `FACT`
+(ADB + on-device, debug variant, owner enabled the service by remote).
+
+| Observation | Result |
+|-------------|--------|
+| Enable via `adb settings put secure enabled_accessibility_services …` | Service shows **Enabled** but `Bound services:{}` — **never bound**. TCL `AppBoot`/`AUTO_START` manager logs `forbid bind service … callee doesn't have OP_AUTO_START permission`. Granting `appops set … AUTO_START allow` was still insufficient to bind |
+| Enable via Settings → Accessibility (owner consent on remote) | **Bound** immediately (`Bound services:{Service[label=NexaTV Home override, eventTypes=TYPE_WINDOW_STATE_CHANGED]}`) |
+| Press HOME | `topResumedActivity = com.nexatv.launcher…/MainActivity` — **NexaTV raised over stock** (repeated 2×) |
+| Stability (loop/flicker) | Top activity stable across samples; **no loop** (service filters on the stock package, ignores its own window) |
+| Back from NexaTV | Stays on NexaTV (override re-catches the stock launcher) — desirable for a Home; spawns a fresh task instance (minor) |
+| App grid in override mode | After gating on `isEffectivelyHome()` (role **or** override), HOME → NexaTV shows the **full app grid** (LauncherApps enumerates without the role) |
+| Survives app reinstall (`install -r`) | Service stays **Bound** |
+
+**Conclusions:**
+- **The override works on this TCL today** — HOME opens NexaTV without disabling the stock launcher
+  (reversible: owner toggles the service off in Settings → Accessibility). This is the adopted mechanism
+  (**ADR-0007**), superseding ADR-0006's role request on Google TV firmware.
+- **Binding requires the consented Settings enable** — `adb`-only enabling is ignored by this firmware
+  (TCL `AppBoot` blocks the autostart bind). So the override is always a real, owner-granted state.
+- **Detection** now uses `HomeRoleRepository.isEffectivelyHome()` = resolver-is-us **or**
+  `NexaOverrideService` present in `AccessibilityManager.getEnabledAccessibilityServiceList(…)`.
+- **Caveats (INFERENCE):** a 2025 Google TV update reportedly broke this on some firmware (works here, could
+  regress on OTA); the accessibility-consent dialog is a heavy one-time setup step; a brief stock-launcher
+  flash precedes NexaTV. Secondary-launcher instructions remain the fallback.
+
 ## 4. Safety notes
 
 Daily-use production device. Early phase is **read-only**. Do not disable the stock launcher, uninstall
