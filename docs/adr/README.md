@@ -31,6 +31,7 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0007](./ADR-0007-home-override-accessibility.md) | Becoming HOME via an accessibility override | **Accepted** (2026-10-20, device-validated) — Google TV blocks third-party `ROLE_HOME`; `NexaOverrideService` raises NexaTV when the stock launcher appears; owner-enabled in Settings → Accessibility, reversible, stock launcher never disabled |
 | [ADR-0008](./ADR-0008-persistence-proto-datastore.md) | Local persistence | **Accepted** (2026-10-20) — **Proto DataStore** for favorites/categories/theme/settings; typed, `Flow`-native, additive schema evolution; local only (no INTERNET, `allowBackup=false`); Room deferred until categories need relational queries |
 | [ADR-0009](./ADR-0009-configuration-architecture.md) | Configuration architecture (user settings) | **Accepted** (2026-10-20) — settings as an additive `SettingsProto` in the ADR-0008 store (tag 4); `SettingsRepository` + Flow seam; state-based Home↔Settings nav (no nav library yet); tile size as a semantic S/M/L token; opens M5 |
+| [ADR-0010](./ADR-0010-weather-widget-network.md) | Home weather widget & the first outbound network call | **Accepted** (2026-10-20) — **amends NFR-021**: adds `INTERNET` for weather only (no telemetry/other network); Open-Meteo (keyless, no secret); `HttpURLConnection`+`org.json` (no new dep); fixed Wrocław coords (no GPS); lazy, fail-soft off the cold-start path |
 
 ## Planned / potential ADRs (per `initial.md` §25)
 
