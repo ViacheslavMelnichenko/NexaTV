@@ -4,7 +4,9 @@
     <string name="app_name">NexaTV</string>
 
     <!-- Home / app grid (M2) -->
-    <string name="home_apps_title">Apps</string>
+    <string name="home_apps_title">All apps</string>
+    <!-- Favorites row (M4 / ADR-0008) -->
+    <string name="home_favorites_title">Favorites</string>
     <string name="home_loading">Loading apps…</string>
     <string name="home_empty_title">No apps to show yet</string>
     <string name="home_empty_hint">No launchable apps were found on this TV.</string>
