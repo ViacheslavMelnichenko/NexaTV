@@ -30,5 +30,12 @@ wired and buildable, and the actual run is deferred until the TCL is attached.
 
 NexaTV registers only `HOME` / `LEANBACK_LAUNCHER` intent-filters (no plain `LAUNCHER`), so the
 benchmarks launch `MainActivity` by explicit component (`LauncherTarget.launchHome`) rather than the
-default launch intent. When NexaTV is itself the active HOME, `pressHome()` surfaces it — watch that
-cold-start iterations still force-stop between runs (Macrobenchmark handles this for `StartupMode.COLD`).
+default launch intent.
+
+Because NexaTV is itself the active HOME, the OS resurrects it immediately after Macrobenchmark's
+`StartupMode.COLD` `killProcess`, so a plain cold launch has nothing to transition to and the harness
+fails with `Unable to confirm activity launch completion []`. To get a real, confirmable launch each
+iteration first surfaces system Settings (`LauncherTarget.leaveHome`, not timed) so the measured
+`launchHome()` is a genuine foreground transition. `MainActivity` also calls `reportFullyDrawn()` (via
+`ReportDrawnWhen`) once the grid replaces the initial Loading state, so `timeToFullDisplay` reflects a
+usable Home, not just the first empty frame.

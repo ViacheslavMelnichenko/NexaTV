@@ -48,8 +48,11 @@ class StartupBenchmark {
         iterations = ITERATIONS,
         startupMode = StartupMode.COLD,
         compilationMode = compilationMode,
+        // NexaTV is the active HOME; the OS resurrects it after the COLD kill, leaving nothing to
+        // transition to. Surface Settings first (not timed) so the measured launchHome() is a real,
+        // confirmable foreground transition. See LauncherTarget.leaveHome.
+        setupBlock = { leaveHome() },
     ) {
-        pressHome()
         launchHome()
     }
 
@@ -61,7 +64,12 @@ class StartupBenchmark {
         iterations = ITERATIONS,
         startupMode = StartupMode.WARM,
         compilationMode = CompilationMode.Partial(),
-        setupBlock = { launchHome() },
+        // Same HOME caveat: leave Home so launchHome() actually brings the grid to the foreground and
+        // produces frames; otherwise re-launching the already-visible HOME draws nothing to measure.
+        setupBlock = {
+            leaveHome()
+            launchHome()
+        },
     ) {
         repeat(DPAD_STEPS) {
             device.pressDPadRight()
