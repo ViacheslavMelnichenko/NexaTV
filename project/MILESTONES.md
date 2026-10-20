@@ -21,9 +21,9 @@
 - [x] Device audit recorded in `docs/technical/ANDROID-TV.md` (identity, CPU/RAM, display, HOME activities, app counts)
 - [x] Repository initialized
 - [x] Initial documentation structure
-- [ ] Initial research notes populated (open-source launchers)
+- [x] Initial research notes populated (6 launchers researched from real repos; matrix + license + architecture docs written 2026-10-20)
 - [x] Initial backlog
 - [x] M0 milestone defined
-- [ ] ADR-0001 (Build vs. Fork) decided
+- [ ] ADR-0001 (Build vs. Fork) decided ← **next**
 
 > Per `initial.md` §32: do **not** install NexaTV during M0.

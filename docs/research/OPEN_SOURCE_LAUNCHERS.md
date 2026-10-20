@@ -1,7 +1,7 @@
 # Open-Source Android TV Launchers — Research Index
 
-> **Status:** Not started. This is the entry point for Phase 0 discovery research.
-> Every claim recorded here or in linked documents must be labelled `FACT`, `INFERENCE`,
+> **Status:** First research pass complete (2026-10-20) — all 6 candidates investigated from their actual
+> repositories. Pending human review. Every claim in the linked documents is labelled `FACT`, `INFERENCE`,
 > `ASSUMPTION`, or `UNKNOWN`, with a source reference (repo URL + commit/date observed).
 
 ## Purpose
@@ -12,16 +12,21 @@ not assumption.
 
 ## Candidates
 
-| # | Project | Repo (to confirm) | Primary tech (to confirm) | License (to confirm) | Detail doc | Status |
-|---|---------|-------------------|---------------------------|----------------------|-----------|--------|
-| 1 | FLauncher | UNKNOWN | UNKNOWN | UNKNOWN | [FLAUNCHER.md](./FLAUNCHER.md) | ☐ Not started |
-| 2 | LTvLauncher | UNKNOWN | UNKNOWN | UNKNOWN | [LTVLAUNCHER.md](./LTVLAUNCHER.md) | ☐ Not started |
-| 3 | LTvLauncher Extended | UNKNOWN | UNKNOWN | UNKNOWN | [LTVLAUNCHER.md](./LTVLAUNCHER.md) | ☐ Not started |
-| 4 | Yukuza Launcher | UNKNOWN | UNKNOWN | UNKNOWN | [YUKUZA.md](./YUKUZA.md) | ☐ Not started |
-| 5 | Tarang Launcher | UNKNOWN | UNKNOWN | UNKNOWN | [TARANG.md](./TARANG.md) | ☐ Not started |
-| 6 | TV Launcher (nielsvanvelzen) | UNKNOWN | UNKNOWN | UNKNOWN | [TV_LAUNCHER.md](./TV_LAUNCHER.md) | ☐ Not started |
-| 7 | LauncherCompose | UNKNOWN | UNKNOWN | UNKNOWN | _TBD_ | ☐ Not started |
-| 8 | Other active launchers found during research | — | — | — | _TBD_ | ☐ Not started |
+| # | Project | Repo | Primary tech | License | Detail doc | Status |
+|---|---------|------|--------------|---------|-----------|--------|
+| 1 | FLauncher | gitlab.com/flauncher/flauncher | Flutter/Dart + Kotlin | **GPL-3.0** | [FLAUNCHER.md](./FLAUNCHER.md) | ☑ Researched |
+| 2 | LTvLauncher | github.com/LeanBitLab/LtvLauncher | Flutter (FLauncher fork) | **GPL-3.0** | [LTVLAUNCHER.md](./LTVLAUNCHER.md) | ☑ Researched |
+| 3 | LTvLauncher Extended | github.com/niposch/LTvLauncher-Extended | Flutter (fork) | **GPL-3.0** | [LTVLAUNCHER.md](./LTVLAUNCHER.md) | ☑ Researched |
+| 4 | Yukuza Launcher | github.com/urunkarpm/yukuza-launcher | Kotlin / Compose-for-TV | MIT *(README only, no LICENSE file)* | [YUKUZA.md](./YUKUZA.md) | ☑ Researched |
+| 5 | Tarang Launcher | github.com/mohitkyadav/tarang-launcher | Kotlin | **None** *(all-rights-reserved)* | [TARANG.md](./TARANG.md) | ☑ Researched |
+| 6 | TV Launcher (nielsvanvelzen) | github.com/nielsvanvelzen/tv-launcher | Kotlin / Compose-for-TV | **GPL-3.0** | [TV_LAUNCHER.md](./TV_LAUNCHER.md) | ☑ Researched |
+| 7 | LauncherCompose | github.com/karuhun-developer/LauncherCompose | Kotlin / Compose (Now-in-Android) | **Apache-2.0** | [TV_LAUNCHER.md](./TV_LAUNCHER.md) | ☑ Researched |
+| 8 | Other active launchers | — | — | — | _as needed_ | ☐ Not started |
+
+> **License takeaway:** every Flutter candidate (FLauncher + all LTvLauncher forks) is **GPL-3.0**, and
+> the strongest native candidate (`tv-launcher`) is also **GPL-3.0** — none can be *copied* into a permissive
+> NexaTV codebase. The only permissive-reuse options are **LauncherCompose (Apache-2.0)** and, with
+> caveats, **Yukuza (MIT declared but missing a LICENSE file)**. See [LICENSE_ANALYSIS.md](./LICENSE_ANALYSIS.md).
 
 ## Research objectives (applied to each project)
 
