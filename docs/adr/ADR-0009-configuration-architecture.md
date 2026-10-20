@@ -2,7 +2,7 @@
 
 ## Status
 
-**Proposed** — 2026-10-20. First configuration decision for NexaTV. **Builds on (does not supersede)**
+**Accepted** — 2026-10-20. First configuration decision for NexaTV. **Builds on (does not supersede)**
 [ADR-0008](./ADR-0008-persistence-proto-datastore.md) — settings are additive state in the same Proto
 DataStore. Opens the M5 "Cinematic Home & Settings" milestone; its first deliverable (M5.1) is the
 settings **foundation**: a reachable Settings screen, a persisted store, and one working parameter
@@ -102,12 +102,12 @@ while theme, background, and sort slot in later as field + row additions.
 
 ## Follow-ups
 
-- **Schema:** un-reserve tag 4, add `SettingsProto` (`TileSize tile_size = 1;`) + enum; regenerate; confirm
-  old `.pb` round-trips with the MEDIUM default.
-- **Repository + tests:** `SettingsRepository` over the shared store; unit tests (default = MEDIUM, set/round-trip
-  S/M/L) with a temp-file DataStore.
+- **Schema — done** (`feat`, this milestone): tag 4 un-reserved, `SettingsProto` (`TileSize tile_size = 1;`) +
+  enum added additively; serializer round-trip confirms old `.pb` reads the MEDIUM default.
+- **Repository + tests — done** (`feat`, this milestone): `SettingsRepository` over the shared store (the store
+  delegate extracted into `LauncherStateStore` so favorites + settings share one `.pb`); unit tests cover
+  default = MEDIUM, set/round-trip S/M/L, the proto↔domain mapping, and favorites staying untouched.
 - **Tile-size token:** replace `HomeScreen.kt`'s `TILE_*` constants with a `TileSize → dp` map; `HomeViewModel`
   exposes the resolved size; grid/favorites render from it.
 - **Settings surface:** top-right Settings icon on home (focusable, D-pad), state toggle to a D-pad Settings
   list with the tile-size row writing live; BACK returns home.
-- **Accept gate:** flip ADR-0009 to **Accepted** once the owner confirms the store/navigation/entry choices.
