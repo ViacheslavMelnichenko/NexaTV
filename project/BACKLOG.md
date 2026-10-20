@@ -28,7 +28,8 @@
 
 ### Feature: Architectural decision
 - ☑ **P1** Decide & finalize ADR-0001 (Build vs. Fork) → **greenfield, permissive license, clean-room references** (2026-10-20).
-- ☐ **P0** Draft & decide ADR-0002: Flutter vs. Kotlin/Compose-for-TV. *Depends on:* ADR-0001 ✓. ← **next**
+- ☑ **P0** Draft & decide ADR-0002: Flutter vs. Kotlin/Compose-for-TV → **Accepted: Kotlin + Jetpack Compose-for-TV** (direct Android APIs, no Flutter), 2026-10-20.
+- ☐ **P0** Validation spike (gate, ~½ day): trivial Compose-for-TV release APK on the TCL — confirm `armeabi-v7a` install/run, `tv-material` D-pad focus, cold-start/RSS via Macrobenchmark. *Depends on:* ADR-0002.
 - ☐ **P1** Pick exact permissive license (MIT vs Apache-2.0) and add `LICENSE` file.
 
 ### Feature: Android launcher-model understanding

@@ -6,7 +6,7 @@
 | ID | Milestone | Goal | Status |
 |----|-----------|------|--------|
 | **M0** | Discovery & Device Audit | ADB connected, device audited (read-only), ecosystem researched, feature matrix + license + architecture comparison, ADR-0001 decided | ☑ Done (2026-10-20) |
-| M1 | Architecture & Project Foundation | Technology/architecture decided (ADRs), code scaffold created | ☐ |
+| M1 | Architecture & Project Foundation | Technology/architecture decided (ADRs), code scaffold created | ◐ (ADR-0002 accepted 2026-10-20 → Kotlin + Compose-for-TV) |
 | M2 | Minimal Launcher | Launcher Activity, D-pad focus, app list render | ☐ |
 | M3 | HOME Integration | Register as HOME (reversibly), verify behavior on real TV | ☐ |
 | M4 | Application Discovery | Robust installed-app discovery, launching, favorites, basic categories | ☐ |

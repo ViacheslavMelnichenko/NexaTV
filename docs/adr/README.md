@@ -23,7 +23,7 @@ Proposed / Accepted / Superseded / Rejected
 | ADR | Title | Status |
 |-----|-------|--------|
 | [ADR-0001](./ADR-0001-build-vs-fork.md) | Build vs. Fork | **Accepted** (2026-10-20) — greenfield, permissive license, clean-room references |
-| ADR-0002 | Flutter vs. Kotlin/Compose-for-TV | _Next_ |
+| [ADR-0002](./ADR-0002-flutter-vs-kotlin-compose.md) | Flutter vs. Kotlin/Compose-for-TV | **Accepted** (2026-10-20) — Kotlin + Jetpack Compose-for-TV, direct Android APIs (no Flutter) |
 
 ## Planned / potential ADRs (per `initial.md` §25)
 
