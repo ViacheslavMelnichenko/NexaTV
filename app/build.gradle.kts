@@ -1,8 +1,12 @@
 // NexaTV — :app module. Licensed under the Apache License, Version 2.0.
+import com.google.protobuf.gradle.id
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.detekt)
+    // Proto DataStore codegen (ADR-0008): compiles src/main/proto into Java-lite classes.
+    alias(libs.plugins.protobuf)
 }
 
 // Static analysis gate (ADR-0003 D1 / NFR-008). Config: config/detekt/detekt.yml.
@@ -63,6 +67,21 @@ android {
     }
 }
 
+// Protobuf-lite codegen for Proto DataStore (ADR-0008). Lite runtime keeps the APK small
+// (NFR-002) and is the variant DataStore expects on Android.
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                id("java") { option("lite") }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -79,6 +98,10 @@ dependencies {
 
     // Compose-for-TV material (androidx.tv) — D-pad-first components (ADR-0002).
     implementation(libs.androidx.tv.material)
+
+    // Local persistence — Proto DataStore + Protobuf-lite runtime (ADR-0008).
+    implementation(libs.androidx.datastore)
+    implementation(libs.protobuf.javalite)
 
     // Unit tests (JVM, run in CI — NFR-008). No device/Robolectric needed.
     testImplementation(libs.junit)

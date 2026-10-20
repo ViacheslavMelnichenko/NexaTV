@@ -1,0 +1,29 @@
+// NexaTV — persisted launcher state schema (ADR-0008, Proto DataStore).
+// Licensed under the Apache License, Version 2.0.
+//
+// Additive-only contract: never renumber or reuse a field tag, and never change a
+// field's type. New state is a NEW field with a safe default, so old files keep
+// deserializing. Tags for not-yet-built state are `reserved` to pin them now.
+syntax = "proto3";
+
+option java_package = "com.nexatv.launcher.data.proto";
+option java_multiple_files = true;
+
+// Root message for the single launcher-state DataStore file.
+message LauncherStateProto {
+  // The user's favorite apps, in pin / reorder order (M4). Empty by default.
+  repeated AppKeyProto favorites = 1;
+
+  // Reserved for upcoming state so their tags stay stable across schema growth:
+  //   2 = category assignments (M4), 3 = theme id (Theming EPIC), 4 = settings (M6).
+  reserved 2, 3, 4;
+}
+
+// Stable identity of a launchable activity within a user profile. Chosen so a
+// pinned favorite survives app updates (component is stable across versions).
+message AppKeyProto {
+  // ComponentName.flattenToString() of the launchable activity.
+  string component = 1;
+  // Profile serial (UserManager.getSerialNumberForUser) — distinguishes work/clone profiles.
+  int64 user_serial = 2;
+}
