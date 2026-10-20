@@ -68,8 +68,8 @@
 > Owner directive (2026-10-20): provide **easy theme switching** whose selection **survives restart**.
 - ☐ **P2** **Theme catalog** — ≥2 built-in themes (e.g. the pastel dark default + at least one alternative),
   each a complete token set behind `NexaTheme`. *Depends on:* Design System step.
-- ☐ **P2** **Theme persistence** — persist the selected theme and re-apply on cold start. *Depends on:* the
-  **Persistence ADR** (DataStore vs. alternatives — currently an open/planned ADR) and the Configuration ADR.
+- ☐ **P2** **Theme persistence** — persist the selected theme and re-apply on cold start via Proto DataStore
+  (**ADR-0008**). *Depends on:* the M4 DataStore foundation (favorites schema/repository) and the Configuration ADR.
 - ☐ **P2** **Theme switcher UI** — a D-pad-friendly control (in Settings) to change theme live; selection
   takes effect immediately and is restored after reboot. *Depends on:* the two items above.
 
@@ -131,9 +131,11 @@ Builds on the M2 grid now that NexaTV is effectively HOME (M3), so enumeration i
   is a `callbackFlow` (registered while collected, unregistered on cancel — no leak); `HomeViewModel` collects
   it with `collectLatest { reload() }` so a burst of callbacks coalesces into one up-to-date load. Unit test
   `an app change reloads the grid` green; `assembleDebug` green. 2026-10-20.
-- ☐ **P1** **Favorites** — pin / unpin / reorder apps, surfaced ahead of the full grid. **Blocked** on the
-  **Persistence ADR** (favorites must survive restart). *Depends on:* Persistence decision.
-- ☐ **P1** **Basic categories** — group apps (e.g. media / games / system) for faster D-pad reach.
-  *Depends on:* the favorites/persistence foundation.
-- ⏸ **P1** **Persistence ADR** (DataStore vs. alternatives) — owner-meaningful decision that gates favorites,
-  categories, and later theme/config persistence. Open/planned ADR; surface to the owner before M4 UI work.
+- ☑ **P1** **Persistence ADR** — **ADR-0008 Accepted** 2026-10-20: **Proto DataStore** for favorites,
+  categories, theme, and settings (owner's choice over Room / Preferences DataStore). Unblocks the M4 UI work
+  and the Theming-persistence step.
+- ☐ **P1** **Favorites** — pin / unpin / reorder apps, surfaced ahead of the full grid; persisted via Proto
+  DataStore (ADR-0008) so they survive restart. *First DataStore step:* schema v1 + favorites repository +
+  unit tests (temp-file DataStore, no device). *Depends on:* ADR-0008 (done).
+- ☐ **P1** **Basic categories** — group apps (e.g. media / games / system) for faster D-pad reach; persisted
+  via the same DataStore. *Depends on:* the favorites/persistence foundation.

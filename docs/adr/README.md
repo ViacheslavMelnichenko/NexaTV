@@ -29,18 +29,18 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0005](./ADR-0005-glass-translucency-technique.md) | "Glass" / translucency technique | **Accepted** (2026-10-20, measurement-gated) — pre-baked "fake glass" default; real-time blur opt-in, gated on-device |
 | [ADR-0006](./ADR-0006-home-role-registration.md) | HOME registration, pre-Home prompt & reversibility | **Accepted** (2026-10-20) — pre-Home prompt gates the grid; reversible, no boot receiver. **Become-Home mechanism superseded by [ADR-0007](./ADR-0007-home-override-accessibility.md)** on Google TV firmware that blocks `ROLE_HOME` replacement |
 | [ADR-0007](./ADR-0007-home-override-accessibility.md) | Becoming HOME via an accessibility override | **Accepted** (2026-10-20, device-validated) — Google TV blocks third-party `ROLE_HOME`; `NexaOverrideService` raises NexaTV when the stock launcher appears; owner-enabled in Settings → Accessibility, reversible, stock launcher never disabled |
+| [ADR-0008](./ADR-0008-persistence-proto-datastore.md) | Local persistence | **Accepted** (2026-10-20) — **Proto DataStore** for favorites/categories/theme/settings; typed, `Flow`-native, additive schema evolution; local only (no INTERNET, `allowBackup=false`); Room deferred until categories need relational queries |
 
 ## Planned / potential ADRs (per `initial.md` §25)
 
 Resolved: Flutter vs. Kotlin/Compose (ADR-0002) · Application discovery strategy (ADR-0004) ·
 CI/CD, signing & release (ADR-0003) · "Glass"/translucency (ADR-0005) ·
 Launcher HOME strategy (ADR-0006 — registration & pre-Home prompt; ADR-0007 — accessibility override after
-on-device validation showed Google TV blocks `ROLE_HOME` replacement).
+on-device validation showed Google TV blocks `ROLE_HOME` replacement) · Persistence (ADR-0008 — Proto DataStore).
 
 Still open / potential:
 
 - State management
-- Persistence
 - Native Android integration
-- Configuration architecture
+- Configuration architecture (builds on ADR-0008's DataStore foundation)
 - Plugin / integration architecture (post-MVP)
