@@ -24,8 +24,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
-import com.nexatv.launcher.ui.theme.NexaSpacing
-import com.nexatv.launcher.ui.theme.NexaTvTheme
+import com.nexatv.launcher.ui.theme.NexaTheme
 
 /**
  * Home entry point. In M1 (Foundation) this renders a labelled placeholder only —
@@ -35,7 +34,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NexaTvTheme {
+            NexaTheme {
                 HomePlaceholder()
             }
         }
@@ -49,7 +48,7 @@ private fun HomePlaceholder() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(NexaSpacing.screenMargin),
+                .padding(NexaTheme.spacing.screenMargin),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
         ) {

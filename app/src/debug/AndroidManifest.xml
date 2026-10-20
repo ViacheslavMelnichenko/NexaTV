@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-only overlay. Adds a separate TV launcher entry for the Design System gallery so it
+  can be opened on-device during development. Merged ONLY into the debug variant; the release
+  APK never contains this activity.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name="com.nexatv.launcher.designsystem.DesignSystemGalleryActivity"
+            android:exported="true"
+            android:label="NexaTV Design System"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.NexaTV">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

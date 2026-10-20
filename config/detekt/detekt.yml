@@ -18,3 +18,6 @@ style:
   # Design tokens are literal by nature (dp grid, sp sizes, color hex).
   MagicNumber:
     active: false
+  # @Preview composables are entry points consumed by tooling, not dead code.
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']

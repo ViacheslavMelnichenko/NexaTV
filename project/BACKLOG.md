@@ -55,14 +55,14 @@
 ## EPIC: Design System  _(foundational — precedes launcher screens)_
 > Owner directive (2026-10-20): the Design System is its **own step**, done **before** building
 > launcher screens so every screen consumes shared tokens/components. Implements PRD §16 / NFR-016.
-- ☐ **P1** **Design System step.** Promote the M1 token seeds (`ui/theme/Color|Type|Dimens|Theme.kt`) into a
-  documented, reusable system: a single `NexaTheme` with semantic token roles (surface/accent/focus/…),
-  a type scale (body ≥18sp — NFR-016), spacing/radius grid, and **a small core-component catalog**
-  (focusable card/tile, section header, D-pad focus treatment) with `@Preview`s.
-  - *Acceptance:* a one-screen "Design System gallery" (debug-only) renders every token + component;
-    screens never hardcode color/size; documented in `docs/design/DESIGN-SYSTEM.md`.
-  - *Note:* structured **theme-agnostic** — all colors flow from the active theme (no literals in screens),
-    so the later theme-switch step is a drop-in.
+- ☑ **P1** **Design System step** (2026-10-20). Promoted the M1 token seeds into a documented, reusable
+  system: semantic `NexaColorScheme` roles behind `NexaTheme` (CompositionLocal), the type scale
+  (body ≥18sp — NFR-016), spacing/radius grid, and a core-component catalog — `SectionHeader` + focusable
+  `AppTile` (D-pad focus ring, no ripple) with `@Preview`s. Debug-only **Design System gallery**
+  (`src/debug`, separate TV entry) renders every token + component. Documented in
+  `docs/design/DESIGN-SYSTEM.md`. `assembleDebug` + detekt green locally.
+  - *Theme-agnostic by construction:* all colors flow from the active `NexaColorScheme` (no literals in
+    screens), so the later theme-switch step is a drop-in.
 
 ## EPIC: Theming — switchable themes, persisted  _(later step; depends on Design System + Persistence ADR)_
 > Owner directive (2026-10-20): provide **easy theme switching** whose selection **survives restart**.
