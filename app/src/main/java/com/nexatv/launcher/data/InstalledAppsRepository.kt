@@ -13,6 +13,7 @@ import android.content.Context
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.os.UserHandle
+import android.os.UserManager
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +32,7 @@ class InstalledAppsRepository(context: Context) {
     private val appContext = context.applicationContext
     private val launcherApps =
         appContext.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+    private val userManager = appContext.getSystemService(UserManager::class.java)
 
     /** Package to hide from its own grid (debug builds carry the `.debug` suffix). */
     private val selfPackage = appContext.packageName
@@ -82,6 +84,7 @@ class InstalledAppsRepository(context: Context) {
             packageName = applicationInfo.packageName,
             component = componentName,
             user = user,
+            userSerial = userManager?.getSerialNumberForUser(user) ?: 0L,
             icon = icon,
         )
     }

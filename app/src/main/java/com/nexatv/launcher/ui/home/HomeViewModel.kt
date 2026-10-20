@@ -12,8 +12,12 @@ package com.nexatv.launcher.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexatv.launcher.data.AppEntry
+import com.nexatv.launcher.data.FavoriteKey
+import com.nexatv.launcher.data.FavoritesRepository
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
+import com.nexatv.launcher.data.resolveFavorites
+import com.nexatv.launcher.data.toFavoriteKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +34,13 @@ sealed interface HomeUiState {
      */
     data object NeedsHomeRole : HomeUiState
     data object Empty : HomeUiState
-    data class Apps(val apps: List<AppEntry>) : HomeUiState
+
+    /**
+     * NexaTV is Home and apps were discovered. [apps] is the full grid ("Усі застосунки"); [favorites]
+     * is the user's pinned apps in pin/reorder order (ADR-0008), rendered as the "Обране" row above the
+     * grid. [favorites] is empty until the user pins something.
+     */
+    data class Apps(val favorites: List<AppEntry>, val apps: List<AppEntry>) : HomeUiState
 }
 
 /**
@@ -42,10 +52,17 @@ sealed interface HomeUiState {
 class HomeViewModel(
     private val repository: InstalledAppsRepository,
     private val homeRole: HomeRoleRepository,
+    private val favoritesRepository: FavoritesRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
+
+    /** Last discovered apps, cached so a favorites change re-emits without re-querying/re-rasterizing. */
+    private var cachedApps: List<AppEntry> = emptyList()
+
+    /** Latest persisted favorites, kept so [emitApps] can resolve them against [cachedApps]. */
+    private var favoriteKeys: List<FavoriteKey> = emptyList()
 
     init {
         refresh()
@@ -54,6 +71,13 @@ class HomeViewModel(
         // (one app update fires several) coalesces into a single, up-to-date load.
         viewModelScope.launch {
             repository.appChanges().collectLatest { reload() }
+        }
+        // Keep favorites live: a pin/unpin/reorder updates the "Обране" row without reloading the grid.
+        viewModelScope.launch {
+            favoritesRepository.favorites.collect { keys ->
+                favoriteKeys = keys
+                if (_state.value is HomeUiState.Apps) emitApps()
+            }
         }
     }
 
@@ -71,9 +95,31 @@ class HomeViewModel(
             _state.value = HomeUiState.NeedsHomeRole
             return
         }
-        val apps = repository.loadApps()
-        _state.value = if (apps.isEmpty()) HomeUiState.Empty else HomeUiState.Apps(apps)
+        cachedApps = repository.loadApps()
+        emitApps()
+    }
+
+    /** Project the cached apps + current favorites into the UI state (favorites resolved in order). */
+    private fun emitApps() {
+        _state.value = if (cachedApps.isEmpty()) {
+            HomeUiState.Empty
+        } else {
+            HomeUiState.Apps(
+                favorites = resolveFavorites(cachedApps, favoriteKeys),
+                apps = cachedApps,
+            )
+        }
     }
 
     fun launch(entry: AppEntry): Boolean = repository.launch(entry)
+
+    /** Pin [entry] if it is not a favorite, otherwise unpin it; persisted via DataStore (ADR-0008). */
+    fun toggleFavorite(entry: AppEntry) {
+        viewModelScope.launch { favoritesRepository.toggle(entry.toFavoriteKey()) }
+    }
+
+    /** Move the favorite at [from] to [to] within the "Обране" row; persisted via DataStore. */
+    fun moveFavorite(from: Int, to: Int) {
+        viewModelScope.launch { favoritesRepository.reorder(from, to) }
+    }
 }

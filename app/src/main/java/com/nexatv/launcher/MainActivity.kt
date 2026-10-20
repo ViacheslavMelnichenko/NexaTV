@@ -25,6 +25,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.LifecycleEventObserver
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
+import com.nexatv.launcher.data.favoritesRepository
 import com.nexatv.launcher.ui.home.HomeScreen
 import com.nexatv.launcher.ui.home.HomeViewModel
 import com.nexatv.launcher.ui.theme.NexaTheme
@@ -43,7 +44,11 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current.applicationContext
                 val roleRepository = remember { HomeRoleRepository(context) }
                 val viewModel: HomeViewModel = viewModel {
-                    HomeViewModel(InstalledAppsRepository(context), roleRepository)
+                    HomeViewModel(
+                        InstalledAppsRepository(context),
+                        roleRepository,
+                        favoritesRepository(context),
+                    )
                 }
 
                 // Re-check the HOME role when the system role-request flow returns (ADR-0006).

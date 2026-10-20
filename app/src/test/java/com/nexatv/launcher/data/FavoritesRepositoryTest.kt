@@ -9,10 +9,13 @@
  */
 package com.nexatv.launcher.data
 
+import android.content.ComponentName
 import androidx.datastore.core.DataStore
 import com.nexatv.launcher.data.proto.AppKeyProto
 import com.nexatv.launcher.data.proto.LauncherStateProto
 import com.nexatv.launcher.data.proto.LauncherStateSerializer
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,6 +77,24 @@ class FavoritesRepositoryTest {
     }
 
     @Test
+    fun `resolveFavorites keeps favorite order and drops uninstalled keys`() {
+        val appA = stubbedApp("pkg/.A")
+        val appB = stubbedApp("pkg/.B")
+        val keys = listOf(
+            FavoriteKey("pkg/.B", 0),      // installed, listed first
+            FavoriteKey("gone/.X", 0),     // no longer installed -> dropped
+            FavoriteKey("pkg/.A", 0),      // installed, listed second
+        )
+
+        assertEquals(listOf(appB, appA), resolveFavorites(listOf(appA, appB), keys))
+    }
+
+    @Test
+    fun `resolveFavorites is empty when nothing is pinned`() {
+        assertEquals(emptyList<AppEntry>(), resolveFavorites(listOf(stubbedApp("pkg/.A")), emptyList()))
+    }
+
+    @Test
     fun `toggle then reorder persists through the store and the flow reflects it`() = runTest {
         val store = FakeLauncherStore()
         val repository = FavoritesRepository(store)
@@ -87,6 +108,16 @@ class FavoritesRepositoryTest {
 
         repository.toggle(b) // unpin
         assertEquals(listOf(a), repository.favorites.first())
+    }
+
+    /** A mock [AppEntry] whose component flattens to [component] on the default profile (serial 0). */
+    private fun stubbedApp(component: String): AppEntry {
+        val componentName = mockk<ComponentName>()
+        every { componentName.flattenToString() } returns component
+        val entry = mockk<AppEntry>()
+        every { entry.component } returns componentName
+        every { entry.userSerial } returns 0L
+        return entry
     }
 
     /** Minimal in-memory [DataStore] backed by a [MutableStateFlow] — no file, no Android. */

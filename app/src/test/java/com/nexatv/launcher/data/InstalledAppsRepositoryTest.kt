@@ -33,6 +33,7 @@ class InstalledAppsRepositoryTest {
         packageName = pkg,
         component = comp,
         user = user,
+        userSerial = 0L,
         icon = null,
     )
 

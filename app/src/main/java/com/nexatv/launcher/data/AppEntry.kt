@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 /**
  * One launchable application, resolved from [android.content.pm.LauncherApps] (ADR-0004).
  * [component] + [user] together uniquely identify the activity to start (profile-aware).
+ * [userSerial] is the profile's stable serial (UserManager) — the persistence-safe form of [user]
+ * used to key favorites (ADR-0008), since a raw [UserHandle] is not durable across reboots.
  * [icon] is pre-rasterized off the UI thread (NFR-003); null when no icon could be loaded
  * (the UI then falls back to a monogram — FR-013).
  */
@@ -26,5 +28,6 @@ data class AppEntry(
     val packageName: String,
     val component: ComponentName,
     val user: UserHandle,
+    val userSerial: Long,
     val icon: ImageBitmap?,
 )

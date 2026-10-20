@@ -25,6 +25,20 @@ import kotlinx.coroutines.flow.map
  */
 data class FavoriteKey(val component: String, val userSerial: Long)
 
+/** The persisted key for a discovered app — component + profile serial (ADR-0008). */
+fun AppEntry.toFavoriteKey(): FavoriteKey = FavoriteKey(component.flattenToString(), userSerial)
+
+/**
+ * Resolve persisted favorite [keys] against the currently discovered [apps], in favorite order.
+ * Keys with no matching installed app (e.g. a favorite that was since uninstalled) are dropped, so
+ * the favorites row never shows a dead tile. Pure/Android-free so it is unit-testable.
+ */
+internal fun resolveFavorites(apps: List<AppEntry>, keys: List<FavoriteKey>): List<AppEntry> {
+    if (keys.isEmpty()) return emptyList()
+    val byKey = apps.associateBy { it.toFavoriteKey() }
+    return keys.mapNotNull { byKey[it] }
+}
+
 /**
  * Owns the user's favorites, persisted via Proto DataStore (ADR-0008). Reads are a cold [Flow] off
  * the store (collected on the UI path at cold start, NFR-001/003); writes are transactional through
