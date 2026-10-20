@@ -11,6 +11,8 @@ package com.nexatv.launcher.ui.components
 
 import android.view.KeyEvent as AndroidKeyEvent
 import android.view.ViewConfiguration
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,8 +38,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,8 +82,18 @@ internal fun AppTile(
     val colors = NexaTheme.colors
     val shape = RoundedCornerShape(NexaTheme.radius.md)
 
+    // Focus cue (M5): the focused tile lifts slightly and casts a tinted glow, so the eye lands on it
+    // from across the room. Animated so the move reads as motion, not a jump; resting tiles stay flat.
+    val scale by animateFloatAsState(targetValue = if (focused) 1.05f else 1f, label = "tileScale")
+    val glow by animateDpAsState(targetValue = if (focused) 24.dp else 0.dp, label = "tileGlow")
+
     Column(
         modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .shadow(elevation = glow, shape = shape, ambientColor = colors.focusRing, spotColor = colors.focusRing)
             .clip(shape)
             .background(if (focused || moving) colors.surfaceVariant else colors.surface)
             .border(
