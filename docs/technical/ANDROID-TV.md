@@ -93,11 +93,21 @@ Validating ADR-0006 on the real TCL surfaced two firmware behaviors that the ADR
   `PackageManager.resolveActivity(…, MATCH_DEFAULT_ONLY)` and compares the resolved package to our own.
   This matches the real HOME button on every firmware; the `RoleManager` role API is **not** a reliable
   source of truth here (`isRoleAvailable` false; role record stale).
-- **Becoming Home (restricted).** Google TV blocks *programmatic* assignment of a third-party launcher as
-  the effective HOME — only a **user-consented interactive flow** (the system Home picker /
-  `ACTION_HOME_SETTINGS`, which our `requestHomeIntent()` falls back to since `ROLE_HOME` is unavailable)
-  can switch it. The owner confirmed a manual switch worked once and later reverted — persistence across
-  reboot is **UNKNOWN** and still to be verified on-device.
+- **Becoming Home (blocked on this firmware).** The user-consented role dialog **does** fire: pressing the
+  pre-Home prompt launches `permissioncontroller/…RequestRoleActivity` ("Set NexaTV as your default home
+  app?" with Google TV / NexaTV / Setup Wizard), and granting it updates the role-holder record to NexaTV.
+  **But the effective HOME never changes:** `resolve-activity`, an explicit HOME intent, and the physical
+  HOME button all still open stock Google TV LauncherX — both immediately after the grant **and after a
+  full reboot** (owner confirmed the stock grid on screen post-reboot, 2026-10-20). `cmd package
+  set-home-activity …/nexatv` likewise reports `Success` with no effect.
+  - **Conclusion (FACT→INFERENCE):** on this TCL Google TV firmware a third-party launcher **cannot become
+    the effective HOME** through the normal `ROLE_HOME` path — Google TV pins its own LauncherX to the HOME
+    button regardless of the role holder. This matches the documented Google TV (vs. AOSP Android TV)
+    launcher-replacement restriction and directly challenges FR-001 on the target device.
+  - **Not attempted (safety):** forcing the fallback by disabling/freezing the stock launcher
+    (`pm disable-user …launcherx`) is **forbidden** by the project safety rules in early development and was
+    not tried. Open options to evaluate with the owner: launch NexaTV as a *secondary* launcher / remapped
+    button, an OEM-specific setting, or revisiting FR-001 scope.
 
 ## 4. Safety notes
 
