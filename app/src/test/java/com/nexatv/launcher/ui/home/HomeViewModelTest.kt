@@ -164,6 +164,19 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun `openAppInfo delegates to the repository`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns true
+        coEvery { repository.loadApps() } returns emptyList()
+        val entry = mockk<AppEntry>()
+        every { repository.openAppInfo(entry) } returns true
+
+        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.openAppInfo(entry))
+    }
+
+    @Test
     fun `toggleFavorite delegates the app key to the repository`() = runTest {
         every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
