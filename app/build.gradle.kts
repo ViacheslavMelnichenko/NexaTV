@@ -116,4 +116,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    // Real org.json so the WeatherRepository parser (ADR-0010) is testable on the JVM; android.jar
+    // ships only stubs. Test-only — production uses the on-device org.json, APK unaffected (NFR-002).
+    testImplementation(libs.json)
 }

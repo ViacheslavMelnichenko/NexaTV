@@ -12,10 +12,13 @@
         android:required="false" />
 
     <!--
-      NFR-021: no INTERNET / ACCESS_NETWORK_STATE permissions.
+      NFR-021 (amended by ADR-0010): INTERNET is granted for exactly ONE purpose — the Home weather
+      widget's single keyless call to Open-Meteo. No ACCESS_NETWORK_STATE, no analytics/telemetry, no
+      other network traffic, no background/boot networking. Any further network use needs its own ADR.
       App enumeration uses LauncherApps via ROLE_HOME (ADR-0004) — no QUERY_ALL_PACKAGES.
       FR-009: RECEIVE_BOOT_COMPLETED is intentionally NOT declared.
     -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!--
       Package visibility (Android 11+). On this Google TV firmware NexaTV never becomes the real
