@@ -169,12 +169,18 @@ private fun AppsContent(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             HomeTopBar(onOpenAllApps = onOpenAllApps, onOpenSettings = onOpenSettings)
-            // The favorites row anchors to the bottom-centre of the screen (the centre above it is left
-            // for the calendar + weather widgets); the LazyRow centres the tiles horizontally itself.
-            Box(
+            // The centre holds the two equal widgets (calendar + weather); it takes the free vertical
+            // space between the top bar and the bottom favorites band (ADR-0010).
+            HomeWidgets(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .padding(horizontal = NexaTheme.spacing.safeAreaHorizontal),
+            )
+            // The favorites row anchors to the bottom-centre; the LazyRow centres the tiles itself.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(bottom = NexaTheme.spacing.screenMargin),
                 contentAlignment = Alignment.BottomCenter,
             ) {

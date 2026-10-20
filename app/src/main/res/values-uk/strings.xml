@@ -37,6 +37,10 @@
     <string name="settings_tile_size_medium">Середній</string>
     <string name="settings_tile_size_large">Великий</string>
 
+    <!-- Home centre widgets (M5 / ADR-0010) -->
+    <string name="home_weather_location">Вроцлав</string>
+    <string name="home_weather_unavailable">Погода недоступна</string>
+
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">Перехоплення Home для NexaTV</string>
     <string name="accessibility_override_description">Дозволяє NexaTV відкриватися як Home при натисканні кнопки HOME. NexaTV лише визначає появу системного лаунчера; вміст екрана не зчитується. Вимкніть будь-коли, щоб повернути стоковий Home.</string>

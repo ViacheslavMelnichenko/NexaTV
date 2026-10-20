@@ -37,6 +37,10 @@
     <string name="settings_tile_size_medium">Medium</string>
     <string name="settings_tile_size_large">Large</string>
 
+    <!-- Home centre widgets (M5 / ADR-0010) -->
+    <string name="home_weather_location">Wrocław</string>
+    <string name="home_weather_unavailable">Weather unavailable</string>
+
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">NexaTV Home override</string>
     <string name="accessibility_override_description">Lets NexaTV open as your Home when you press the HOME button. NexaTV only detects when the system launcher appears; it never reads screen content. Turn this off any time to return to the stock Home.</string>
