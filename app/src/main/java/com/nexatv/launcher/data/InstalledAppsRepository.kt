@@ -75,6 +75,11 @@ class InstalledAppsRepository(context: Context) {
         launcherApps.startMainActivity(entry.component, entry.user, null, null)
     }.isSuccess
 
+    /** Open the system "App info" screen for [entry] (the context-menu "Інформація" action). */
+    fun openAppInfo(entry: AppEntry): Boolean = runCatching {
+        launcherApps.startAppDetailsActivity(entry.component, entry.user, null, null)
+    }.isSuccess
+
     private fun LauncherActivityInfo.toEntry(): AppEntry {
         val icon = runCatching {
             getBadgedIcon(0).toBitmap(width = ICON_PX, height = ICON_PX).asImageBitmap()

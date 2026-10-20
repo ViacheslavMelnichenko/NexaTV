@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed as itemsIndexedRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +44,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
@@ -50,6 +54,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.nexatv.launcher.R
 import com.nexatv.launcher.data.AppEntry
+import com.nexatv.launcher.data.toFavoriteKey
 import com.nexatv.launcher.ui.components.AppTile
 import com.nexatv.launcher.ui.components.SectionHeader
 import com.nexatv.launcher.ui.theme.NexaTheme
@@ -65,7 +70,7 @@ private const val ERROR_VISIBLE_MS = 3000L
 @Composable
 internal fun HomeScreen(
     state: HomeUiState,
-    onLaunch: (AppEntry) -> Boolean,
+    actions: HomeActions,
     onRequestHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -77,11 +82,19 @@ internal fun HomeScreen(
             is HomeUiState.Apps -> AppsContent(
                 favorites = state.favorites,
                 apps = state.apps,
-                onLaunch = onLaunch,
+                actions = actions,
             )
         }
     }
 }
+
+/** The per-app actions the Home surface invokes: launch (OK) plus the long-press menu entries. */
+@Immutable
+internal class HomeActions(
+    val onLaunch: (AppEntry) -> Boolean,
+    val onToggleFavorite: (AppEntry) -> Unit,
+    val onAppInfo: (AppEntry) -> Unit,
+)
 
 /**
  * The Home content: an optional "Favorites" row (ADR-0008) above the full app grid. Favorites are
@@ -93,25 +106,43 @@ internal fun HomeScreen(
 private fun AppsContent(
     favorites: List<AppEntry>,
     apps: List<AppEntry>,
-    onLaunch: (AppEntry) -> Boolean,
+    actions: HomeActions,
 ) {
     var launchError by remember { mutableStateOf<String?>(null) }
+    var menuTarget by remember { mutableStateOf<AppEntry?>(null) }
     val favoritesFocus = remember { FocusRequester() }
     val gridFocus = remember { FocusRequester() }
     val failedTemplate = stringResource(R.string.home_launch_failed)
+    val favoriteKeys = remember(favorites) { favorites.map { it.toFavoriteKey() }.toSet() }
 
     fun tryLaunch(app: AppEntry) {
-        if (!onLaunch(app)) launchError = failedTemplate.format(app.label)
+        if (!actions.onLaunch(app)) launchError = failedTemplate.format(app.label)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (favorites.isNotEmpty()) {
-                FavoritesRow(favorites, favoritesFocus, onLaunch = ::tryLaunch)
+                FavoritesRow(favorites, favoritesFocus, onLaunch = ::tryLaunch, onLongPress = { menuTarget = it })
             }
-            AppGridSection(apps, favoritesPresent = favorites.isNotEmpty(), gridFocus, onLaunch = ::tryLaunch)
+            AppGridSection(
+                apps,
+                favoritesPresent = favorites.isNotEmpty(),
+                gridFocus,
+                onLaunch = ::tryLaunch,
+                onLongPress = { menuTarget = it },
+            )
         }
         launchError?.let { message -> TransientMessage(message) }
+    }
+
+    menuTarget?.let { target ->
+        AppContextMenu(
+            app = target,
+            isFavorite = target.toFavoriteKey() in favoriteKeys,
+            onToggleFavorite = { actions.onToggleFavorite(target); menuTarget = null },
+            onAppInfo = { actions.onAppInfo(target); menuTarget = null },
+            onDismiss = { menuTarget = null },
+        )
     }
 
     // FR-006/FR-011: land focus on the favorites row when present, otherwise the first grid tile,
@@ -136,6 +167,7 @@ private fun FavoritesRow(
     favorites: List<AppEntry>,
     firstFocus: FocusRequester,
     onLaunch: (AppEntry) -> Unit,
+    onLongPress: (AppEntry) -> Unit,
 ) {
     SectionHeader(
         title = stringResource(R.string.home_favorites_title),
@@ -165,6 +197,7 @@ private fun FavoritesRow(
                     .height(TILE_HEIGHT)
                     .then(if (index == 0) Modifier.focusRequester(firstFocus) else Modifier),
                 onClick = { onLaunch(app) },
+                onLongClick = { onLongPress(app) },
             )
         }
     }
@@ -178,6 +211,7 @@ private fun ColumnScope.AppGridSection(
     favoritesPresent: Boolean,
     gridFocus: FocusRequester,
     onLaunch: (AppEntry) -> Unit,
+    onLongPress: (AppEntry) -> Unit,
 ) {
     SectionHeader(
         title = stringResource(R.string.home_apps_title),
@@ -216,8 +250,60 @@ private fun ColumnScope.AppGridSection(
                     .height(TILE_HEIGHT)
                     .then(if (index == 0) Modifier.focusRequester(gridFocus) else Modifier),
                 onClick = { onLaunch(app) },
+                onLongClick = { onLongPress(app) },
             )
         }
+    }
+}
+
+/**
+ * The long-press OK context menu (ADR-0008). No "Menu" key exists on the TV remote, so a long OK on a
+ * tile opens this: pin/unpin, open App info, or cancel. Reorder ("Перемістити") follows in a later change.
+ * Short OK always launches, so this is the only destructive-free way to act on an item without opening it.
+ */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun AppContextMenu(
+    app: AppEntry,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit,
+    onAppInfo: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val firstAction = remember { FocusRequester() }
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(NexaTheme.radius.md),
+            modifier = Modifier.widthIn(min = 280.dp),
+        ) {
+            Column(
+                modifier = Modifier.padding(NexaTheme.spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
+            ) {
+                Text(
+                    text = app.label,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = NexaTheme.colors.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(bottom = NexaTheme.spacing.sm),
+                )
+                val pinLabel = if (isFavorite) R.string.home_menu_unpin else R.string.home_menu_pin
+                MenuAction(stringResource(pinLabel), onToggleFavorite, Modifier.focusRequester(firstAction))
+                MenuAction(stringResource(R.string.home_menu_app_info), onAppInfo)
+                MenuAction(stringResource(R.string.home_menu_cancel), onDismiss)
+            }
+        }
+    }
+    LaunchedEffect(Unit) { runCatching { firstAction.requestFocus() } }
+}
+
+/** A full-width, D-pad-focusable row in the context menu. */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun MenuAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(onClick = onClick, modifier = modifier.fillMaxWidth()) {
+        Text(text)
     }
 }
 

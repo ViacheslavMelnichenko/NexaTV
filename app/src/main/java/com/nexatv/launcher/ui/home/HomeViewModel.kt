@@ -113,6 +113,9 @@ class HomeViewModel(
 
     fun launch(entry: AppEntry): Boolean = repository.launch(entry)
 
+    /** Open the system "App info" screen for [entry] (context-menu "Інформація"). */
+    fun openAppInfo(entry: AppEntry): Boolean = repository.openAppInfo(entry)
+
     /** Pin [entry] if it is not a favorite, otherwise unpin it; persisted via DataStore (ADR-0008). */
     fun toggleFavorite(entry: AppEntry) {
         viewModelScope.launch { favoritesRepository.toggle(entry.toFavoriteKey()) }

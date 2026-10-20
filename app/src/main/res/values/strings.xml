@@ -12,6 +12,12 @@
     <string name="home_empty_hint">No launchable apps were found on this TV.</string>
     <string name="home_launch_failed">Couldn\'t open %1$s</string>
 
+    <!-- Long-press OK context menu (M4 / ADR-0008) -->
+    <string name="home_menu_pin">Pin to Favorites</string>
+    <string name="home_menu_unpin">Unpin</string>
+    <string name="home_menu_app_info">App info</string>
+    <string name="home_menu_cancel">Cancel</string>
+
     <!-- Pre-Home prompt (M3 / FR-015 / ADR-0006) -->
     <string name="home_prompt_title">Make NexaTV your Home</string>
     <string name="home_prompt_body">Set NexaTV as the default Home to see all your apps and open them with the HOME button. You can switch back any time in Settings.</string>

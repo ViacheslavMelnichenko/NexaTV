@@ -26,6 +26,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
 import com.nexatv.launcher.data.favoritesRepository
+import com.nexatv.launcher.ui.home.HomeActions
 import com.nexatv.launcher.ui.home.HomeScreen
 import com.nexatv.launcher.ui.home.HomeViewModel
 import com.nexatv.launcher.ui.theme.NexaTheme
@@ -68,9 +69,16 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val state by viewModel.state.collectAsStateWithLifecycle()
+                val actions = remember(viewModel) {
+                    HomeActions(
+                        onLaunch = viewModel::launch,
+                        onToggleFavorite = viewModel::toggleFavorite,
+                        onAppInfo = { viewModel.openAppInfo(it) },
+                    )
+                }
                 HomeScreen(
                     state = state,
-                    onLaunch = viewModel::launch,
+                    actions = actions,
                     onRequestHome = { roleRequest.launch(roleRepository.requestHomeIntent()) },
                 )
             }

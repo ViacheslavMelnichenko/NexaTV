@@ -10,10 +10,11 @@
 package com.nexatv.launcher.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -48,13 +49,14 @@ import com.nexatv.launcher.ui.theme.NexaTheme
  * driven entirely by tokens, so every theme restyles it for free. `indication = null`: the ring
  * *is* the focus affordance (no Material ripple on TV). When [icon] is null a monogram is drawn.
  */
-@OptIn(ExperimentalTvMaterial3Api::class)
+@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun AppTile(
     label: String,
     modifier: Modifier = Modifier,
     icon: ImageBitmap? = null,
     onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
@@ -72,10 +74,12 @@ internal fun AppTile(
                 ),
                 shape = shape,
             )
-            .clickable(
+            // Short OK launches; long OK (no "Menu" key on the TV remote) opens the context menu.
+            .combinedClickable(
                 interactionSource = interaction,
                 indication = null,
                 onClick = onClick,
+                onLongClick = onLongClick,
             )
             .padding(NexaTheme.spacing.md),
         verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
