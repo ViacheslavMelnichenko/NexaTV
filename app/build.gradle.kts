@@ -7,6 +7,10 @@ plugins {
     alias(libs.plugins.detekt)
     // Proto DataStore codegen (ADR-0008): compiles src/main/proto into Java-lite classes.
     alias(libs.plugins.protobuf)
+    // Baseline Profile consumer side: wires the generated profile into the release APK and
+    // auto-creates the nonMinifiedRelease / benchmarkRelease build types the :benchmark module
+    // measures. Generating the actual profile is device-gated (see :benchmark/README.md).
+    alias(libs.plugins.baselineprofile)
 }
 
 // Static analysis gate (ADR-0003 D1 / NFR-008). Config: config/detekt/detekt.yml.
@@ -102,6 +106,11 @@ dependencies {
     // Local persistence — Proto DataStore + Protobuf-lite runtime (ADR-0008).
     implementation(libs.androidx.datastore)
     implementation(libs.protobuf.javalite)
+
+    // Installs the generated Baseline Profile at first run so hot code is AOT-compiled (NFR-001).
+    implementation(libs.androidx.profileinstaller)
+    // Producer of that profile + the macrobenchmarks (device-gated run; see :benchmark).
+    baselineProfile(project(":benchmark"))
 
     // Unit tests (JVM, run in CI — NFR-008). No device/Robolectric needed.
     testImplementation(libs.junit)

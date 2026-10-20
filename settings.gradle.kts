@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "NexaTV"
 include(":app")
+// Device-gated performance harness: Macrobenchmark + Baseline Profile generator (measures :app).
+include(":benchmark")
