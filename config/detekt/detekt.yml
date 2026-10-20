@@ -12,6 +12,17 @@ naming:
   FunctionNaming:
     ignoreAnnotated: ['Composable']
 
+complexity:
+  # @Composable functions are declarative UI trees, not imperative logic: parameter counts
+  # (state + event callbacks), tree length, and "many small composables per file" are idiomatic,
+  # so detekt's imperative-code size thresholds don't apply to them.
+  LongParameterList:
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    ignoreAnnotatedFunctions: ['Composable']
+
 style:
   MaxLineLength:
     maxLineLength: 120
