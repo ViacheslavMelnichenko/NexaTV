@@ -31,11 +31,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install SDK packages
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      # ubuntu-latest ships a license-accepted Android SDK (ANDROID_SDK_ROOT) with
+      # platform-34 + build-tools 34.0.0 preinstalled — no setup-android action needed.
+      - name: Verify Android SDK (preinstalled)
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls "$ANDROID_SDK_ROOT/platforms" || true
+          ls "$ANDROID_SDK_ROOT/build-tools" || true
 
       - name: Set up Gradle (with cache)
         uses: gradle/actions/setup-gradle@v4
