@@ -87,7 +87,7 @@ internal fun AppTile(
     val scale by animateFloatAsState(targetValue = if (focused) 1.05f else 1f, label = "tileScale")
     // The glow spreads ~this far past the tile; the rows that host tiles must leave at least this much
     // padding inside their (clipping) scroll bounds, or the halo is sheared off at the container edge.
-    val glow by animateDpAsState(targetValue = if (focused) 16.dp else 0.dp, label = "tileGlow")
+    val glow by animateDpAsState(targetValue = if (focused) 8.dp else 0.dp, label = "tileGlow")
 
     Column(
         modifier = modifier
