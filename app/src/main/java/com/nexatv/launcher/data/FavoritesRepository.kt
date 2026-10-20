@@ -11,10 +11,8 @@ package com.nexatv.launcher.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import com.nexatv.launcher.data.proto.AppKeyProto
 import com.nexatv.launcher.data.proto.LauncherStateProto
-import com.nexatv.launcher.data.proto.LauncherStateSerializer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -89,12 +87,6 @@ internal fun moveFavorite(current: List<FavoriteKey>, from: Int, to: Int): List<
     return current.toMutableList().apply { add(to, removeAt(from)) }
 }
 
-/** App-internal store file (ADR-0008); local only, consistent with no-INTERNET / `allowBackup=false`. */
-private val Context.launcherStateStore: DataStore<LauncherStateProto> by dataStore(
-    fileName = "launcher_state.pb",
-    serializer = LauncherStateSerializer,
-)
-
-/** Production factory: a [FavoritesRepository] over the app-internal DataStore. */
+/** Production factory: a [FavoritesRepository] over the shared app-internal DataStore. */
 fun favoritesRepository(context: Context): FavoritesRepository =
     FavoritesRepository(context.applicationContext.launcherStateStore)

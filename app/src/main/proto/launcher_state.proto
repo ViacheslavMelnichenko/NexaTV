@@ -14,9 +14,29 @@ message LauncherStateProto {
   // The user's favorite apps, in pin / reorder order (M4). Empty by default.
   repeated AppKeyProto favorites = 1;
 
+  // User settings (ADR-0009). Unset on old files -> reads the default SettingsProto (MEDIUM tiles).
+  SettingsProto settings = 4;
+
   // Reserved for upcoming state so their tags stay stable across schema growth:
-  //   2 = category assignments (M4), 3 = theme id (Theming EPIC), 4 = settings (M6).
-  reserved 2, 3, 4;
+  //   2 = category assignments (M4), 3 = theme id (Theming EPIC).
+  reserved 2, 3;
+}
+
+// User-configurable launcher settings (ADR-0009). Grows additively: new settings are new fields
+// with safe defaults, so old files keep deserializing. Tag 1 is the first setting (tile size).
+message SettingsProto {
+  // How large home tiles are drawn. TILE_SIZE_UNSPECIFIED (the default) means the owner never
+  // chose, which the repository resolves to MEDIUM.
+  TileSize tile_size = 1;
+}
+
+// Home tile size presets (ADR-0009). Semantic S/M/L, not raw dp — the UI maps each to dimensions,
+// so storage stays layout-free and a future custom size can reuse the token.
+enum TileSize {
+  TILE_SIZE_UNSPECIFIED = 0;
+  TILE_SIZE_SMALL = 1;
+  TILE_SIZE_MEDIUM = 2;
+  TILE_SIZE_LARGE = 3;
 }
 
 // Stable identity of a launchable activity within a user profile. Chosen so a
