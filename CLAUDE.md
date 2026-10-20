@@ -15,7 +15,13 @@ when it matters:
 
 ## Hard rules
 
-1. **Phase discipline.** We are in **Phase 0 — Discovery**. Do **not** write launcher code yet.
+1. **Phase discipline & autonomy.** Phase 0 (Discovery) is **complete** — all five ADRs accepted, the
+   permissive license chosen (Apache-2.0), and the ADR-0002 validation spike passed on the real TCL. Work
+   now proceeds into **M1 — Foundation** (launcher code is allowed). Keep work coherent within the current
+   phase, but **do not gate on an explicit "go" for obvious, low-risk next steps** — continue automatically
+   from one task to the next. **Stop and ask only** when a decision is non-trivial or owner-dependent, when
+   a step needs the owner's verification (e.g. a visual or on-device check), or when an observed result
+   contradicts expectations.
 2. **Evidence over memory.** When researching a repo, use the actual repository (README, source,
    LICENSE, releases, issues, commits) — never recall its state from memory. Label every claim
    `FACT`, `INFERENCE`, `ASSUMPTION`, or `UNKNOWN`.
@@ -28,8 +34,10 @@ when it matters:
    blocked.
 6. **Decisions are recorded.** Meaningful architectural choices become ADRs under `docs/adr/`.
 7. **Documentation describes decisions and behavior**, not code. It must still be useful in six months.
-8. **Interactive, small steps.** For each meaningful step: explain what/why → show exact command →
-   state expected output → let the user run it → analyze the real result → continue. Never invent output.
+8. **Small, reviewable steps.** Keep each change small and reviewable; never dump large implementations;
+   never invent command output. Run obvious, safe steps yourself and report the real result — you do **not**
+   need to hand every command to the owner. Reserve the full explain → confirm → run → verify loop for steps
+   that are risky, destructive, hard to reverse, or that need the owner's own eyes (see **Device safety**).
 
 ## Git
 
