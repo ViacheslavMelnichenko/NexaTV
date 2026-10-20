@@ -134,8 +134,12 @@ Builds on the M2 grid now that NexaTV is effectively HOME (M3), so enumeration i
 - ☑ **P1** **Persistence ADR** — **ADR-0008 Accepted** 2026-10-20: **Proto DataStore** for favorites,
   categories, theme, and settings (owner's choice over Room / Preferences DataStore). Unblocks the M4 UI work
   and the Theming-persistence step.
-- ☐ **P1** **Favorites** — pin / unpin / reorder apps, surfaced ahead of the full grid; persisted via Proto
-  DataStore (ADR-0008) so they survive restart. *First DataStore step:* schema v1 + favorites repository +
-  unit tests (temp-file DataStore, no device). *Depends on:* ADR-0008 (done).
+- ☑ **P1** **DataStore foundation** (ADR-0008) 2026-10-20: protobuf-lite toolchain wired; `launcher_state.proto`
+  v1 (`LauncherStateProto.favorites`, tags 2-4 reserved); `FavoritesRepository` (favorites `Flow`, transactional
+  toggle/reorder; `FavoriteKey` = component + profile serial so a favorite survives app updates) + serializer +
+  JVM unit tests (pure algebra, serializer round-trip, fake in-memory DataStore). Tests + detekt green.
+- ☐ **P1** **Favorites UI** — pin / unpin / reorder apps via D-pad, surfaced ahead of the full grid; wire
+  `FavoritesRepository` into the Home flow so favorites render and persist across restart. *Depends on:* the
+  DataStore foundation (done).
 - ☐ **P1** **Basic categories** — group apps (e.g. media / games / system) for faster D-pad reach; persisted
   via the same DataStore. *Depends on:* the favorites/persistence foundation.
