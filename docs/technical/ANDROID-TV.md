@@ -76,6 +76,29 @@ First reversible install of the NexaTV launcher on the real TCL — debug varian
 > affects real use. `Modifier.focusRestorer { firstTile }` on the grid was kept regardless — it restores
 > focus to the first tile when returning from a launched app.
 
+## 3b. M3 HOME-role detection & "become Home" findings (2026-10-20)
+
+Validating ADR-0006 on the real TCL surfaced two firmware behaviors that the ADR's planned
+`RoleManager`-based approach did not anticipate. Both are `FACT` (ADB, debug variant installed).
+
+| Observation | Result | Source |
+|-------------|--------|--------|
+| `RoleManager.isRoleAvailable(ROLE_HOME)` | **false** on this firmware → an `isRoleAvailable && isRoleHeld` check wrongly reports "not Home" | FACT (app showed the pre-Home prompt while the role record named NexaTV) |
+| Role record vs. resolver disagree | `cmd role get-role-holders HOME` returned `nexatv` while `resolve-activity` + the HOME button both opened **stock** LauncherX | FACT (ADB) |
+| Programmatic set to a third-party launcher | `cmd package set-home-activity …/nexatv` → `Success`, but the **effective** HOME stayed stock (resolver + HOME button unchanged) | FACT (ADB) |
+| Programmatic set back to stock | `set-home-activity …/launcherx` → record **and** resolver both become stock (consistent) | FACT (ADB) |
+
+**Conclusions:**
+- **Detection (fixed).** `HomeRoleRepository.isDefaultHome()` now resolves the HOME intent via
+  `PackageManager.resolveActivity(…, MATCH_DEFAULT_ONLY)` and compares the resolved package to our own.
+  This matches the real HOME button on every firmware; the `RoleManager` role API is **not** a reliable
+  source of truth here (`isRoleAvailable` false; role record stale).
+- **Becoming Home (restricted).** Google TV blocks *programmatic* assignment of a third-party launcher as
+  the effective HOME — only a **user-consented interactive flow** (the system Home picker /
+  `ACTION_HOME_SETTINGS`, which our `requestHomeIntent()` falls back to since `ROLE_HOME` is unavailable)
+  can switch it. The owner confirmed a manual switch worked once and later reverted — persistence across
+  reboot is **UNKNOWN** and still to be verified on-device.
+
 ## 4. Safety notes
 
 Daily-use production device. Early phase is **read-only**. Do not disable the stock launcher, uninstall
