@@ -147,8 +147,9 @@ major functionality usable from the remote (Up/Down/Left/Right/OK/Back/Home, lon
 
 ## 11. Assumptions
 
-- `ASSUMPTION` — `RoleManager ROLE_HOME` / the system default-app picker is available and functional on this
-  TCL build (to verify).
+- `FACT` — `RoleManager ROLE_HOME` is present and functional on this TCL build (current holder
+  `com.google.android.apps.tv.launcherx`, confirmed via `cmd role` 2026-10-20). `ASSUMPTION` (still open) —
+  the user-facing default-Home picker lets us actually *select* NexaTV; verify once an installable APK exists.
 - `ASSUMPTION` — `tv-material` focus behaves correctly on this SDK-34 unit (to confirm in the ADR-0002 spike).
 - `ASSUMPTION` — The owner's C#→Kotlin transfer keeps the single-stack learning curve a schedule risk, not a
   blocker.

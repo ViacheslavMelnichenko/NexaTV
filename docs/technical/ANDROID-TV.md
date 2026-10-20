@@ -35,6 +35,7 @@
 | Field | Value | Source |
 |-------|-------|--------|
 | Current default launcher (package/activity) | `com.google.android.apps.tv.launcherx` → `…home.HomeActivity` (Google TV "LauncherX") | FACT (ADB `resolve-activity`) |
+| `ROLE_HOME` (RoleManager) | **Present & functional**; current holder `com.google.android.apps.tv.launcherx`; `cmd role` interface works (BROWSER role resolves too) → confirms the mechanism NexaTV will use to become Home (FR-001/FR-015) | FACT (ADB `cmd role get-role-holders android.app.role.HOME` 2026-10-20) |
 | Available HOME activities | 3: (1) `com.google.android.apps.tv.launcherx/.home.HomeActivity` (active); (2) `com.google.android.tungsten.setupwraith/.RecoveryActivity` (setup/recovery); (3) `com.android.tv.settings/.system.FallbackHome` (**system fallback HOME**) | FACT (ADB `pm query-activities … HOME`) |
 | Launchable apps | 48 via `LAUNCHER`, **54 via `LEANBACK_LAUNCHER`** (TV apps) | FACT (ADB `query-activities`) |
 | Relevant TV system features | `android.software.leanback`, `leanback_only`, `android.hardware.type.television`, `android.hardware.tv.tuner`, `live_tv` | FACT (ADB `pm list features`) |
