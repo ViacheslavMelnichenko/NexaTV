@@ -30,19 +30,33 @@ import com.nexatv.launcher.MainActivity
 class NexaOverrideService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-        if (event.packageName?.toString() != STOCK_LAUNCHER_PACKAGE) return
+        if (event == null || !isStockHomeForegrounded(event)) return
 
-        // Stock Google TV just came to the front (HOME press / wake) — raise NexaTV over it.
+        // Stock Google TV HOME just came to the front (HOME press / wake) — raise NexaTV over it.
         val home = Intent(this, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         startActivity(home)
     }
+
+    /**
+     * True only when the stock launcher's HOME screen itself comes to the front. The launcher also owns
+     * other windows (the quick-settings/dashboard panel opened by the gear, global search, …); matching
+     * the whole package hijacked those too — pressing the gear flashed the panel and bounced straight back
+     * to NexaTV, locking the user out of Settings. Gating on the HOME activity's class name fixes that.
+     */
+    private fun isStockHomeForegrounded(event: AccessibilityEvent): Boolean =
+        event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED &&
+            event.packageName?.toString() == STOCK_LAUNCHER_PACKAGE &&
+            event.className?.toString() == STOCK_LAUNCHER_HOME_ACTIVITY
 
     override fun onInterrupt() = Unit
 
     private companion object {
         /** Stock Google TV launcher on this TCL (see ANDROID-TV.md §2). */
         const val STOCK_LAUNCHER_PACKAGE = "com.google.android.apps.tv.launcherx"
+
+        /** The launcher's HOME screen activity — what HOME/wake brings forward (not its other windows). */
+        const val STOCK_LAUNCHER_HOME_ACTIVITY =
+            "com.google.android.apps.tv.launcherx.home.HomeActivity"
     }
 }
