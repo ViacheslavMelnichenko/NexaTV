@@ -17,6 +17,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -26,6 +28,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestWatcher
@@ -43,6 +46,12 @@ class HomeViewModelTest {
 
     private val repository = mockk<InstalledAppsRepository>()
     private val homeRole = mockk<HomeRoleRepository>()
+
+    @Before
+    fun setUp() {
+        // Default: no live app-change signals. Tests that exercise FR-002 override this.
+        every { repository.appChanges() } returns emptyFlow()
+    }
 
     @Test
     fun `not effectively Home yields NeedsHomeRole state and skips discovery`() = runTest {
@@ -101,6 +110,25 @@ class HomeViewModelTest {
         val viewModel = HomeViewModel(repository, homeRole)
 
         assertTrue(viewModel.state.value is HomeUiState.Loading)
+    }
+
+    @Test
+    fun `an app change reloads the grid`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns true
+        val changes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        every { repository.appChanges() } returns changes
+        // First load (init) is empty; after a change signal the second load has an app.
+        val apps = listOf(mockk<AppEntry>())
+        coEvery { repository.loadApps() } returnsMany listOf(emptyList(), apps)
+
+        val viewModel = HomeViewModel(repository, homeRole)
+        advanceUntilIdle()
+        assertTrue(viewModel.state.value is HomeUiState.Empty)
+
+        changes.emit(Unit)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value is HomeUiState.Apps)
     }
 
     @Test

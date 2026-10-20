@@ -12,9 +12,13 @@ package com.nexatv.launcher.data
 import android.content.Context
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
+import android.os.UserHandle
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.withContext
 
 /**
@@ -40,6 +44,28 @@ class InstalledAppsRepository(context: Context) {
             .flatMap { user -> runCatching { launcherApps.getActivityList(null, user) }.getOrDefault(emptyList()) }
             .map { it.toEntry() }
         orderInstalledApps(rawList, selfPackage)
+    }
+
+    /**
+     * Cold stream that emits once per install/removal/change of a launchable app (FR-002). Backed by a
+     * [LauncherApps.Callback] registered while collected and unregistered on cancellation, so there is no
+     * leak and no cost when nothing observes it. Emits bare signals (not deltas): the collector re-queries
+     * [loadApps], which is the single source of truth and already de-dups/sorts.
+     */
+    fun appChanges(): Flow<Unit> = callbackFlow {
+        val callback = object : LauncherApps.Callback() {
+            override fun onPackageAdded(packageName: String?, user: UserHandle?) { trySend(Unit) }
+            override fun onPackageRemoved(packageName: String?, user: UserHandle?) { trySend(Unit) }
+            override fun onPackageChanged(packageName: String?, user: UserHandle?) { trySend(Unit) }
+            override fun onPackagesAvailable(names: Array<out String>?, user: UserHandle?, replacing: Boolean) {
+                trySend(Unit)
+            }
+            override fun onPackagesUnavailable(names: Array<out String>?, user: UserHandle?, replacing: Boolean) {
+                trySend(Unit)
+            }
+        }
+        launcherApps.registerCallback(callback)
+        awaitClose { launcherApps.unregisterCallback(callback) }
     }
 
     /** Start an app's main activity. Returns false on failure (FR-003 keeps focus, shows a message). */
