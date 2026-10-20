@@ -58,4 +58,7 @@ information (IP, port, pairing codes) is **never** committed. See `initial.md` �
 
 ## License
 
-TBD — to be chosen as part of the architecture decision (see `docs/research/LICENSE_ANALYSIS.md`).
+**Apache License 2.0** (see [`LICENSE`](./LICENSE) and [`NOTICE`](./NOTICE)). Chosen 2026-10-20 per
+ADR-0001 (permissive) and ADR-0002 (Kotlin + Compose-for-TV) — Apache-2.0 provides an explicit patent
+grant and matches the Android/Jetpack/`androidx.tv` ecosystem. Third-party reuse is tracked in
+[`docs/research/LICENSE_ANALYSIS.md`](./docs/research/LICENSE_ANALYSIS.md).
