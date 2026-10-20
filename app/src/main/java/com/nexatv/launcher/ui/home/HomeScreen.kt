@@ -378,7 +378,9 @@ private fun FavoritesRow(
     LazyRow(
         contentPadding = PaddingValues(
             horizontal = NexaTheme.spacing.safeAreaHorizontal,
-            vertical = NexaTheme.spacing.sm,
+            // The row clips to its own bounds, so this vertical room is what keeps a focused tile's
+            // glow (see AppTile) from being sheared off at the top or the "All apps" edge below.
+            vertical = NexaTheme.spacing.md,
         ),
         horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
         modifier = Modifier

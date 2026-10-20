@@ -85,7 +85,9 @@ internal fun AppTile(
     // Focus cue (M5): the focused tile lifts slightly and casts a tinted glow, so the eye lands on it
     // from across the room. Animated so the move reads as motion, not a jump; resting tiles stay flat.
     val scale by animateFloatAsState(targetValue = if (focused) 1.05f else 1f, label = "tileScale")
-    val glow by animateDpAsState(targetValue = if (focused) 24.dp else 0.dp, label = "tileGlow")
+    // The glow spreads ~this far past the tile; the rows that host tiles must leave at least this much
+    // padding inside their (clipping) scroll bounds, or the halo is sheared off at the container edge.
+    val glow by animateDpAsState(targetValue = if (focused) 16.dp else 0.dp, label = "tileGlow")
 
     Column(
         modifier = modifier
