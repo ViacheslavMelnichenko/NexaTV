@@ -33,6 +33,12 @@ android {
         versionCode = 100
         versionName = "0.1.0"
         vectorDrawables.useSupportLibrary = true
+
+        // Single device target is 32-bit armeabi-v7a (ADR-0002), so keep only that ABI's native libs
+        // (e.g. DataStore's libdatastore_shared_counter.so, which otherwise ships for all four ABIs).
+        // Keeps the APK lean (NFR-002) and satisfies the CI "armeabi-v7a only" ABI gate — a device
+        // that can't run 64-bit/x86 code should never carry those .so files.
+        ndk { abiFilters += "armeabi-v7a" }
     }
 
     buildTypes {
