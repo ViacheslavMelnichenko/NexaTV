@@ -90,18 +90,14 @@ V8-0012T01-LF1V643.003175
 
 The TV exposes Android Wireless Debugging.
 
-Current observed wireless debugging information:
+Wireless debugging exposes (per session) a network SSID, the TV's LAN IP, a pairing port, and a
+temporary Wi-Fi pairing code. These are runtime values and are deliberately **not** recorded here.
 
-Network:
-VaultP
+Network:   <redacted — runtime>
+IP:        <redacted — runtime>
+Pairing port: <redacted — runtime>
 
-IP:
-10.12.15.90
-
-Pairing port:
-36729
-
-A temporary Wi-Fi pairing code was displayed by the TV.
+A temporary Wi-Fi pairing code was displayed by the TV (never committed).
 
 IMPORTANT:
 
