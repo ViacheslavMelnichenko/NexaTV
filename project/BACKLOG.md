@@ -42,5 +42,8 @@
 
 ---
 
+## EPIC: Phase 1 — Foundation (cont.)
+- ☑ **P0** Author PRD v1 — MVP locked to **FR-001..FR-009** under NFR-001..NFR-007 (`docs/product/PRD.md`, 2026-10-20, Draft v1 for review).
+
 ## EPIC: Phase 2+ — Launcher capabilities  _(M2+, placeholder)_
-Derived from the PRD once written. MVP target: FR-001..FR-009 (see `docs/product/PRD.md`).
+MVP target: **FR-001..FR-009** (see `docs/product/PRD.md`). Tasks per FR are broken out when M2 planning starts.
