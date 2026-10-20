@@ -1,7 +1,7 @@
 # Spike result — ADR-0002 stack validation (Kotlin + Jetpack Compose-for-TV)
 
 > **Status:** ☑ **PASS** (2026-10-20). This records the outcome of the Phase 0 → M1 validation gate
-> for [ADR-0002](../adr/ADR-0002-flutter-vs-compose.md). The spike **code is throwaway** (built under
+> for [ADR-0002](../adr/ADR-0002-flutter-vs-kotlin-compose.md). The spike **code is throwaway** (built under
 > `spike/compose-tv-hello/`, git-ignored — never part of history); only this evidence is kept.
 
 ## Purpose
