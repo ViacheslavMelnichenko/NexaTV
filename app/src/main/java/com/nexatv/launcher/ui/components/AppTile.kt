@@ -9,12 +9,13 @@
  */
 package com.nexatv.launcher.ui.components
 
+import android.view.KeyEvent as AndroidKeyEvent
+import android.view.ViewConfiguration
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -28,10 +29,13 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
@@ -43,13 +47,20 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nexatv.launcher.ui.theme.NexaTheme
 
+/** The "OK"/confirm keys on a TV remote or keyboard (no dedicated Menu key exists on the remote). */
+private val OK_KEYCODES = setOf(
+    AndroidKeyEvent.KEYCODE_DPAD_CENTER,
+    AndroidKeyEvent.KEYCODE_ENTER,
+    AndroidKeyEvent.KEYCODE_NUMPAD_ENTER,
+)
+
 /**
  * The canonical NexaTV tile: a square art area over a single-line label (FR-013).
  * The D-pad focus treatment — a [NexaTheme.colors.focusRing] border plus a lifted surface — is
  * driven entirely by tokens, so every theme restyles it for free. `indication = null`: the ring
  * *is* the focus affordance (no Material ripple on TV). When [icon] is null a monogram is drawn.
  */
-@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 internal fun AppTile(
     label: String,
@@ -82,12 +93,7 @@ internal fun AppTile(
                 shape = shape,
             )
             // Short OK launches; long OK (no "Menu" key on the TV remote) opens the context menu.
-            .combinedClickable(
-                interactionSource = interaction,
-                indication = null,
-                onClick = onClick,
-                onLongClick = onLongClick,
-            )
+            .okClickable(interaction = interaction, onClick = onClick, onLongClick = onLongClick)
             .padding(NexaTheme.spacing.md),
         verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
     ) {
@@ -120,6 +126,38 @@ internal fun AppTile(
                 .wrapContentHeight(),
         )
     }
+}
+
+/**
+ * OK-key handling for a tile: a short press is [onClick], a long press is [onLongClick], decided from
+ * the key's own event-time because foundation's clickable can't detect a D-pad long-press on TV. Also
+ * makes the node focusable so it can receive those key events. No ripple — the focus ring is the cue.
+ */
+@Composable
+private fun Modifier.okClickable(
+    interaction: MutableInteractionSource,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+): Modifier {
+    val longPressMs = remember { ViewConfiguration.getLongPressTimeout().toLong() }
+    var okDownAt by remember { mutableLongStateOf(0L) }
+    return onKeyEvent { keyEvent ->
+        val native = keyEvent.nativeKeyEvent
+        when {
+            native.keyCode !in OK_KEYCODES -> false
+            native.action == AndroidKeyEvent.ACTION_DOWN -> {
+                if (okDownAt == 0L) okDownAt = native.eventTime
+                true
+            }
+            native.action == AndroidKeyEvent.ACTION_UP -> {
+                val held = native.eventTime - okDownAt
+                okDownAt = 0L
+                if (held >= longPressMs) onLongClick() else onClick()
+                true
+            }
+            else -> false
+        }
+    }.focusable(interactionSource = interaction)
 }
 
 /** Art-less fallback: the label's first letter on an accent chip (FR-013). */
