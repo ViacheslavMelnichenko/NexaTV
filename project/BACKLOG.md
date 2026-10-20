@@ -26,7 +26,8 @@
 ### Feature: Architectural decision
 - ☑ **P1** Decide & finalize ADR-0001 (Build vs. Fork) → **greenfield, permissive license, clean-room references** (2026-10-20).
 - ☑ **P0** Draft & decide ADR-0002: Flutter vs. Kotlin/Compose-for-TV → **Accepted: Kotlin + Jetpack Compose-for-TV** (direct Android APIs, no Flutter), 2026-10-20.
-- ☐ **P0** Validation spike (gate, ~½ day): trivial Compose-for-TV release APK on the TCL — confirm `armeabi-v7a` install/run, `tv-material` D-pad focus, cold-start/RSS via Macrobenchmark. *Depends on:* ADR-0002.
+- ☑ **P0** Validation spike (gate) — **PASS** 2026-10-20 (`docs/technical/SPIKE-ADR-0002.md`). Compose-for-TV builds (AGP 8.7.3 / Gradle 8.9 / Kotlin 1.9.24 / tv-material 1.0.0), APK has no native (`primaryCpuAbi=null`) so installs/runs on `armeabi-v7a` TCL, D-pad focus owner-confirmed on screen, cold start ~833 ms (`am start -W`, ceiling). Spike code throwaway/git-ignored.
+  - ☐ **P1** Precise baselines via **Macrobenchmark**: NFR-001 cold-start p50/p95, NFR-002 idle PSS, NFR-017 glass fps/PSS gate (deferred from the gate — rough `am start -W` only so far).
 - ☑ **P1** Pick exact permissive license (MIT vs Apache-2.0) and add `LICENSE` file → **Apache-2.0** chosen; `LICENSE` + `NOTICE` added (2026-10-20).
 
 ### Feature: Android launcher-model understanding

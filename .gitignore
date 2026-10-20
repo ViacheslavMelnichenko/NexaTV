@@ -48,3 +48,8 @@ key.properties
 logcat-*.txt
 scratch/
 tmp/
+
+# --- Throwaway validation spike (ADR-0002 gate) & downloaded tools ---
+# Spike is a disposable build to validate the stack on the real TCL; never part of history.
+spike/
+tools/
