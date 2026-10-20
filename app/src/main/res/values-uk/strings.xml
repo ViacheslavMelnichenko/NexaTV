@@ -27,6 +27,14 @@
     <string name="home_prompt_body">Зробіть NexaTV типовим Home-застосунком, щоб бачити всі застосунки й відкривати їх кнопкою HOME. Повернутися назад можна будь-коли в Налаштуваннях.</string>
     <string name="home_prompt_action">Зробити типовим Home</string>
 
+    <!-- Settings screen (M5.1 / ADR-0009) -->
+    <string name="home_open_settings">Відкрити налаштування</string>
+    <string name="settings_title">Налаштування</string>
+    <string name="settings_tile_size">Розмір плиток</string>
+    <string name="settings_tile_size_small">Малий</string>
+    <string name="settings_tile_size_medium">Середній</string>
+    <string name="settings_tile_size_large">Великий</string>
+
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">Перехоплення Home для NexaTV</string>
     <string name="accessibility_override_description">Дозволяє NexaTV відкриватися як Home при натисканні кнопки HOME. NexaTV лише визначає появу системного лаунчера; вміст екрана не зчитується. Вимкніть будь-коли, щоб повернути стоковий Home.</string>

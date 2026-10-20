@@ -9,17 +9,25 @@
  */
 package com.nexatv.launcher.ui.home
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
@@ -48,6 +56,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,6 +87,7 @@ internal fun HomeScreen(
     state: HomeUiState,
     actions: HomeActions,
     onRequestHome: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
@@ -89,6 +100,7 @@ internal fun HomeScreen(
                 apps = state.apps,
                 tile = state.tileSize.dimensions(),
                 actions = actions,
+                onOpenSettings = onOpenSettings,
             )
         }
     }
@@ -124,6 +136,7 @@ private fun AppsContent(
     apps: List<AppEntry>,
     tile: TileDimensions,
     actions: HomeActions,
+    onOpenSettings: () -> Unit,
 ) {
     var launchError by remember { mutableStateOf<String?>(null) }
     var menuTarget by remember { mutableStateOf<AppEntry?>(null) }
@@ -139,6 +152,7 @@ private fun AppsContent(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            TopBar(onOpenSettings = onOpenSettings)
             if (favorites.isNotEmpty()) {
                 FavoritesRow(
                     favorites = favorites,
@@ -162,7 +176,6 @@ private fun AppsContent(
             }
             AppGridSection(
                 apps,
-                favoritesPresent = favorites.isNotEmpty(),
                 tile = tile,
                 gridFocus = gridFocus,
                 onLaunch = ::tryLaunch,
@@ -205,6 +218,59 @@ private fun AppsContent(
 }
 
 /**
+ * The home top bar (M5.1 / ADR-0009): currently just the Settings entry, pinned to the top-right. It
+ * sits above the rows in the Column flow, so a D-pad ▲ from favorites/grid reaches it; the later M5
+ * cinematic pass adds the clock/date and Search/Wi-Fi alongside it.
+ */
+@Composable
+private fun TopBar(onOpenSettings: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = NexaTheme.spacing.safeAreaHorizontal,
+                end = NexaTheme.spacing.safeAreaHorizontal,
+                top = NexaTheme.spacing.screenMargin,
+            ),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        SettingsEntry(onClick = onOpenSettings)
+    }
+}
+
+/** A focusable round Settings icon; the focus ring is the cue (no ripple). Opens the Settings screen. */
+@Composable
+private fun SettingsEntry(onClick: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    val focused by interaction.collectIsFocusedAsState()
+    val colors = NexaTheme.colors
+    val shape = RoundedCornerShape(percent = 50)
+
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(shape)
+            .background(if (focused) colors.accent else colors.surfaceVariant)
+            .border(
+                border = BorderStroke(
+                    width = if (focused) 3.dp else 1.dp,
+                    color = if (focused) colors.focusRing else colors.surfaceVariant,
+                ),
+                shape = shape,
+            )
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_settings),
+            contentDescription = stringResource(R.string.home_open_settings),
+            colorFilter = ColorFilter.tint(if (focused) colors.onAccent else colors.onSurface),
+            modifier = Modifier.size(24.dp),
+        )
+    }
+}
+
+/**
  * The horizontal "Favorites" row (ADR-0008). Normally the first tile holds the row's entry focus; in a
  * [reorder] session the row previews the moved order, keeps focus on the moving tile, and traps the
  * D-pad (◄ ► move, OK commit, BACK cancel) so the shuffle can't accidentally leave the row.
@@ -230,7 +296,8 @@ private fun FavoritesRow(
         modifier = Modifier.padding(
             start = NexaTheme.spacing.safeAreaHorizontal,
             end = NexaTheme.spacing.safeAreaHorizontal,
-            top = NexaTheme.spacing.screenMargin,
+            // The top bar already supplies the top margin, so this header only needs a small gap.
+            top = NexaTheme.spacing.sm,
         ),
     )
     LazyRow(
@@ -332,7 +399,6 @@ private fun BoxScope.ReorderHint() {
 @Composable
 private fun ColumnScope.AppGridSection(
     apps: List<AppEntry>,
-    favoritesPresent: Boolean,
     tile: TileDimensions,
     gridFocus: FocusRequester,
     onLaunch: (AppEntry) -> Unit,
@@ -343,7 +409,7 @@ private fun ColumnScope.AppGridSection(
         modifier = Modifier.padding(
             start = NexaTheme.spacing.safeAreaHorizontal,
             end = NexaTheme.spacing.safeAreaHorizontal,
-            top = if (favoritesPresent) NexaTheme.spacing.sm else NexaTheme.spacing.screenMargin,
+            top = NexaTheme.spacing.sm,
         ),
     )
     LazyVerticalGrid(

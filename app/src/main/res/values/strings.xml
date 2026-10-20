@@ -27,6 +27,14 @@
     <string name="home_prompt_body">Set NexaTV as the default Home to see all your apps and open them with the HOME button. You can switch back any time in Settings.</string>
     <string name="home_prompt_action">Set as default Home</string>
 
+    <!-- Settings screen (M5.1 / ADR-0009) -->
+    <string name="home_open_settings">Open settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_tile_size">Tile size</string>
+    <string name="settings_tile_size_small">Small</string>
+    <string name="settings_tile_size_medium">Medium</string>
+    <string name="settings_tile_size_large">Large</string>
+
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">NexaTV Home override</string>
     <string name="accessibility_override_description">Lets NexaTV open as your Home when you press the HOME button. NexaTV only detects when the system launcher appears; it never reads screen content. Turn this off any time to return to the stock Home.</string>

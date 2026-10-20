@@ -11,11 +11,14 @@ package com.nexatv.launcher
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -27,9 +30,12 @@ import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
 import com.nexatv.launcher.data.favoritesRepository
 import com.nexatv.launcher.data.settingsRepository
+import com.nexatv.launcher.data.TileSize
 import com.nexatv.launcher.ui.home.HomeActions
 import com.nexatv.launcher.ui.home.HomeScreen
+import com.nexatv.launcher.ui.home.HomeUiState
 import com.nexatv.launcher.ui.home.HomeViewModel
+import com.nexatv.launcher.ui.settings.SettingsScreen
 import com.nexatv.launcher.ui.theme.NexaTheme
 
 /**
@@ -79,11 +85,23 @@ class MainActivity : ComponentActivity() {
                         onAppInfo = { viewModel.openAppInfo(it) },
                     )
                 }
-                HomeScreen(
-                    state = state,
-                    actions = actions,
-                    onRequestHome = { roleRequest.launch(roleRepository.requestHomeIntent()) },
-                )
+
+                // Two-screen, state-based navigation (ADR-0009): no nav library until routes multiply.
+                var showSettings by remember { mutableStateOf(false) }
+                if (showSettings) {
+                    BackHandler { showSettings = false }
+                    SettingsScreen(
+                        tileSize = (state as? HomeUiState.Apps)?.tileSize ?: TileSize.MEDIUM,
+                        onSelectTileSize = viewModel::setTileSize,
+                    )
+                } else {
+                    HomeScreen(
+                        state = state,
+                        actions = actions,
+                        onRequestHome = { roleRequest.launch(roleRepository.requestHomeIntent()) },
+                        onOpenSettings = { showSettings = true },
+                    )
+                }
             }
         }
     }

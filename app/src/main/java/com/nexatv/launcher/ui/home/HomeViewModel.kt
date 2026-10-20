@@ -144,4 +144,9 @@ class HomeViewModel(
     fun moveFavorite(from: Int, to: Int) {
         viewModelScope.launch { favoritesRepository.reorder(from, to) }
     }
+
+    /** Persist the home tile size (ADR-0009); the grid re-renders live via the settings Flow. */
+    fun setTileSize(size: TileSize) {
+        viewModelScope.launch { settingsRepository.setTileSize(size) }
+    }
 }
