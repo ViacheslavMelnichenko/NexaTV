@@ -120,7 +120,7 @@ internal fun AppTile(
             color = colors.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),

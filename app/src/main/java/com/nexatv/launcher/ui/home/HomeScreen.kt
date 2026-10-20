@@ -66,9 +66,18 @@ import com.nexatv.launcher.ui.components.SectionHeader
 import com.nexatv.launcher.ui.theme.NexaTheme
 import kotlinx.coroutines.delay
 
-/** Width floor for a grid cell; the grid fits as many columns as the screen allows. */
-private val TILE_MIN_WIDTH = 180.dp
-private val TILE_HEIGHT = 220.dp
+/**
+ * Width floor for a grid cell; the grid fits as many columns as the screen allows. Kept compact so a
+ * 1920-wide TV shows ~6 columns of small tiles rather than a few oversized ones (M5 will make this
+ * size user-configurable).
+ */
+private val TILE_MIN_WIDTH = 88.dp
+private val TILE_HEIGHT = 130.dp
+
+/** Favorites reuse the compact tile size so the quick-access strip stays small and consistent. */
+private val FAVORITE_TILE_WIDTH = 88.dp
+private val FAVORITE_TILE_HEIGHT = 130.dp
+
 private const val ERROR_VISIBLE_MS = 3000L
 
 /** The Home surface: the pre-Home prompt (FR-015) or, once NexaTV is Home, the D-pad app grid. */
@@ -255,8 +264,8 @@ private fun FavoritesRow(
                 icon = app.icon,
                 moving = isMoving,
                 modifier = Modifier
-                    .width(TILE_MIN_WIDTH)
-                    .height(TILE_HEIGHT)
+                    .width(FAVORITE_TILE_WIDTH)
+                    .height(FAVORITE_TILE_HEIGHT)
                     .then(
                         when {
                             isMoving -> Modifier.focusRequester(movingFocus)
