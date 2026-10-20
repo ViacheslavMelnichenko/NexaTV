@@ -84,6 +84,28 @@ The focusable building block of the launcher.
 - Size is passed by the caller (via `modifier`), because tile dimensions are a layout concern of each
   screen, not of the component.
 
+## Home layout & remote interaction (M4)
+
+Owner decisions (2026-10-20), binding for the Home screen and every per-item action:
+
+- **Favorites live in their own row.** The Home screen is a **"Обране" (Favorites) row** above the full
+  **"Усі застосунки"** grid (Google TV / FLauncher idiom). Favorites are always within reach and initial
+  focus lands in that row; the separation is explicit rather than pinned-first-in-grid. Favorites are an
+  *ordered* set (ADR-0008) and render in the user's pin/reorder order.
+- **The remote has no "Menu" button, so long-press OK is the context-action trigger** — this is the single
+  interaction model for *all* per-item actions across the launcher, not just favorites:
+  - **Short OK = the primary action** (launch the app). Never repurpose short OK for anything else — it is
+    the one gesture that must always just launch.
+  - **Long-press OK (≈0.5 s) = a small context menu** over the focused tile: **Закріпити/Відкріпити**
+    (pin/unpin), **Перемістити** (reorder — enters a move mode), **Інформація** (app info), **Скасувати**.
+    The menu is the extensible home for future per-item actions (hide, uninstall, …).
+- **Why a menu, not an instant toggle:** it is self-evident (nothing hidden behind an undiscoverable
+  gesture), it scales to more actions, and it keeps reorder reachable without a separate entry point. The
+  cost is one extra step to pin; accepted for discoverability.
+
+Recorded here (not a separate ADR) because it is a design-system interaction rule; the persistence it relies
+on is [ADR-0008](../adr/ADR-0008-persistence-proto-datastore.md).
+
 ## The Design System gallery (debug-only)
 
 `DesignSystemGalleryActivity` (in **`src/debug`**, so it is absent from release) renders every token and
