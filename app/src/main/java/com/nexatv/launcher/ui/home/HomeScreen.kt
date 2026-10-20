@@ -53,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -96,10 +97,13 @@ internal fun HomeScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = NexaTheme.colors
+    // The gradient wash allocates a Brush + color list; build it once per palette, not per composition.
+    val backdrop = remember(colors) { colors.backdropBrush() }
     Surface(
         modifier = modifier
             .fillMaxSize()
-            .background(NexaTheme.colors.backdropBrush()),
+            .background(backdrop),
         colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
     ) {
         when (state) {
@@ -396,6 +400,9 @@ private fun FavoritesRow(
         horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md, Alignment.CenterHorizontally),
         modifier = Modifier
             .fillMaxWidth()
+            // Returning to Home lands focus back on the last-focused favorite (parity with the All-apps
+            // grid), falling back to the first tile — not an unpredictable bounce to favorite #1.
+            .focusRestorer { firstFocus }
             .then(
                 if (reorder != null) {
                     Modifier.onPreviewKeyEvent { reorderKey(it, onReorderMove, onReorderCommit, onReorderCancel) }

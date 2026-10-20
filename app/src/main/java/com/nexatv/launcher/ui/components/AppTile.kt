@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -80,7 +79,21 @@ internal fun AppTile(
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     val colors = NexaTheme.colors
-    val shape = RoundedCornerShape(NexaTheme.radius.md)
+    val radius = NexaTheme.radius.md
+    val shape = remember(radius) { RoundedCornerShape(radius) }
+    // While "picked up" for reordering a tile keeps an accent ring even without focus, so the item being
+    // moved is always visible as the row shuffles around it. Hoisted so it only reallocates on a real
+    // focus/moving/theme change, not on every composition.
+    val border = remember(focused, moving, colors) {
+        BorderStroke(
+            width = if (focused || moving) 3.dp else 1.dp,
+            color = when {
+                moving -> colors.accent
+                focused -> colors.focusRing
+                else -> colors.surfaceVariant
+            },
+        )
+    }
 
     // Focus cue (M5): the focused tile lifts slightly and casts a tinted glow, so the eye lands on it
     // from across the room. Animated so the move reads as motion, not a jump; resting tiles stay flat.
@@ -89,28 +102,29 @@ internal fun AppTile(
     // padding inside their (clipping) scroll bounds, or the halo is sheared off at the container edge.
     val glow by animateDpAsState(targetValue = if (focused) 8.dp else 0.dp, label = "tileGlow")
 
+    // A tile label is a *secondary* cue — the icon identifies the app — so it is kept light and quiet
+    // (regular weight, muted colour, small). Hoisted so it is built once, not rebuilt every composition.
+    val bodyMedium = MaterialTheme.typography.bodyMedium
+    val labelStyle = remember(bodyMedium) {
+        bodyMedium.copy(fontSize = 14.sp, lineHeight = 17.sp, fontWeight = FontWeight.Normal)
+    }
+
     Column(
         modifier = modifier
+            // Read the animated scale + glow INSIDE the layer block, so each focus-animation frame only
+            // redraws this layer instead of recomposing the whole tile (the point of the graphicsLayer
+            // phase). The glow is a shadow cast from the tile's shape, tinted with the focus ring.
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                shadowElevation = glow.toPx()
+                this.shape = shape
+                ambientShadowColor = colors.focusRing
+                spotShadowColor = colors.focusRing
             }
-            .shadow(elevation = glow, shape = shape, ambientColor = colors.focusRing, spotColor = colors.focusRing)
             .clip(shape)
             .background(if (focused || moving) colors.surfaceVariant else colors.surface)
-            .border(
-                // While "picked up" for reordering a tile keeps an accent ring even without focus,
-                // so the item being moved is always visible as the row shuffles around it.
-                border = BorderStroke(
-                    width = if (focused || moving) 3.dp else 1.dp,
-                    color = when {
-                        moving -> colors.accent
-                        focused -> colors.focusRing
-                        else -> colors.surfaceVariant
-                    },
-                ),
-                shape = shape,
-            )
+            .border(border = border, shape = shape)
             // Short OK launches; long OK (no "Menu" key on the TV remote) opens the context menu.
             .okClickable(interaction = interaction, onClick = onClick, onLongClick = onLongClick)
             .padding(NexaTheme.spacing.sm),
@@ -138,14 +152,9 @@ internal fun AppTile(
         }
         Text(
             text = label,
-            // A tile label is a *secondary* cue — the icon identifies the app — so it is kept light and
-            // quiet (regular weight, muted colour, small). Soft word-wrap over two lines lets a full name
-            // like "Play Store" sit whole instead of being cut with an ellipsis on the first line.
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
-                lineHeight = 17.sp,
-                fontWeight = FontWeight.Normal,
-            ),
+            // Soft word-wrap over two lines lets a full name like "Play Store" sit whole instead of
+            // being cut with an ellipsis on the first line.
+            style = labelStyle,
             color = colors.onSurfaceMuted,
             softWrap = true,
             maxLines = 2,

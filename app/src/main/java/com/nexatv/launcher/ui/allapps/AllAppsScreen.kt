@@ -77,6 +77,9 @@ internal fun AllAppsScreen(
     val gridFocus = remember { FocusRequester() }
     val failedTemplate = stringResource(R.string.home_launch_failed)
     val favoriteKeys = remember(favorites) { favorites.map { it.toFavoriteKey() }.toSet() }
+    val colors = NexaTheme.colors
+    // The gradient wash allocates a Brush + color list; build it once per palette, not per composition.
+    val backdrop = remember(colors) { colors.backdropBrush() }
 
     fun tryLaunch(app: AppEntry) {
         if (!onLaunch(app)) launchError = failedTemplate.format(app.label)
@@ -85,7 +88,7 @@ internal fun AllAppsScreen(
     Surface(
         modifier = modifier
             .fillMaxSize()
-            .background(NexaTheme.colors.backdropBrush()),
+            .background(backdrop),
         colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
