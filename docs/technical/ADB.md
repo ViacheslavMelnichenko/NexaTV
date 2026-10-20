@@ -12,7 +12,11 @@ query packages, and launch activities. Over a TV we use **wireless debugging** (
 ## Development host
 
 - OS: **Windows 11** (per environment). Shell used here: Git Bash.
-- ADB install status on this machine: _UNKNOWN — verify (`adb --version`)_.
+- ADB install status: **Installed** (FACT, 2026-10-20). Android Debug Bridge 1.0.41 / platform-tools **37.0.1**.
+  - Installed via `winget install --id Google.PlatformTools -e --source winget`.
+  - Binary: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe\platform-tools\adb.exe`
+  - winget modified PATH and added an `adb` alias, but the alias is not usable from the current Git Bash
+    session; invoke adb by full path (or restart the shell to pick up the new PATH).
 
 ## Connection workflow (wireless)
 

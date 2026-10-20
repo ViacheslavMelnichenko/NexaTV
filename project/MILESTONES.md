@@ -17,11 +17,11 @@
 
 ## M0 — exit criteria (current milestone)
 
-- [ ] Working ADB connection to the TCL
-- [ ] Device audit recorded in `docs/technical/ANDROID-TV.md`
+- [x] Working ADB connection to the TCL (wireless, paired + connected 2026-10-20)
+- [x] Device audit recorded in `docs/technical/ANDROID-TV.md` (identity, CPU/RAM, display, HOME activities, app counts)
 - [x] Repository initialized
 - [x] Initial documentation structure
-- [ ] Initial research notes populated
+- [ ] Initial research notes populated (open-source launchers)
 - [x] Initial backlog
 - [x] M0 milestone defined
 - [ ] ADR-0001 (Build vs. Fork) decided

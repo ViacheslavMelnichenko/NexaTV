@@ -14,27 +14,27 @@
 | Kernel | 5.15.180-android14-11 | FACT (initial.md) |
 | Build | tcl9618-user 14 UTT2.250416.001 AU02 release-keys | FACT (initial.md) |
 | Product information | V8-0012T01-LF1V643.003175 | FACT (initial.md) |
-| Model | _UNKNOWN_ | ADB to confirm |
-| Product / device codename | _UNKNOWN_ | ADB to confirm |
-| SDK level | _UNKNOWN (expect 34)_ | ADB to confirm |
-| Build fingerprint | _UNKNOWN_ | ADB to confirm |
-| CPU ABI | _UNKNOWN_ | ADB to confirm |
-| CPU cores | _UNKNOWN_ | ADB to confirm |
-| RAM | _UNKNOWN_ | ADB to confirm |
-| Resolution | _UNKNOWN_ | ADB to confirm |
-| Density | _UNKNOWN_ | ADB to confirm |
-| Refresh rate | _UNKNOWN_ | ADB to confirm |
+| Model | Smart TV Pro | FACT (ADB 2026-10-20) |
+| Product / device codename | G08_4K_GB / G08 | FACT (ADB) |
+| SDK level | 34 | FACT (ADB) |
+| Build fingerprint | TCL/G08_4K_GB/G08:14/UTT2.250416.001/AU02:user/release-keys | FACT (ADB) |
+| CPU ABI | **armeabi-v7a** (abilist: armeabi-v7a, armeabi) — **32-bit ARM only, no arm64** | FACT (ADB) |
+| CPU cores | 4 | FACT (ADB) |
+| RAM | 2,451,284 kB (~2.34 GiB total) | FACT (ADB `/proc/meminfo`) |
+| Resolution | Panel 3840x2160 (4K); **UI override 1920x1080** | FACT (ADB `wm size`) |
+| Density | 320 dpi (xhdpi) | FACT (ADB `wm density`) |
+| Refresh rate | _UNKNOWN_ | ADB to confirm (`dumpsys display`) |
 
 ## 2. Launcher / HOME environment (to be ADB-confirmed)
 
 | Field | Value | Source |
 |-------|-------|--------|
-| Current default launcher (package/activity) | _UNKNOWN_ | ADB `resolve-activity` |
-| Available HOME activities | _UNKNOWN_ | ADB `pm query-activities` |
-| Installed launcher packages | _UNKNOWN_ | ADB |
-| TV input services | _UNKNOWN_ | ADB |
-| Relevant system features (e.g. `android.software.leanback`) | _UNKNOWN_ | ADB `pm list features` |
-| Relevant package names | _UNKNOWN_ | ADB |
+| Current default launcher (package/activity) | `com.google.android.apps.tv.launcherx` → `…home.HomeActivity` (Google TV "LauncherX") | FACT (ADB `resolve-activity`) |
+| Available HOME activities | 3: (1) `com.google.android.apps.tv.launcherx/.home.HomeActivity` (active); (2) `com.google.android.tungsten.setupwraith/.RecoveryActivity` (setup/recovery); (3) `com.android.tv.settings/.system.FallbackHome` (**system fallback HOME**) | FACT (ADB `pm query-activities … HOME`) |
+| Launchable apps | 48 via `LAUNCHER`, **54 via `LEANBACK_LAUNCHER`** (TV apps) | FACT (ADB `query-activities`) |
+| Relevant TV system features | `android.software.leanback`, `leanback_only`, `android.hardware.type.television`, `android.hardware.tv.tuner`, `live_tv` | FACT (ADB `pm list features`) |
+| TV input services | _UNKNOWN_ | ADB to confirm |
+| Installed launcher packages | _see HOME activities above; full `pm list packages` not yet captured_ | ADB to confirm |
 
 ## 3. Android launcher model (research notes — `initial.md` §17)
 
@@ -53,3 +53,10 @@ To document (verified on the actual TCL where noted):
 Daily-use production device. Early phase is **read-only**. Do not disable the stock launcher, uninstall
 system apps, or modify system partitions. Keep Settings reachable at all times. First NexaTV install must
 be reversible. See `initial.md` §16.
+
+**Recovery insight (FACT):** the system exposes `com.android.tv.settings/.system.FallbackHome` as a HOME
+activity. This is the natural fallback if a custom launcher is ever set as default and misbehaves — but
+during early development we will NOT change the default HOME at all; we launch NexaTV explicitly instead.
+
+**Build implication (FACT):** the device is **32-bit ARM only** (`armeabi-v7a`, no `arm64-v8a`). Any APK
+we build must ship a `armeabi-v7a` (or universal) binary; an arm64-only build will not install/run.
