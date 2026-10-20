@@ -38,7 +38,8 @@
 
 ## EPIC: Phase 1 — Foundation  _(M1 — complete 2026-10-20)_
 - ☑ **P1** Create the code scaffold for the chosen stack (2026-10-20). Root Gradle + version catalog (`gradle/libs.versions.toml`) + wrapper 8.9; `:app` module `com.nexatv.launcher` (SDK 34, `versionCode` 100 / `versionName` 0.1.0, NFR-011). Manifest: HOME + LEANBACK_LAUNCHER (FR-001), no INTERNET + `allowBackup=false` + data-extraction rules (NFR-021). Compose-for-TV design tokens (color/type/spacing, body ≥18sp — NFR-016), en/uk strings (NFR-020), placeholder Home. **Builds** (`assembleDebug`, JDK 17 / SDK 34). `.gitattributes` enforces LF for CI (ADR-0003).
-  - ☐ **P1** CI pipeline (GitHub Actions) per ADR-0003/NFR-008 — assemble + test on push; not yet wired.
+  - ☑ **P1** CI pipeline — `.github/workflows/ci.yml` wiring the ADR-0003 D1 gate (2026-10-20): `assembleDebug` + Android Lint + `testDebugUnitTest` + **detekt** (config `config/detekt/detekt.yml`) + **ABI assert** (armeabi-v7a only) + **APK-size budget** + **gitleaks** secret scan, on PR/push to `main`. All Gradle steps verified green locally.
+    - ☐ **P1** `release.yml` (tag-driven signed release, ADR-0003 D2/D6) — **blocked** on the owner-generated **offline keystore** (D3/D4) + GH `release` Environment secrets + branch protection. Owner-dependent; not a step the agent can do alone.
 
 ---
 
@@ -51,5 +52,28 @@
   - ☑ **ADR-0005** — "Glass"/translucency technique (fake-glass default; real-time blur gated on-device) — covers NFR-017. **Accepted** (measurement-gated) 2026-10-20.
 - ☑ **P1** Create the FR×Test traceability matrix stub (`docs/testing/TRACEABILITY.md`) + refresh TEST-PLAN.md for the Kotlin stack. 2026-10-20.
 
-## EPIC: Phase 2+ — Launcher capabilities  _(M2+, placeholder)_
-MVP target: **FR-001..FR-009** (see `docs/product/PRD.md`). Tasks per FR are broken out when M2 planning starts.
+## EPIC: Design System  _(foundational — precedes launcher screens)_
+> Owner directive (2026-10-20): the Design System is its **own step**, done **before** building
+> launcher screens so every screen consumes shared tokens/components. Implements PRD §16 / NFR-016.
+- ☐ **P1** **Design System step.** Promote the M1 token seeds (`ui/theme/Color|Type|Dimens|Theme.kt`) into a
+  documented, reusable system: a single `NexaTheme` with semantic token roles (surface/accent/focus/…),
+  a type scale (body ≥18sp — NFR-016), spacing/radius grid, and **a small core-component catalog**
+  (focusable card/tile, section header, D-pad focus treatment) with `@Preview`s.
+  - *Acceptance:* a one-screen "Design System gallery" (debug-only) renders every token + component;
+    screens never hardcode color/size; documented in `docs/design/DESIGN-SYSTEM.md`.
+  - *Note:* structured **theme-agnostic** — all colors flow from the active theme (no literals in screens),
+    so the later theme-switch step is a drop-in.
+
+## EPIC: Theming — switchable themes, persisted  _(later step; depends on Design System + Persistence ADR)_
+> Owner directive (2026-10-20): provide **easy theme switching** whose selection **survives restart**.
+- ☐ **P2** **Theme catalog** — ≥2 built-in themes (e.g. the pastel dark default + at least one alternative),
+  each a complete token set behind `NexaTheme`. *Depends on:* Design System step.
+- ☐ **P2** **Theme persistence** — persist the selected theme and re-apply on cold start. *Depends on:* the
+  **Persistence ADR** (DataStore vs. alternatives — currently an open/planned ADR) and the Configuration ADR.
+- ☐ **P2** **Theme switcher UI** — a D-pad-friendly control (in Settings) to change theme live; selection
+  takes effect immediately and is restored after reboot. *Depends on:* the two items above.
+
+## EPIC: Phase 2 — Minimal Launcher  _(M2)_
+MVP target: **FR-001..FR-009** (see `docs/product/PRD.md`). First real launcher behavior: Launcher Activity,
+app enumeration via `LauncherApps.getActivityList` over `ROLE_HOME` (ADR-0004), D-pad focus, launch.
+Tasks per FR are broken out when M2 planning starts (after the Design System step).
