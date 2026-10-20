@@ -27,8 +27,9 @@
 - ☐ **P1** Architecture comparison (`docs/research/ARCHITECTURE_COMPARISON.md`). *Depends on:* per-project research.
 
 ### Feature: Architectural decision
-- ☐ **P1** Decide & finalize ADR-0001 (Build vs. Fork). *Depends on:* matrix + license + architecture docs.
-- ☐ **P1** Draft ADR: Flutter vs. Kotlin/Compose. *Depends on:* architecture comparison.
+- ☑ **P1** Decide & finalize ADR-0001 (Build vs. Fork) → **greenfield, permissive license, clean-room references** (2026-10-20).
+- ☐ **P0** Draft & decide ADR-0002: Flutter vs. Kotlin/Compose-for-TV. *Depends on:* ADR-0001 ✓. ← **next**
+- ☐ **P1** Pick exact permissive license (MIT vs Apache-2.0) and add `LICENSE` file.
 
 ### Feature: Android launcher-model understanding
 - ☐ **P2** Document HOME intent / multiple-HOME / reboot / crash-recovery behavior, verified on the TCL.

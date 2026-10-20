@@ -5,7 +5,7 @@
 
 | ID | Milestone | Goal | Status |
 |----|-----------|------|--------|
-| **M0** | Discovery & Device Audit | ADB connected, device audited (read-only), ecosystem researched, feature matrix + license + architecture comparison, ADR-0001 decided | ◐ In progress |
+| **M0** | Discovery & Device Audit | ADB connected, device audited (read-only), ecosystem researched, feature matrix + license + architecture comparison, ADR-0001 decided | ☑ Done (2026-10-20) |
 | M1 | Architecture & Project Foundation | Technology/architecture decided (ADRs), code scaffold created | ☐ |
 | M2 | Minimal Launcher | Launcher Activity, D-pad focus, app list render | ☐ |
 | M3 | HOME Integration | Register as HOME (reversibly), verify behavior on real TV | ☐ |
@@ -24,6 +24,8 @@
 - [x] Initial research notes populated (6 launchers researched from real repos; matrix + license + architecture docs written 2026-10-20)
 - [x] Initial backlog
 - [x] M0 milestone defined
-- [ ] ADR-0001 (Build vs. Fork) decided ← **next**
+- [x] ADR-0001 (Build vs. Fork) decided → greenfield, permissive license, clean-room references
+
+**M0 complete.** Next milestone **M1** starts with ADR-0002 (Flutter vs. Kotlin/Compose-for-TV) and the PRD.
 
 > Per `initial.md` §32: do **not** install NexaTV during M0.

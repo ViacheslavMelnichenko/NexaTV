@@ -22,7 +22,8 @@ Proposed / Accepted / Superseded / Rejected
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [ADR-0001](./ADR-0001-build-vs-fork.md) | Build vs. Fork | Proposed |
+| [ADR-0001](./ADR-0001-build-vs-fork.md) | Build vs. Fork | **Accepted** (2026-10-20) — greenfield, permissive license, clean-room references |
+| ADR-0002 | Flutter vs. Kotlin/Compose-for-TV | _Next_ |
 
 ## Planned / potential ADRs (per `initial.md` §25)
 
