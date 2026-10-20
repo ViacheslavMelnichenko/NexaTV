@@ -16,6 +16,8 @@ import com.nexatv.launcher.data.FavoriteKey
 import com.nexatv.launcher.data.FavoritesRepository
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
+import com.nexatv.launcher.data.SettingsRepository
+import com.nexatv.launcher.data.TileSize
 import com.nexatv.launcher.data.resolveFavorites
 import com.nexatv.launcher.data.toFavoriteKey
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,9 +40,14 @@ sealed interface HomeUiState {
     /**
      * NexaTV is Home and apps were discovered. [apps] is the full grid ("Усі застосунки"); [favorites]
      * is the user's pinned apps in pin/reorder order (ADR-0008), rendered as the "Обране" row above the
-     * grid. [favorites] is empty until the user pins something.
+     * grid. [favorites] is empty until the user pins something. [tileSize] is the user's chosen tile
+     * size (ADR-0009); the UI maps it to concrete dimensions.
      */
-    data class Apps(val favorites: List<AppEntry>, val apps: List<AppEntry>) : HomeUiState
+    data class Apps(
+        val favorites: List<AppEntry>,
+        val apps: List<AppEntry>,
+        val tileSize: TileSize,
+    ) : HomeUiState
 }
 
 /**
@@ -53,6 +60,7 @@ class HomeViewModel(
     private val repository: InstalledAppsRepository,
     private val homeRole: HomeRoleRepository,
     private val favoritesRepository: FavoritesRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -63,6 +71,9 @@ class HomeViewModel(
 
     /** Latest persisted favorites, kept so [emitApps] can resolve them against [cachedApps]. */
     private var favoriteKeys: List<FavoriteKey> = emptyList()
+
+    /** Latest persisted tile size (ADR-0009); defaults to MEDIUM until the store's first emission. */
+    private var tileSize: TileSize = TileSize.MEDIUM
 
     init {
         refresh()
@@ -76,6 +87,13 @@ class HomeViewModel(
         viewModelScope.launch {
             favoritesRepository.favorites.collect { keys ->
                 favoriteKeys = keys
+                if (_state.value is HomeUiState.Apps) emitApps()
+            }
+        }
+        // Keep tile size live: changing it in Settings re-renders the grid/favorites without a reload.
+        viewModelScope.launch {
+            settingsRepository.tileSize.collect { size ->
+                tileSize = size
                 if (_state.value is HomeUiState.Apps) emitApps()
             }
         }
@@ -107,6 +125,7 @@ class HomeViewModel(
             HomeUiState.Apps(
                 favorites = resolveFavorites(cachedApps, favoriteKeys),
                 apps = cachedApps,
+                tileSize = tileSize,
             )
         }
     }

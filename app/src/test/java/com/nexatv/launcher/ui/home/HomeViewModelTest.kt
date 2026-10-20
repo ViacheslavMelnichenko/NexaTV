@@ -15,6 +15,8 @@ import com.nexatv.launcher.data.FavoriteKey
 import com.nexatv.launcher.data.FavoritesRepository
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
+import com.nexatv.launcher.data.SettingsRepository
+import com.nexatv.launcher.data.TileSize
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -23,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -51,19 +54,22 @@ class HomeViewModelTest {
     private val repository = mockk<InstalledAppsRepository>()
     private val homeRole = mockk<HomeRoleRepository>()
     private val favorites = mockk<FavoritesRepository>(relaxUnitFun = true)
+    private val settings = mockk<SettingsRepository>(relaxUnitFun = true)
 
     @Before
     fun setUp() {
-        // Default: no live app-change signals and no favorites. Tests override these as needed.
+        // Default: no live app-change signals, no favorites, tile size stays at the MEDIUM default.
+        // Tests override these as needed.
         every { repository.appChanges() } returns emptyFlow()
         every { favorites.favorites } returns emptyFlow()
+        every { settings.tileSize } returns emptyFlow()
     }
 
     @Test
     fun `not effectively Home yields NeedsHomeRole state and skips discovery`() = runTest {
         every { homeRole.isEffectivelyHome() } returns false
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is HomeUiState.NeedsHomeRole)
@@ -77,7 +83,7 @@ class HomeViewModelTest {
         val apps = listOf(mockk<AppEntry>())
         coEvery { repository.loadApps() } returns apps
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is HomeUiState.Apps)
@@ -88,7 +94,7 @@ class HomeViewModelTest {
         every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is HomeUiState.Empty)
@@ -100,7 +106,7 @@ class HomeViewModelTest {
         val apps = listOf(mockk<AppEntry>(), mockk<AppEntry>())
         coEvery { repository.loadApps() } returns apps
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         val state = viewModel.state.value
@@ -113,7 +119,7 @@ class HomeViewModelTest {
         every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
 
         assertTrue(viewModel.state.value is HomeUiState.Loading)
     }
@@ -127,7 +133,7 @@ class HomeViewModelTest {
         val apps = listOf(mockk<AppEntry>())
         coEvery { repository.loadApps() } returnsMany listOf(emptyList(), apps)
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
         assertTrue(viewModel.state.value is HomeUiState.Empty)
 
@@ -144,7 +150,7 @@ class HomeViewModelTest {
         val entry = mockk<AppEntry>()
         every { repository.launch(entry) } returns true
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         assertTrue(viewModel.launch(entry))
@@ -157,7 +163,7 @@ class HomeViewModelTest {
         val entry = mockk<AppEntry>()
         every { repository.launch(entry) } returns false
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         assertFalse(viewModel.launch(entry))
@@ -170,7 +176,7 @@ class HomeViewModelTest {
         val entry = mockk<AppEntry>()
         every { repository.openAppInfo(entry) } returns true
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         assertTrue(viewModel.openAppInfo(entry))
@@ -181,7 +187,7 @@ class HomeViewModelTest {
         every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
         val entry = stubbedApp("pkg/.A", serial = 0L)
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         viewModel.toggleFavorite(entry)
@@ -194,7 +200,7 @@ class HomeViewModelTest {
     fun `moveFavorite delegates the indices to the repository`() = runTest {
         every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
 
         viewModel.moveFavorite(from = 2, to = 0)
@@ -211,7 +217,7 @@ class HomeViewModelTest {
         val favFlow = MutableSharedFlow<List<FavoriteKey>>(extraBufferCapacity = 1)
         every { favorites.favorites } returns favFlow
 
-        val viewModel = HomeViewModel(repository, homeRole, favorites)
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
         advanceUntilIdle()
         assertTrue((viewModel.state.value as HomeUiState.Apps).favorites.isEmpty())
 
@@ -221,6 +227,29 @@ class HomeViewModelTest {
         val state = viewModel.state.value as HomeUiState.Apps
         assertEquals(listOf(app), state.favorites)
         assertEquals(listOf(app), state.apps)
+    }
+
+    @Test
+    fun `tile size defaults to MEDIUM when the store has not emitted`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns true
+        coEvery { repository.loadApps() } returns listOf(mockk<AppEntry>())
+
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
+        advanceUntilIdle()
+
+        assertEquals(TileSize.MEDIUM, (viewModel.state.value as HomeUiState.Apps).tileSize)
+    }
+
+    @Test
+    fun `the persisted tile size is reflected in the Apps state`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns true
+        coEvery { repository.loadApps() } returns listOf(mockk<AppEntry>())
+        every { settings.tileSize } returns flowOf(TileSize.LARGE)
+
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings)
+        advanceUntilIdle()
+
+        assertEquals(TileSize.LARGE, (viewModel.state.value as HomeUiState.Apps).tileSize)
     }
 
     /** A mock [AppEntry] whose component/serial resolve to a stable [FavoriteKey]. */

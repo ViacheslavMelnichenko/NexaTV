@@ -64,19 +64,9 @@ import com.nexatv.launcher.data.toFavoriteKey
 import com.nexatv.launcher.ui.components.AppTile
 import com.nexatv.launcher.ui.components.SectionHeader
 import com.nexatv.launcher.ui.theme.NexaTheme
+import com.nexatv.launcher.ui.theme.TileDimensions
+import com.nexatv.launcher.ui.theme.dimensions
 import kotlinx.coroutines.delay
-
-/**
- * Width floor for a grid cell; the grid fits as many columns as the screen allows. Kept compact so a
- * 1920-wide TV shows ~6 columns of small tiles rather than a few oversized ones (M5 will make this
- * size user-configurable).
- */
-private val TILE_MIN_WIDTH = 88.dp
-private val TILE_HEIGHT = 130.dp
-
-/** Favorites reuse the compact tile size so the quick-access strip stays small and consistent. */
-private val FAVORITE_TILE_WIDTH = 88.dp
-private val FAVORITE_TILE_HEIGHT = 130.dp
 
 private const val ERROR_VISIBLE_MS = 3000L
 
@@ -97,6 +87,7 @@ internal fun HomeScreen(
             is HomeUiState.Apps -> AppsContent(
                 favorites = state.favorites,
                 apps = state.apps,
+                tile = state.tileSize.dimensions(),
                 actions = actions,
             )
         }
@@ -131,6 +122,7 @@ private fun <T> List<T>.moved(from: Int, to: Int): List<T> {
 private fun AppsContent(
     favorites: List<AppEntry>,
     apps: List<AppEntry>,
+    tile: TileDimensions,
     actions: HomeActions,
 ) {
     var launchError by remember { mutableStateOf<String?>(null) }
@@ -150,6 +142,7 @@ private fun AppsContent(
             if (favorites.isNotEmpty()) {
                 FavoritesRow(
                     favorites = favorites,
+                    tile = tile,
                     firstFocus = favoritesFocus,
                     reorder = reorder,
                     onLaunch = ::tryLaunch,
@@ -170,7 +163,8 @@ private fun AppsContent(
             AppGridSection(
                 apps,
                 favoritesPresent = favorites.isNotEmpty(),
-                gridFocus,
+                tile = tile,
+                gridFocus = gridFocus,
                 onLaunch = ::tryLaunch,
                 onLongPress = { menuTarget = it },
             )
@@ -219,6 +213,7 @@ private fun AppsContent(
 @Composable
 private fun FavoritesRow(
     favorites: List<AppEntry>,
+    tile: TileDimensions,
     firstFocus: FocusRequester,
     reorder: ReorderSession?,
     onLaunch: (AppEntry) -> Unit,
@@ -264,8 +259,8 @@ private fun FavoritesRow(
                 icon = app.icon,
                 moving = isMoving,
                 modifier = Modifier
-                    .width(FAVORITE_TILE_WIDTH)
-                    .height(FAVORITE_TILE_HEIGHT)
+                    .width(tile.width)
+                    .height(tile.height)
                     .then(
                         when {
                             isMoving -> Modifier.focusRequester(movingFocus)
@@ -338,6 +333,7 @@ private fun BoxScope.ReorderHint() {
 private fun ColumnScope.AppGridSection(
     apps: List<AppEntry>,
     favoritesPresent: Boolean,
+    tile: TileDimensions,
     gridFocus: FocusRequester,
     onLaunch: (AppEntry) -> Unit,
     onLongPress: (AppEntry) -> Unit,
@@ -351,7 +347,7 @@ private fun ColumnScope.AppGridSection(
         ),
     )
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = TILE_MIN_WIDTH),
+        columns = GridCells.Adaptive(minSize = tile.width),
         contentPadding = PaddingValues(
             start = NexaTheme.spacing.safeAreaHorizontal,
             end = NexaTheme.spacing.safeAreaHorizontal,
@@ -376,7 +372,7 @@ private fun ColumnScope.AppGridSection(
                 icon = app.icon,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(TILE_HEIGHT)
+                    .height(tile.height)
                     .then(if (index == 0) Modifier.focusRequester(gridFocus) else Modifier),
                 onClick = { onLaunch(app) },
                 onLongClick = { onLongPress(app) },

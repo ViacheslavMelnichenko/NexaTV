@@ -26,6 +26,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
 import com.nexatv.launcher.data.favoritesRepository
+import com.nexatv.launcher.data.settingsRepository
 import com.nexatv.launcher.ui.home.HomeActions
 import com.nexatv.launcher.ui.home.HomeScreen
 import com.nexatv.launcher.ui.home.HomeViewModel
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
                         InstalledAppsRepository(context),
                         roleRepository,
                         favoritesRepository(context),
+                        settingsRepository(context),
                     )
                 }
 
