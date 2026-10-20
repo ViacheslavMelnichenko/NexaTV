@@ -12,6 +12,7 @@ package com.nexatv.launcher
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -95,6 +96,12 @@ private fun LauncherApp() {
     }
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // Signal "fully drawn" once real content replaces the initial Loading state, so the Baseline
+    // Profile/Macrobenchmark timeToFullDisplay reflects the grid being usable, not just the first
+    // empty frame (NFR-001). No-op in normal use; read by the benchmark harness (:benchmark).
+    ReportDrawnWhen { state !is HomeUiState.Loading }
+
     val actions = remember(viewModel) {
         HomeActions(
             onLaunch = viewModel::launch,
