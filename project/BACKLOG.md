@@ -36,8 +36,9 @@
 
 ---
 
-## EPIC: Phase 1 — Foundation  _(M1, not started)_
-- ☐ **P2** Create the code scaffold for the chosen stack. *Depends on:* ADR-0001 + stack ADR.
+## EPIC: Phase 1 — Foundation  _(M1 — complete 2026-10-20)_
+- ☑ **P1** Create the code scaffold for the chosen stack (2026-10-20). Root Gradle + version catalog (`gradle/libs.versions.toml`) + wrapper 8.9; `:app` module `com.nexatv.launcher` (SDK 34, `versionCode` 100 / `versionName` 0.1.0, NFR-011). Manifest: HOME + LEANBACK_LAUNCHER (FR-001), no INTERNET + `allowBackup=false` + data-extraction rules (NFR-021). Compose-for-TV design tokens (color/type/spacing, body ≥18sp — NFR-016), en/uk strings (NFR-020), placeholder Home. **Builds** (`assembleDebug`, JDK 17 / SDK 34). `.gitattributes` enforces LF for CI (ADR-0003).
+  - ☐ **P1** CI pipeline (GitHub Actions) per ADR-0003/NFR-008 — assemble + test on push; not yet wired.
 
 ---
 
