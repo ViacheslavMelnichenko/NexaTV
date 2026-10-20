@@ -45,8 +45,8 @@ class HomeViewModelTest {
     private val homeRole = mockk<HomeRoleRepository>()
 
     @Test
-    fun `not default Home yields NeedsHomeRole state and skips discovery`() = runTest {
-        every { homeRole.isDefaultHome() } returns false
+    fun `not effectively Home yields NeedsHomeRole state and skips discovery`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns false
 
         val viewModel = HomeViewModel(repository, homeRole)
         advanceUntilIdle()
@@ -55,8 +55,22 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun `effectively Home via override yields the app grid`() = runTest {
+        // isEffectivelyHome() is true because the HOME-override is enabled (ADR-0007), not the role —
+        // the ViewModel treats both the same: it shows the grid, never the prompt.
+        every { homeRole.isEffectivelyHome() } returns true
+        val apps = listOf(mockk<AppEntry>())
+        coEvery { repository.loadApps() } returns apps
+
+        val viewModel = HomeViewModel(repository, homeRole)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value is HomeUiState.Apps)
+    }
+
+    @Test
     fun `empty discovery yields Empty state`() = runTest {
-        every { homeRole.isDefaultHome() } returns true
+        every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
 
         val viewModel = HomeViewModel(repository, homeRole)
@@ -67,7 +81,7 @@ class HomeViewModelTest {
 
     @Test
     fun `non-empty discovery yields Apps state with the loaded list`() = runTest {
-        every { homeRole.isDefaultHome() } returns true
+        every { homeRole.isEffectivelyHome() } returns true
         val apps = listOf(mockk<AppEntry>(), mockk<AppEntry>())
         coEvery { repository.loadApps() } returns apps
 
@@ -81,7 +95,7 @@ class HomeViewModelTest {
 
     @Test
     fun `initial state before dispatcher runs is Loading`() = runTest {
-        every { homeRole.isDefaultHome() } returns true
+        every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
 
         val viewModel = HomeViewModel(repository, homeRole)
@@ -91,7 +105,7 @@ class HomeViewModelTest {
 
     @Test
     fun `launch delegates to repository and returns true on success`() = runTest {
-        every { homeRole.isDefaultHome() } returns true
+        every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
         val entry = mockk<AppEntry>()
         every { repository.launch(entry) } returns true
@@ -104,7 +118,7 @@ class HomeViewModelTest {
 
     @Test
     fun `launch delegates to repository and returns false on failure`() = runTest {
-        every { homeRole.isDefaultHome() } returns true
+        every { homeRole.isEffectivelyHome() } returns true
         coEvery { repository.loadApps() } returns emptyList()
         val entry = mockk<AppEntry>()
         every { repository.launch(entry) } returns false

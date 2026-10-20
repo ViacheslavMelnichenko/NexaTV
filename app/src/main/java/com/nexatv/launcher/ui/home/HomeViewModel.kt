@@ -23,7 +23,10 @@ import kotlinx.coroutines.launch
 sealed interface HomeUiState {
     data object Loading : HomeUiState
 
-    /** Not the default Home yet: show the pre-Home prompt, not a partial grid (FR-015 / ADR-0006). */
+    /**
+     * Not Home yet (neither the default Home nor the HOME-override): show the pre-Home prompt instead
+     * of a (potentially partial) grid (FR-015 / ADR-0006 / ADR-0007).
+     */
     data object NeedsHomeRole : HomeUiState
     data object Empty : HomeUiState
     data class Apps(val apps: List<AppEntry>) : HomeUiState
@@ -48,11 +51,11 @@ class HomeViewModel(
     }
 
     /**
-     * Re-evaluate from scratch: full app visibility is gated on holding `ROLE_HOME`, so until NexaTV
-     * is the default Home we surface the prompt instead of a (potentially partial) grid.
+     * Re-evaluate from scratch: until NexaTV is effectively Home — the default Home *or* the enabled
+     * HOME-override (ADR-0007) — we surface the prompt instead of a (potentially partial) grid.
      */
     fun refresh() {
-        if (!homeRole.isDefaultHome()) {
+        if (!homeRole.isEffectivelyHome()) {
             _state.value = HomeUiState.NeedsHomeRole
             return
         }
