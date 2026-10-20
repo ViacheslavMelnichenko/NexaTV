@@ -9,9 +9,13 @@
  */
 package com.nexatv.launcher.data
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
+import android.content.pm.ResolveInfo
+import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.compose.ui.graphics.asImageBitmap
@@ -33,6 +37,7 @@ class InstalledAppsRepository(context: Context) {
     private val launcherApps =
         appContext.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     private val userManager = appContext.getSystemService(UserManager::class.java)
+    private val packageManager = appContext.packageManager
 
     /** Package to hide from its own grid (debug builds carry the `.debug` suffix). */
     private val selfPackage = appContext.packageName
@@ -42,10 +47,29 @@ class InstalledAppsRepository(context: Context) {
      * Icons are rasterized here (off the UI thread) so composition stays cheap (NFR-003).
      */
     suspend fun loadApps(): List<AppEntry> = withContext(Dispatchers.Default) {
-        val rawList = launcherApps.profiles
+        val launchable = launcherApps.profiles
             .flatMap { user -> runCatching { launcherApps.getActivityList(null, user) }.getOrDefault(emptyList()) }
             .map { it.toEntry() }
-        orderInstalledApps(rawList, selfPackage)
+        // LauncherApps.getActivityList only returns CATEGORY_LAUNCHER activities; TV-native apps
+        // (Prime Video, Google TV, Play Games, …) ship a CATEGORY_LEANBACK_LAUNCHER entry *only*, so
+        // they are otherwise invisible. Supplement with the leanback launcher set for packages the
+        // standard query didn't already cover (FR-002 "see every launchable app").
+        val seen = launchable.mapTo(HashSet()) { it.packageName }
+        val leanbackOnly = leanbackLauncherEntries().filterNot { it.packageName in seen }
+        orderInstalledApps(launchable + leanbackOnly, selfPackage)
+    }
+
+    /**
+     * The TV (leanback) launcher activities for the current user, as [AppEntry]s. Resolved via
+     * [android.content.pm.PackageManager] because [LauncherApps] exposes no leanback-category query;
+     * visibility of these packages comes from the `<queries>` launcher intents in the manifest.
+     */
+    private fun leanbackLauncherEntries(): List<AppEntry> {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
+        val resolved = runCatching { packageManager.queryIntentActivities(intent, 0) }.getOrDefault(emptyList())
+        val user = Process.myUserHandle()
+        val serial = userManager?.getSerialNumberForUser(user) ?: 0L
+        return resolved.mapNotNull { it.toEntry(user, serial) }
     }
 
     /**
@@ -73,6 +97,15 @@ class InstalledAppsRepository(context: Context) {
     /** Start an app's main activity. Returns false on failure (FR-003 keeps focus, shows a message). */
     fun launch(entry: AppEntry): Boolean = runCatching {
         launcherApps.startMainActivity(entry.component, entry.user, null, null)
+    }.recoverCatching {
+        // Leanback-only apps aren't always startable via LauncherApps' main-activity path; fall back
+        // to their explicit leanback launch intent.
+        appContext.startActivity(
+            Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
+                .setComponent(entry.component)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
     }.isSuccess
 
     /** Open the system "App info" screen for [entry] (the context-menu "Інформація" action). */
@@ -90,6 +123,22 @@ class InstalledAppsRepository(context: Context) {
             component = componentName,
             user = user,
             userSerial = userManager?.getSerialNumberForUser(user) ?: 0L,
+            icon = icon,
+        )
+    }
+
+    /** Map a leanback [ResolveInfo] to an [AppEntry]; null if it carries no activity. */
+    private fun ResolveInfo.toEntry(user: UserHandle, serial: Long): AppEntry? {
+        val info = activityInfo ?: return null
+        val icon = runCatching {
+            loadIcon(packageManager).toBitmap(width = ICON_PX, height = ICON_PX).asImageBitmap()
+        }.getOrNull()
+        return AppEntry(
+            label = loadLabel(packageManager).toString(),
+            packageName = info.packageName,
+            component = ComponentName(info.packageName, info.name),
+            user = user,
+            userSerial = serial,
             icon = icon,
         )
     }

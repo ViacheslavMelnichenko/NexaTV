@@ -17,6 +17,25 @@
       FR-009: RECEIVE_BOOT_COMPLETED is intentionally NOT declared.
     -->
 
+    <!--
+      Package visibility (Android 11+). On this Google TV firmware NexaTV never becomes the real
+      system HOME (the override is an accessibility shim, ADR-0006/0007), so it is NOT auto-granted
+      visibility of every installed app — without this it sees only a handful of packages and the
+      grid looks almost empty. We declare exactly the launcher intents we resolve (standard + TV
+      "leanback" launchers), which grants visibility of just those apps — still no QUERY_ALL_PACKAGES
+      (ADR-0004).
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
