@@ -31,9 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -69,7 +71,7 @@ internal fun HomeScreen(
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
+@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun AppGrid(
     apps: List<AppEntry>,
@@ -99,7 +101,11 @@ private fun AppGrid(
                 ),
                 horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
                 verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
-                modifier = Modifier.fillMaxSize(),
+                // Restore (or, on first entry, seed) focus to the first tile so the very first
+                // D-pad press moves instead of being absorbed re-entering the grid (FR-006).
+                modifier = Modifier
+                    .fillMaxSize()
+                    .focusRestorer { firstItem },
             ) {
                 itemsIndexed(
                     items = apps,

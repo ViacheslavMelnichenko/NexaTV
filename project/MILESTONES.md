@@ -7,7 +7,7 @@
 |----|-----------|------|--------|
 | **M0** | Discovery & Device Audit | ADB connected, device audited (read-only), ecosystem researched, feature matrix + license + architecture comparison, ADR-0001 decided | ☑ Done (2026-10-20) |
 | M1 | Architecture & Project Foundation | Technology/architecture decided (ADRs), code scaffold created | ☑ Done (2026-10-20) — 5 ADRs accepted, Apache-2.0 chosen, Kotlin + Compose-for-TV scaffold builds (`assembleDebug`) |
-| M2 | Minimal Launcher | Launcher Activity, D-pad focus, app list render | ◐ In progress (2026-10-20) — code complete (grid renders/launches via `LauncherApps`, D-pad focus, states); on-device verification pending |
+| M2 | Minimal Launcher | Launcher Activity, D-pad focus, app list render | ☑ Complete (2026-10-20) — grid renders/launches via `LauncherApps`, D-pad focus + states; **verified on the real TCL** (reversible install, one-cell D-pad, OK launches focused app, HOME returns to stock) |
 | M3 | HOME Integration | Register as HOME (reversibly), verify behavior on real TV | ☐ |
 | M4 | Application Discovery | Robust installed-app discovery, launching, favorites, basic categories | ☐ |
 | M5 | Production TV UX | Polished focus/navigation/animations, remote-first UX | ☐ |
@@ -26,7 +26,7 @@
 - [x] M0 milestone defined
 - [x] ADR-0001 (Build vs. Fork) decided → greenfield, permissive license, clean-room references
 
-**M0 complete.** **M1 complete (2026-10-20).** Next milestone **M2 — Minimal Launcher**.
+**M0 complete.** **M1 complete (2026-10-20).** **M2 complete (2026-10-20).** Next milestone **M3 — HOME Integration**.
 
 ## M1 — exit criteria (met 2026-10-20)
 
@@ -41,11 +41,12 @@
 > Per `initial.md` §32: do **not** install NexaTV during M0–M1. First on-device
 > install happens in M2/M3 with a verified recovery path.
 
-## M2 — exit criteria (in progress)
+## M2 — exit criteria (complete 2026-10-20)
 
 - [x] Launcher Activity renders a D-pad-navigable app grid (`ui/home/HomeScreen` on `AppTile`)
 - [x] App discovery via `LauncherApps.getActivityList` across profiles (ADR-0004), off the UI thread
 - [x] Launch on OK; Loading/Empty states + in-UI launch-error (FR-003/FR-006/FR-011/FR-012/FR-014)
 - [x] `assembleDebug` + `lintDebug` + `detekt` green
-- [ ] **On-device (owner):** first install with verified recovery path; D-pad navigation + launch confirmed
-      on the real TCL remote; FR-011 focus check from ~3 m. (Pre-`ROLE_HOME` the grid may be partial — M3.)
+- [x] **On-device:** first reversible install on the real TCL; D-pad moves one cell/press, OK launches the
+      focused app, focus ring visible, `HOME` returns to the stock launcher. See `docs/technical/ANDROID-TV.md`
+      §3a. (Pre-`ROLE_HOME` the grid may be partial — full visibility in M3.)

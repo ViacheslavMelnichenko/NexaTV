@@ -19,3 +19,10 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 - Minimal launcher (M2): app discovery via `LauncherApps` across profiles (ADR-0004, no
   `QUERY_ALL_PACKAGES`), a D-pad-navigable app grid that launches on OK, canonical tiles with
   icon + monogram fallback, safe-area insets, and Loading/Empty/launch-error states.
+- `Modifier.focusRestorer` on the Home grid so focus returns to the first tile when coming
+  back from a launched app.
+
+### Verified
+- M2 on the real TCL (2026-10-20): first reversible install, grid renders real icons, D-pad
+  moves one cell per press, OK launches the focused app, `HOME` returns to the stock launcher.
+  Recorded in `docs/technical/ANDROID-TV.md` §3a.

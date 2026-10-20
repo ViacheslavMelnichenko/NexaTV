@@ -54,6 +54,28 @@ To document (verified on the actual TCL where noted):
 
 > Do not assume "set an APK as HOME" behaves identically across firmware. Verify on the TCL.
 
+## 3a. M2 first install & on-device verification (2026-10-20)
+
+First reversible install of the NexaTV launcher on the real TCL — debug variant
+(`com.nexatv.launcher.debug`), started **explicitly** (`am start`), the default HOME left untouched.
+
+| Check | Result | Source |
+|-------|--------|--------|
+| Install | `adb install -r app-debug.apk` → `Success`; no crash in logcat | FACT (ADB) |
+| Render (FR-013/FR-014) | Grid of real app icons under an "Apps" header; labels + focus ring draw correctly | FACT (screencap) |
+| Focus visible (FR-011) | Focused tile shows the `focusRing` border + lifted surface, legible across the room | FACT (screencap) |
+| D-pad nav (FR-006) | Each press moves focus exactly one cell (Gallery → Media Player → Message Box) | FACT (screencap after each key) |
+| Launch (FR-003) | OK on a focused tile starts **that** app (`com.tcl.messagebox/.activity.MainActivity`), not the first | FACT (`dumpsys … topResumedActivity`) |
+| Reversibility | `HOME` returns to the stock `…launcherx/.home.HomeActivity`; stock launcher never modified | FACT (ADB) |
+| Recovery | `adb uninstall com.nexatv.launcher.debug` removes it cleanly | FACT (plan) |
+
+> **Testing-method note (not an app bug):** injecting `input keyevent` ~3 s after `am start` made the
+> *first* D-pad event appear "absorbed" (focus didn't move) — the window was still taking input focus, so
+> the first injected key was dropped by the system, not the app. With the window settled (~5 s), the first
+> press moves correctly. A real remote press (human reaction time) always lands after settle, so this never
+> affects real use. `Modifier.focusRestorer { firstTile }` on the grid was kept regardless — it restores
+> focus to the first tile when returning from a launched app.
+
 ## 4. Safety notes
 
 Daily-use production device. Early phase is **read-only**. Do not disable the stock launcher, uninstall

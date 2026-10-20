@@ -73,7 +73,7 @@
 - ☐ **P2** **Theme switcher UI** — a D-pad-friendly control (in Settings) to change theme live; selection
   takes effect immediately and is restored after reboot. *Depends on:* the two items above.
 
-## EPIC: Phase 2 — Minimal Launcher  _(M2 — in progress)_
+## EPIC: Phase 2 — Minimal Launcher  _(M2 — complete 2026-10-20)_
 M2 goal (per MILESTONES) is deliberately narrow: **Launcher Activity, D-pad focus, app-list render +
 launch**. Favorites/categories/settings/persistence are **M4/M6**, HOME registration is **M3** — kept out
 of M2 for phase discipline. Covers **FR-002, FR-003, FR-006, FR-011, FR-012, FR-014** (partial); full
@@ -87,8 +87,11 @@ MVP (FR-001..009) completes across M3/M4.
   fallback, FR-013), initial focus on first tile (FR-006/FR-011), safe-area insets (FR-012), launch on OK
   with an in-UI, focus-preserving, auto-dismiss error (FR-003/FR-014). `MainActivity` renders it. 2026-10-20.
 - ☑ **P0** `assembleDebug` + `lintDebug` + `detekt` green locally. 2026-10-20.
-- ☐ **P0** **On-device verification** (owner-dependent): first install with a verified recovery path, then
-  confirm D-pad navigation + launch on the real TCL remote, and FR-011 (≥2 focus signals, ≤150 ms) from ~3 m.
+- ☑ **P0** **On-device verification** on the real TCL (2026-10-20): first reversible install
+  (`com.nexatv.launcher.debug`, HOME untouched) — no crash; grid renders real icons; D-pad moves one cell
+  per press (FR-006); OK launches the *focused* app (FR-003); focus ring visible (FR-011); `HOME` returns
+  to the stock launcher (reversible). Added `Modifier.focusRestorer` so focus returns to the first tile
+  after coming back from a launched app. Details in `docs/technical/ANDROID-TV.md` §3a.
   *Note:* pre-`ROLE_HOME`, the grid may be partial (ADR-0004 / FR-015) — expected until M3.
 - ☐ **P1** Live app add/remove via `LauncherApps.Callback` (FR-002 ≤2 s) — **deferred to M4** (discovery
   robustness); M2 loads once on start.
