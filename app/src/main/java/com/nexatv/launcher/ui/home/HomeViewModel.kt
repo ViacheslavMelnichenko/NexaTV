@@ -20,11 +20,15 @@ import com.nexatv.launcher.data.SettingsRepository
 import com.nexatv.launcher.data.TileSize
 import com.nexatv.launcher.data.resolveFavorites
 import com.nexatv.launcher.data.toFavoriteKey
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** UI state for the Home grid — a first frame appears before discovery finishes (FR-009/FR-014). */
 sealed interface HomeUiState {
@@ -61,6 +65,7 @@ class HomeViewModel(
     private val homeRole: HomeRoleRepository,
     private val favoritesRepository: FavoritesRepository,
     private val settingsRepository: SettingsRepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -68,6 +73,12 @@ class HomeViewModel(
 
     /** Last discovered apps, cached so a favorites change re-emits without re-querying/re-rasterizing. */
     private var cachedApps: List<AppEntry> = emptyList()
+
+    /** True once the catalogue has been loaded at least once, so [refresh] never re-queries needlessly. */
+    private var hasLoaded: Boolean = false
+
+    /** The in-flight catalogue load, cancelled before a new one so overlapping triggers coalesce. */
+    private var reloadJob: Job? = null
 
     /** Latest persisted favorites, kept so [emitApps] can resolve them against [cachedApps]. */
     private var favoriteKeys: List<FavoriteKey> = emptyList()
@@ -99,23 +110,45 @@ class HomeViewModel(
         }
     }
 
-    /** Fire-and-forget re-evaluation for callers outside a coroutine (role return, ON_RESUME). */
+    /**
+     * Re-evaluate the HOME role on a role return or every ON_RESUME. This must stay cheap: it does NOT
+     * re-query/re-rasterize the catalogue once it is loaded — the live [InstalledAppsRepository.appChanges]
+     * stream already owns catalogue reloads on install/removal (FR-002). Only the first time we become
+     * Home (nothing loaded yet) does this trigger a full load; afterwards it just re-checks the role and
+     * re-projects the cached apps (or surfaces the prompt if NexaTV stopped being Home).
+     */
     fun refresh() {
-        viewModelScope.launch { reload() }
+        if (!hasLoaded) {
+            reload()
+            return
+        }
+        viewModelScope.launch {
+            if (isEffectivelyHome()) emitApps() else _state.value = HomeUiState.NeedsHomeRole
+        }
     }
 
     /**
-     * Re-evaluate from scratch: until NexaTV is effectively Home — the default Home *or* the enabled
-     * HOME-override (ADR-0007) — we surface the prompt instead of a (potentially partial) grid.
+     * Load the catalogue from scratch: the first become-Home, or an install/removal via [appChanges].
+     * Until NexaTV is effectively Home — the default Home *or* the enabled HOME-override (ADR-0007) — we
+     * surface the prompt instead of a (potentially partial) grid. Cancels any in-flight load first so a
+     * burst of triggers (init racing the first resume, or several change callbacks) rasterizes icons once.
      */
-    private suspend fun reload() {
-        if (!homeRole.isEffectivelyHome()) {
-            _state.value = HomeUiState.NeedsHomeRole
-            return
+    private fun reload() {
+        reloadJob?.cancel()
+        reloadJob = viewModelScope.launch {
+            if (!isEffectivelyHome()) {
+                _state.value = HomeUiState.NeedsHomeRole
+                return@launch
+            }
+            cachedApps = repository.loadApps()
+            hasLoaded = true
+            emitApps()
         }
-        cachedApps = repository.loadApps()
-        emitApps()
     }
+
+    /** Resolve the HOME role (two binder round-trips) off the UI thread so the first frame isn't blocked. */
+    private suspend fun isEffectivelyHome(): Boolean =
+        withContext(defaultDispatcher) { homeRole.isEffectivelyHome() }
 
     /** Project the cached apps + current favorites into the UI state (favorites resolved in order). */
     private fun emitApps() {
