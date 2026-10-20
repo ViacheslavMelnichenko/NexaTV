@@ -93,5 +93,47 @@ MVP (FR-001..009) completes across M3/M4.
   to the stock launcher (reversible). Added `Modifier.focusRestorer` so focus returns to the first tile
   after coming back from a launched app. Details in `docs/technical/ANDROID-TV.md` §3a.
   *Note:* pre-`ROLE_HOME`, the grid may be partial (ADR-0004 / FR-015) — expected until M3.
-- ☐ **P1** Live app add/remove via `LauncherApps.Callback` (FR-002 ≤2 s) — **deferred to M4** (discovery
-  robustness); M2 loads once on start.
+- ☑ **P1** Live app add/remove via `LauncherApps.Callback` (FR-002 ≤2 s) — **moved to M4** (discovery
+  robustness) and **done there** 2026-10-20; M2 loaded once on start. See the M4 EPIC below.
+
+---
+
+## EPIC: Phase 3 — HOME Integration  _(M3 — complete 2026-10-20)_
+M3 goal (per MILESTONES): **become the TV's HOME, reversibly, and verify on the real TV.** On this TCL
+Google TV the normal `ROLE_HOME` path is **blocked by firmware** (ADR-0006 validation), so HOME
+integration is achieved via a reversible **accessibility override** (ADR-0007). Covers **FR-001 / FR-015**
+on this device. Stock launcher never disabled (Hard Rule 3).
+- ☑ **P0** On-device validation of the `ROLE_HOME` path (ADR-0006): the RequestRole dialog fires and the
+  role record updates, **but** the effective HOME stays stock Google TV — confirmed across a full reboot.
+  Documented in `docs/technical/ANDROID-TV.md` §3b and the project memory. 2026-10-20.
+- ☑ **P0** Reversible **accessibility override** (`override/NexaOverrideService` + `xml/nexa_accessibility_config`):
+  watches `TYPE_WINDOW_STATE_CHANGED` from the stock launcher package and raises NexaTV over it. Owner
+  enables it in Settings → Accessibility; reversible by toggling off. 2026-10-20.
+- ☑ **P0** Firmware-independent HOME/override **detection**: `PackageManager.resolveActivity(HOME)` +
+  enabled-accessibility-service check (`isEffectivelyHome()` = default Home **or** override enabled) — the
+  `RoleManager` API is unreliable here. Grid gates on `isEffectivelyHome()`. Unit tests green. 2026-10-20.
+- ☑ **P0** **On-device verification** (TCL): HOME → NexaTV (repeatable, stable, no loop), Back stays on
+  NexaTV, grid populates in override mode. `docs/technical/ANDROID-TV.md` §3c. 2026-10-20.
+  - *Non-obvious gotcha:* this firmware binds the service **only** via the on-device Settings consent
+    enable; `adb settings put secure enabled_accessibility_services …` is ignored (TCL `AppBoot`
+    `OP_AUTO_START` block).
+- ☐ **P2** **Accessibility-consent onboarding** — guide the owner to the Settings → Accessibility toggle
+  from the pre-Home prompt (ADR-0007 follow-up; current prompt opens `ACTION_ACCESSIBILITY_SETTINGS`).
+- ☐ **P2** **Override firmware-regression fallback** — secondary-launcher path if an OTA breaks the override
+  (ADR-0007 follow-up).
+
+---
+
+## EPIC: Phase 4 — Application Discovery  _(M4 — in progress)_
+M4 goal (per MILESTONES): **robust installed-app discovery, launching, favorites, basic categories.**
+Builds on the M2 grid now that NexaTV is effectively HOME (M3), so enumeration is complete (FR-015/016).
+- ☑ **P0** Live app list updates via `LauncherApps.Callback` (FR-002 ≤2 s). `InstalledAppsRepository.appChanges()`
+  is a `callbackFlow` (registered while collected, unregistered on cancel — no leak); `HomeViewModel` collects
+  it with `collectLatest { reload() }` so a burst of callbacks coalesces into one up-to-date load. Unit test
+  `an app change reloads the grid` green; `assembleDebug` green. 2026-10-20.
+- ☐ **P1** **Favorites** — pin / unpin / reorder apps, surfaced ahead of the full grid. **Blocked** on the
+  **Persistence ADR** (favorites must survive restart). *Depends on:* Persistence decision.
+- ☐ **P1** **Basic categories** — group apps (e.g. media / games / system) for faster D-pad reach.
+  *Depends on:* the favorites/persistence foundation.
+- ⏸ **P1** **Persistence ADR** (DataStore vs. alternatives) — owner-meaningful decision that gates favorites,
+  categories, and later theme/config persistence. Open/planned ADR; surface to the owner before M4 UI work.
