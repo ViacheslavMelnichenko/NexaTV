@@ -138,10 +138,11 @@ Builds on the M2 grid now that NexaTV is effectively HOME (M3), so enumeration i
   v1 (`LauncherStateProto.favorites`, tags 2-4 reserved); `FavoritesRepository` (favorites `Flow`, transactional
   toggle/reorder; `FavoriteKey` = component + profile serial so a favorite survives app updates) + serializer +
   JVM unit tests (pure algebra, serializer round-trip, fake in-memory DataStore). Tests + detekt green.
-- ◧ **P1** **Favorites UI** — *in progress.* ☑ Home state resolves favorites and exposes pin/unpin/reorder
-  (85c5974); ☑ "Обране" row renders above the grid with first-tile focus (73896ff); ☑ long-press OK context
-  menu — pin/unpin + system App info — with `combinedClickable` (645295a). ☐ **Перемістити** (D-pad reorder
-  mode) still to build; ☐ on-device visual check on the TCL (owner's eyes). *Depends on:* the DataStore
+- ◧ **P1** **Favorites UI** — *built; awaiting on-device check.* ☑ Home state resolves favorites and exposes
+  pin/unpin/reorder (85c5974); ☑ "Обране" row renders above the grid with first-tile focus (73896ff); ☑
+  long-press OK context menu — pin/unpin + system App info — with `combinedClickable` (645295a); ☑
+  **Перемістити** — D-pad reorder mode (◄ ► move, OK commit, BACK cancel), previewed locally and persisted as
+  one `moveFavorite` (7923937). ☐ on-device visual check on the TCL (owner's eyes). *Depends on:* the DataStore
   foundation (done).
 - ☐ **P1** **Basic categories** — group apps (e.g. media / games / system) for faster D-pad reach; persisted
   via the same DataStore. *Depends on:* the favorites/persistence foundation.
