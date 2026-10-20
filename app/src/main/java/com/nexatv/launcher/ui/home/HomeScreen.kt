@@ -54,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
@@ -75,6 +76,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
+import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
 import com.nexatv.launcher.R
 import com.nexatv.launcher.data.AppEntry
@@ -82,6 +84,7 @@ import com.nexatv.launcher.data.toFavoriteKey
 import com.nexatv.launcher.ui.components.AppTile
 import com.nexatv.launcher.ui.components.SectionHeader
 import com.nexatv.launcher.ui.theme.NexaTheme
+import com.nexatv.launcher.ui.theme.backdropBrush
 import com.nexatv.launcher.ui.theme.TileDimensions
 import com.nexatv.launcher.ui.theme.dimensions
 import java.util.Date
@@ -99,7 +102,12 @@ internal fun HomeScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(
+        modifier = modifier
+            .fillMaxSize()
+            .background(NexaTheme.colors.backdropBrush()),
+        colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+    ) {
         when (state) {
             HomeUiState.Loading -> CenteredMessage(stringResource(R.string.home_loading))
             HomeUiState.NeedsHomeRole -> PreHomePrompt(onRequestHome = onRequestHome)

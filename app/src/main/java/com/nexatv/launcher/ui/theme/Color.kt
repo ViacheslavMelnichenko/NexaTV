@@ -18,6 +18,10 @@ import androidx.compose.ui.graphics.Color
 internal object NexaColors {
     val Surface = Color(0xFF0F1419)
     val SurfaceVariant = Color(0xFF1B2430)
+    // Cinematic backdrop endpoints: a softly lifted, blue-tinted top fading to a deep near-black
+    // bottom, so the room's dark "letterbox" frames the content without a flat single tone.
+    val BackdropTop = Color(0xFF17202C)
+    val BackdropBottom = Color(0xFF080B0F)
     val OnSurface = Color(0xFFE6EAF0)
     val OnSurfaceMuted = Color(0xFF9AA6B2)
     val Accent = Color(0xFF8EC5FF)

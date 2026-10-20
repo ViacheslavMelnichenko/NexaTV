@@ -11,6 +11,7 @@ package com.nexatv.launcher.ui.theme
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -29,7 +30,13 @@ data class NexaColorScheme(
     val focusRing: Color,
     val success: Color,
     val error: Color,
+    val backdropTop: Color,
+    val backdropBottom: Color,
 )
+
+/** The cinematic Home backdrop: a vertical wash from the softly lifted top to the deep bottom. */
+internal fun NexaColorScheme.backdropBrush(): Brush =
+    Brush.verticalGradient(listOf(backdropTop, backdropBottom))
 
 /** Default theme: calm pastel on a dark TV-room surface (NFR-016). */
 internal val PastelDarkColors = NexaColorScheme(
@@ -42,6 +49,8 @@ internal val PastelDarkColors = NexaColorScheme(
     focusRing = NexaColors.Focus,
     success = NexaColors.Success,
     error = NexaColors.Error,
+    backdropTop = NexaColors.BackdropTop,
+    backdropBottom = NexaColors.BackdropBottom,
 )
 
 /** Active palette, provided by [NexaTheme]. Static: swapping it re-composes consumers. */
