@@ -15,8 +15,12 @@
     <!-- Long-press OK context menu (M4 / ADR-0008) -->
     <string name="home_menu_pin">Закріпити в «Обраному»</string>
     <string name="home_menu_unpin">Відкріпити</string>
+    <string name="home_menu_move">Перемістити</string>
     <string name="home_menu_app_info">Інформація про застосунок</string>
     <string name="home_menu_cancel">Скасувати</string>
+
+    <!-- Reorder mode hint (shown while moving a favorite) -->
+    <string name="home_reorder_hint">Рухайте ◄ ►, OK — поставити, BACK — скасувати</string>
 
     <!-- Pre-Home prompt (M3 / FR-015 / ADR-0006) -->
     <string name="home_prompt_title">Зробіть NexaTV своїм Home</string>

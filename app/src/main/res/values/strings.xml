@@ -15,8 +15,12 @@
     <!-- Long-press OK context menu (M4 / ADR-0008) -->
     <string name="home_menu_pin">Pin to Favorites</string>
     <string name="home_menu_unpin">Unpin</string>
+    <string name="home_menu_move">Move</string>
     <string name="home_menu_app_info">App info</string>
     <string name="home_menu_cancel">Cancel</string>
+
+    <!-- Reorder mode hint (shown while moving a favorite) -->
+    <string name="home_reorder_hint">Move with ◄ ►, press OK to place, BACK to cancel</string>
 
     <!-- Pre-Home prompt (M3 / FR-015 / ADR-0006) -->
     <string name="home_prompt_title">Make NexaTV your Home</string>

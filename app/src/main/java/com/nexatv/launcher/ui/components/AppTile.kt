@@ -55,6 +55,7 @@ internal fun AppTile(
     label: String,
     modifier: Modifier = Modifier,
     icon: ImageBitmap? = null,
+    moving: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -66,11 +67,17 @@ internal fun AppTile(
     Column(
         modifier = modifier
             .clip(shape)
-            .background(if (focused) colors.surfaceVariant else colors.surface)
+            .background(if (focused || moving) colors.surfaceVariant else colors.surface)
             .border(
+                // While "picked up" for reordering a tile keeps an accent ring even without focus,
+                // so the item being moved is always visible as the row shuffles around it.
                 border = BorderStroke(
-                    width = if (focused) 3.dp else 1.dp,
-                    color = if (focused) colors.focusRing else colors.surfaceVariant,
+                    width = if (focused || moving) 3.dp else 1.dp,
+                    color = when {
+                        moving -> colors.accent
+                        focused -> colors.focusRing
+                        else -> colors.surfaceVariant
+                    },
                 ),
                 shape = shape,
             )

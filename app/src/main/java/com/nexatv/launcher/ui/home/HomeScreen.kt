@@ -42,6 +42,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -93,13 +99,23 @@ internal fun HomeScreen(
 internal class HomeActions(
     val onLaunch: (AppEntry) -> Boolean,
     val onToggleFavorite: (AppEntry) -> Unit,
+    val onMoveFavorite: (Int, Int) -> Unit,
     val onAppInfo: (AppEntry) -> Unit,
 )
 
+/** A live "move favorite" session: the moving tile started at [origin] and now sits at slot [current]. */
+private class ReorderSession(val origin: Int, val current: Int)
+
+/** Pure list move used to preview a reorder without persisting until the owner commits. */
+private fun <T> List<T>.moved(from: Int, to: Int): List<T> {
+    if (from !in indices || to !in indices || from == to) return this
+    return toMutableList().apply { add(to, removeAt(from)) }
+}
+
 /**
  * The Home content: an optional "Favorites" row (ADR-0008) above the full app grid. Favorites are
- * pinned apps the owner reaches first; the grid below lists every launchable app. A short OK press
- * on any tile launches it (the long-press context menu arrives in a follow-up change).
+ * pinned apps the owner reaches first; the grid below lists every launchable app. Short OK launches;
+ * long OK opens the context menu (pin/unpin, move, app info).
  */
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -110,6 +126,7 @@ private fun AppsContent(
 ) {
     var launchError by remember { mutableStateOf<String?>(null) }
     var menuTarget by remember { mutableStateOf<AppEntry?>(null) }
+    var reorder by remember { mutableStateOf<ReorderSession?>(null) }
     val favoritesFocus = remember { FocusRequester() }
     val gridFocus = remember { FocusRequester() }
     val failedTemplate = stringResource(R.string.home_launch_failed)
@@ -122,7 +139,24 @@ private fun AppsContent(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (favorites.isNotEmpty()) {
-                FavoritesRow(favorites, favoritesFocus, onLaunch = ::tryLaunch, onLongPress = { menuTarget = it })
+                FavoritesRow(
+                    favorites = favorites,
+                    firstFocus = favoritesFocus,
+                    reorder = reorder,
+                    onLaunch = ::tryLaunch,
+                    onLongPress = { menuTarget = it },
+                    onReorderMove = { delta ->
+                        reorder?.let { s ->
+                            val next = (s.current + delta).coerceIn(0, favorites.lastIndex)
+                            if (next != s.current) reorder = ReorderSession(s.origin, next)
+                        }
+                    },
+                    onReorderCommit = {
+                        reorder?.let { actions.onMoveFavorite(it.origin, it.current) }
+                        reorder = null
+                    },
+                    onReorderCancel = { reorder = null },
+                )
             }
             AppGridSection(
                 apps,
@@ -132,14 +166,21 @@ private fun AppsContent(
                 onLongPress = { menuTarget = it },
             )
         }
+        if (reorder != null) ReorderHint()
         launchError?.let { message -> TransientMessage(message) }
     }
 
     menuTarget?.let { target ->
+        val key = target.toFavoriteKey()
         AppContextMenu(
             app = target,
-            isFavorite = target.toFavoriteKey() in favoriteKeys,
+            isFavorite = key in favoriteKeys,
             onToggleFavorite = { actions.onToggleFavorite(target); menuTarget = null },
+            onMove = {
+                val index = favorites.indexOfFirst { it.toFavoriteKey() == key }
+                if (index >= 0) reorder = ReorderSession(index, index)
+                menuTarget = null
+            },
             onAppInfo = { actions.onAppInfo(target); menuTarget = null },
             onDismiss = { menuTarget = null },
         )
@@ -160,15 +201,26 @@ private fun AppsContent(
     }
 }
 
-/** The horizontal "Favorites" row (ADR-0008); the first tile holds the row's entry focus. */
+/**
+ * The horizontal "Favorites" row (ADR-0008). Normally the first tile holds the row's entry focus; in a
+ * [reorder] session the row previews the moved order, keeps focus on the moving tile, and traps the
+ * D-pad (◄ ► move, OK commit, BACK cancel) so the shuffle can't accidentally leave the row.
+ */
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun FavoritesRow(
     favorites: List<AppEntry>,
     firstFocus: FocusRequester,
+    reorder: ReorderSession?,
     onLaunch: (AppEntry) -> Unit,
     onLongPress: (AppEntry) -> Unit,
+    onReorderMove: (Int) -> Unit,
+    onReorderCommit: () -> Unit,
+    onReorderCancel: () -> Unit,
 ) {
+    val display = if (reorder != null) favorites.moved(reorder.origin, reorder.current) else favorites
+    val movingFocus = remember { FocusRequester() }
+
     SectionHeader(
         title = stringResource(R.string.home_favorites_title),
         modifier = Modifier.padding(
@@ -183,23 +235,91 @@ private fun FavoritesRow(
             vertical = NexaTheme.spacing.md,
         ),
         horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (reorder != null) {
+                    Modifier.onPreviewKeyEvent { reorderKey(it, onReorderMove, onReorderCommit, onReorderCancel) }
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         itemsIndexedRow(
-            items = favorites,
+            items = display,
             key = { _, app -> "fav:" + app.component.flattenToShortString() },
         ) { index, app ->
+            val isMoving = reorder != null && index == reorder.current
             AppTile(
                 label = app.label,
                 icon = app.icon,
+                moving = isMoving,
                 modifier = Modifier
                     .width(TILE_MIN_WIDTH)
                     .height(TILE_HEIGHT)
-                    .then(if (index == 0) Modifier.focusRequester(firstFocus) else Modifier),
+                    .then(
+                        when {
+                            isMoving -> Modifier.focusRequester(movingFocus)
+                            reorder == null && index == 0 -> Modifier.focusRequester(firstFocus)
+                            else -> Modifier
+                        },
+                    ),
                 onClick = { onLaunch(app) },
                 onLongClick = { onLongPress(app) },
             )
         }
+    }
+
+    // Keep focus on the moving tile as it hops between slots, so ◄ ► keeps acting on the same item.
+    LaunchedEffect(reorder?.current) {
+        if (reorder != null) runCatching { movingFocus.requestFocus() }
+    }
+}
+
+/** D-pad handling while reordering: ◄ ► move the tile, OK commits, BACK cancels; up/down are trapped. */
+@OptIn(ExperimentalComposeUiApi::class)
+private fun reorderKey(
+    event: KeyEvent,
+    onMove: (Int) -> Unit,
+    onCommit: () -> Unit,
+    onCancel: () -> Unit,
+): Boolean {
+    // Trap all arrow/OK/BACK presses (both edges) so the reorder shuffle can't leave the row; act once,
+    // on key-down. Keys we don't handle fall through to normal focus navigation.
+    val handled = event.key in REORDER_KEYS
+    if (handled && event.type == KeyEventType.KeyDown) {
+        when (event.key) {
+            Key.DirectionLeft -> onMove(-1)
+            Key.DirectionRight -> onMove(1)
+            Key.DirectionCenter, Key.Enter -> onCommit()
+            Key.Back -> onCancel()
+        }
+    }
+    return handled
+}
+
+private val REORDER_KEYS = setOf(
+    Key.DirectionLeft, Key.DirectionRight, Key.DirectionCenter, Key.Enter, Key.Back,
+    Key.DirectionUp, Key.DirectionDown,
+)
+
+/** A bottom banner explaining the reorder controls while a move is in progress. */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun BoxScope.ReorderHint() {
+    Box(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(NexaTheme.spacing.screenMargin)
+            .clip(RoundedCornerShape(NexaTheme.radius.md))
+            .background(NexaTheme.colors.accent)
+            .padding(horizontal = NexaTheme.spacing.lg, vertical = NexaTheme.spacing.md),
+    ) {
+        Text(
+            text = stringResource(R.string.home_reorder_hint),
+            style = MaterialTheme.typography.bodyLarge,
+            color = NexaTheme.colors.onAccent,
+        )
     }
 }
 
@@ -258,8 +378,8 @@ private fun ColumnScope.AppGridSection(
 
 /**
  * The long-press OK context menu (ADR-0008). No "Menu" key exists on the TV remote, so a long OK on a
- * tile opens this: pin/unpin, open App info, or cancel. Reorder ("Перемістити") follows in a later change.
- * Short OK always launches, so this is the only destructive-free way to act on an item without opening it.
+ * tile opens this: pin/unpin, move (favorites only), open App info, or cancel. Short OK always launches,
+ * so this is the only destructive-free way to act on an item without opening it.
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -267,6 +387,7 @@ private fun AppContextMenu(
     app: AppEntry,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
+    onMove: () -> Unit,
     onAppInfo: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -290,6 +411,8 @@ private fun AppContextMenu(
                 )
                 val pinLabel = if (isFavorite) R.string.home_menu_unpin else R.string.home_menu_pin
                 MenuAction(stringResource(pinLabel), onToggleFavorite, Modifier.focusRequester(firstAction))
+                // "Move" reorders within the Favorites row, so it only applies to a pinned app.
+                if (isFavorite) MenuAction(stringResource(R.string.home_menu_move), onMove)
                 MenuAction(stringResource(R.string.home_menu_app_info), onAppInfo)
                 MenuAction(stringResource(R.string.home_menu_cancel), onDismiss)
             }

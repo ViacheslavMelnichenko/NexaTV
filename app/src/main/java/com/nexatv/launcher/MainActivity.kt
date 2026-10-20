@@ -73,6 +73,7 @@ class MainActivity : ComponentActivity() {
                     HomeActions(
                         onLaunch = viewModel::launch,
                         onToggleFavorite = viewModel::toggleFavorite,
+                        onMoveFavorite = viewModel::moveFavorite,
                         onAppInfo = { viewModel.openAppInfo(it) },
                     )
                 }
