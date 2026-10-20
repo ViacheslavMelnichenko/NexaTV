@@ -30,6 +30,7 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0006](./ADR-0006-home-role-registration.md) | HOME registration, pre-Home prompt & reversibility | **Accepted** (2026-10-20) — pre-Home prompt gates the grid; reversible, no boot receiver. **Become-Home mechanism superseded by [ADR-0007](./ADR-0007-home-override-accessibility.md)** on Google TV firmware that blocks `ROLE_HOME` replacement |
 | [ADR-0007](./ADR-0007-home-override-accessibility.md) | Becoming HOME via an accessibility override | **Accepted** (2026-10-20, device-validated) — Google TV blocks third-party `ROLE_HOME`; `NexaOverrideService` raises NexaTV when the stock launcher appears; owner-enabled in Settings → Accessibility, reversible, stock launcher never disabled |
 | [ADR-0008](./ADR-0008-persistence-proto-datastore.md) | Local persistence | **Accepted** (2026-10-20) — **Proto DataStore** for favorites/categories/theme/settings; typed, `Flow`-native, additive schema evolution; local only (no INTERNET, `allowBackup=false`); Room deferred until categories need relational queries |
+| [ADR-0009](./ADR-0009-configuration-architecture.md) | Configuration architecture (user settings) | **Proposed** (2026-10-20) — settings as an additive `SettingsProto` in the ADR-0008 store (tag 4); `SettingsRepository` + Flow seam; state-based Home↔Settings nav (no nav library yet); tile size as a semantic S/M/L token; opens M5 |
 
 ## Planned / potential ADRs (per `initial.md` §25)
 
@@ -38,9 +39,10 @@ CI/CD, signing & release (ADR-0003) · "Glass"/translucency (ADR-0005) ·
 Launcher HOME strategy (ADR-0006 — registration & pre-Home prompt; ADR-0007 — accessibility override after
 on-device validation showed Google TV blocks `ROLE_HOME` replacement) · Persistence (ADR-0008 — Proto DataStore).
 
+Resolved (M5): Configuration architecture (ADR-0009 — settings as additive Proto DataStore state, proposed).
+
 Still open / potential:
 
 - State management
 - Native Android integration
-- Configuration architecture (builds on ADR-0008's DataStore foundation)
 - Plugin / integration architecture (post-MVP)
