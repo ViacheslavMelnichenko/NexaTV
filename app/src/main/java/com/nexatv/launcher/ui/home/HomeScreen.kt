@@ -14,6 +14,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.text.format.DateFormat
+import android.text.format.DateUtils
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -280,9 +281,15 @@ private fun Clock() {
 
     val moment = remember(now) { Date(now) }
     val timeText = remember(now, context) { DateFormat.getTimeFormat(context).format(moment) }
-    val dateText = remember(now, context) { DateFormat.getLongDateFormat(context).format(moment) }
+    // Day + month only (no year), localized, sitting on one line after the time.
+    val dateText = remember(now, context) {
+        DateUtils.formatDateTime(context, now, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR)
+    }
 
-    Column {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
+    ) {
         Text(
             text = timeText,
             style = MaterialTheme.typography.displayLarge,
@@ -292,6 +299,8 @@ private fun Clock() {
             text = dateText,
             style = MaterialTheme.typography.bodyMedium,
             color = NexaTheme.colors.onSurfaceMuted,
+            // Lift the small date off the baseline so it rests level with the time's digits.
+            modifier = Modifier.padding(bottom = NexaTheme.spacing.sm),
         )
     }
 }
