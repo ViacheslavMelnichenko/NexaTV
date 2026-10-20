@@ -25,7 +25,7 @@ internal data class TileDimensions(val width: Dp, val height: Dp)
 
 /** Resolve a semantic [TileSize] to its drawn dimensions. The S/M/L → dp map lives only here. */
 internal fun TileSize.dimensions(): TileDimensions = when (this) {
-    TileSize.SMALL -> TileDimensions(width = 72.dp, height = 108.dp)
-    TileSize.MEDIUM -> TileDimensions(width = 88.dp, height = 130.dp)
-    TileSize.LARGE -> TileDimensions(width = 120.dp, height = 168.dp)
+    TileSize.SMALL -> TileDimensions(width = 80.dp, height = 100.dp)
+    TileSize.MEDIUM -> TileDimensions(width = 96.dp, height = 120.dp)
+    TileSize.LARGE -> TileDimensions(width = 128.dp, height = 156.dp)
 }

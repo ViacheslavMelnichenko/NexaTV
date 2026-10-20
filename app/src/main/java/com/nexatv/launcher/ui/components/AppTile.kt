@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -96,13 +97,16 @@ internal fun AppTile(
             )
             // Short OK launches; long OK (no "Menu" key on the TV remote) opens the context menu.
             .okClickable(interaction = interaction, onClick = onClick, onLongClick = onLongClick)
-            .padding(NexaTheme.spacing.md),
+            .padding(NexaTheme.spacing.sm),
         verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // The icon takes all the height the label leaves, so a square-ish tile stays balanced whether the
+        // name wraps to one line or two — rather than a fixed square that forces the tile taller.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f),
+                .weight(1f),
             contentAlignment = Alignment.Center,
         ) {
             if (icon != null) {
@@ -110,7 +114,7 @@ internal fun AppTile(
                     bitmap = icon,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
                 )
             } else {
                 Monogram(label = label)
@@ -119,15 +123,16 @@ internal fun AppTile(
         Text(
             text = label,
             // A tile label is a *secondary* cue — the icon identifies the app — so it is kept light and
-            // quiet (regular weight, muted colour, 16sp) rather than the loud titleMedium: less visual
-            // shouting and narrower glyphs let more of the name fit before the ellipsis.
+            // quiet (regular weight, muted colour, small). Soft word-wrap over two lines lets a full name
+            // like "Play Store" sit whole instead of being cut with an ellipsis on the first line.
             style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
+                fontSize = 14.sp,
+                lineHeight = 17.sp,
                 fontWeight = FontWeight.Normal,
             ),
             color = colors.onSurfaceMuted,
-            maxLines = 1,
+            softWrap = true,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier

@@ -150,15 +150,21 @@ private fun AppsContent(
         if (!actions.onLaunch(app)) launchError = failedTemplate.format(app.label)
     }
 
+    val favoritesPresent = favorites.isNotEmpty()
+    // The Settings gear shares the first section's header row (no separate top bar), so it never claims
+    // a whole row of dead space above the content. It rides the "Favorites" header when favorites exist,
+    // otherwise the "All apps" header, so it is always present and reachable by a D-pad ▲.
+    val settingsGear: @Composable () -> Unit = { SettingsEntry(onClick = onOpenSettings) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            TopBar(onOpenSettings = onOpenSettings)
-            if (favorites.isNotEmpty()) {
+            if (favoritesPresent) {
                 FavoritesRow(
                     favorites = favorites,
                     tile = tile,
                     firstFocus = favoritesFocus,
                     reorder = reorder,
+                    headerTrailing = settingsGear,
                     onLaunch = ::tryLaunch,
                     onLongPress = { menuTarget = it },
                     onReorderMove = { delta ->
@@ -178,6 +184,7 @@ private fun AppsContent(
                 apps,
                 tile = tile,
                 gridFocus = gridFocus,
+                headerTrailing = if (favoritesPresent) null else settingsGear,
                 onLaunch = ::tryLaunch,
                 onLongPress = { menuTarget = it },
             )
@@ -214,27 +221,6 @@ private fun AppsContent(
             delay(ERROR_VISIBLE_MS)
             launchError = null
         }
-    }
-}
-
-/**
- * The home top bar (M5.1 / ADR-0009): currently just the Settings entry, pinned to the top-right. It
- * sits above the rows in the Column flow, so a D-pad ▲ from favorites/grid reaches it; the later M5
- * cinematic pass adds the clock/date and Search/Wi-Fi alongside it.
- */
-@Composable
-private fun TopBar(onOpenSettings: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = NexaTheme.spacing.safeAreaHorizontal,
-                end = NexaTheme.spacing.safeAreaHorizontal,
-                top = NexaTheme.spacing.screenMargin,
-            ),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        SettingsEntry(onClick = onOpenSettings)
     }
 }
 
@@ -282,6 +268,7 @@ private fun FavoritesRow(
     tile: TileDimensions,
     firstFocus: FocusRequester,
     reorder: ReorderSession?,
+    headerTrailing: (@Composable () -> Unit)?,
     onLaunch: (AppEntry) -> Unit,
     onLongPress: (AppEntry) -> Unit,
     onReorderMove: (Int) -> Unit,
@@ -293,17 +280,18 @@ private fun FavoritesRow(
 
     SectionHeader(
         title = stringResource(R.string.home_favorites_title),
+        trailing = headerTrailing,
         modifier = Modifier.padding(
             start = NexaTheme.spacing.safeAreaHorizontal,
             end = NexaTheme.spacing.safeAreaHorizontal,
-            // The top bar already supplies the top margin, so this header only needs a small gap.
-            top = NexaTheme.spacing.sm,
+            // First element on screen now (no separate top bar): a small top margin clears TV overscan.
+            top = NexaTheme.spacing.md,
         ),
     )
     LazyRow(
         contentPadding = PaddingValues(
             horizontal = NexaTheme.spacing.safeAreaHorizontal,
-            vertical = NexaTheme.spacing.md,
+            vertical = NexaTheme.spacing.sm,
         ),
         horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
         modifier = Modifier
@@ -401,11 +389,13 @@ private fun ColumnScope.AppGridSection(
     apps: List<AppEntry>,
     tile: TileDimensions,
     gridFocus: FocusRequester,
+    headerTrailing: (@Composable () -> Unit)?,
     onLaunch: (AppEntry) -> Unit,
     onLongPress: (AppEntry) -> Unit,
 ) {
     SectionHeader(
         title = stringResource(R.string.home_apps_title),
+        trailing = headerTrailing,
         modifier = Modifier.padding(
             start = NexaTheme.spacing.safeAreaHorizontal,
             end = NexaTheme.spacing.safeAreaHorizontal,
