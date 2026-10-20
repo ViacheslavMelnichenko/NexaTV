@@ -21,12 +21,19 @@ not assumption.
 | 5 | Tarang Launcher | github.com/mohitkyadav/tarang-launcher | Kotlin | **None** *(all-rights-reserved)* | [TARANG.md](./TARANG.md) | ☑ Researched |
 | 6 | TV Launcher (nielsvanvelzen) | github.com/nielsvanvelzen/tv-launcher | Kotlin / Compose-for-TV | **GPL-3.0** | [TV_LAUNCHER.md](./TV_LAUNCHER.md) | ☑ Researched |
 | 7 | LauncherCompose | github.com/karuhun-developer/LauncherCompose | Kotlin / Compose (Now-in-Android) | **Apache-2.0** | [TV_LAUNCHER.md](./TV_LAUNCHER.md) | ☑ Researched |
-| 8 | Other active launchers | — | — | — | _as needed_ | ☐ Not started |
+| 8 | CleanYourTV | github.com/Gathin23/cleanyourtv | Java/RecyclerView (debloat toolkit + minimal launcher) | **MIT** *(code; bundled font OFL-1.1)* | [CLEANYOURTV.md](./CLEANYOURTV.md) | ☑ Researched (2nd pass) |
+| — | Projectivy / Wolf / tsynik-LeanbackLauncher | *(closed / unlicensed)* | — | **none / proprietary** | [CLEANYOURTV.md](./CLEANYOURTV.md) | ☑ Benchmarks only (no reuse) |
 
 > **License takeaway:** every Flutter candidate (FLauncher + all LTvLauncher forks) is **GPL-3.0**, and
 > the strongest native candidate (`tv-launcher`) is also **GPL-3.0** — none can be *copied* into a permissive
-> NexaTV codebase. The only permissive-reuse options are **LauncherCompose (Apache-2.0)** and, with
-> caveats, **Yukuza (MIT declared but missing a LICENSE file)**. See [LICENSE_ANALYSIS.md](./LICENSE_ANALYSIS.md).
+> NexaTV codebase. The permissive-reuse options are **LauncherCompose (Apache-2.0)**, **CleanYourTV (MIT —
+> code; verified 2026-10-20)**, and, with caveats, **Yukuza (MIT declared but missing a LICENSE file)**. See
+> [LICENSE_ANALYSIS.md](./LICENSE_ANALYSIS.md).
+>
+> **2nd-pass note (2026-10-20):** an independent refresh re-verified the key licenses (LauncherCompose =
+> Apache-2.0, tv-launcher = GPL-3.0) and confirmed the landscape is dominated by the candidates above. The
+> only genuinely new entry is **CleanYourTV**; **Projectivy** and **Wolf** are **closed-source** (UX
+> benchmarks only). No other actively-maintained OSS TV *launcher* was missed.
 
 ## Research objectives (applied to each project)
 
