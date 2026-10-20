@@ -2,6 +2,14 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.detekt)
+}
+
+// Static analysis gate (ADR-0003 D1 / NFR-008). Config: config/detekt/detekt.yml.
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.files("config/detekt/detekt.yml"))
+    autoCorrect = false
 }
 
 android {

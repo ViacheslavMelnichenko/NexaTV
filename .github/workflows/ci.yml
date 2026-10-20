@@ -1,0 +1,82 @@
+# NexaTV — PR / main CI gate. Implements ADR-0003 D1 (NFR-008).
+# Performance NFRs (001/002/003) are NOT gated here: GitHub runners have no
+# 32-bit ARM device (ADR-0003 D9) — those are a manual pre-release on-device step.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# One run per ref; cancel superseded runs.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build · Lint · Test · Detekt
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Set up Gradle (with cache)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Assemble · Lint · Unit tests · Detekt
+        run: ./gradlew assembleDebug lintDebug testDebugUnitTest detekt --stacktrace
+
+      - name: ABI assert (armeabi-v7a only, no 64-bit .so)
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          BAD=$(unzip -l "$APK" | awk '{print $4}' | grep '^lib/' | grep -vE '^lib/armeabi-v7a/' || true)
+          if [ -n "$BAD" ]; then
+            echo "::error::Forbidden native libs for the armeabi-v7a target:"; echo "$BAD"; exit 1
+          fi
+          echo "ABI OK: no forbidden native libraries."
+
+      - name: APK size budget (debug <= 30 MB)
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          SIZE=$(stat -c%s "$APK"); MAX=$((30 * 1024 * 1024))
+          echo "Debug APK size: $SIZE bytes (budget $MAX). Release budget is tighter (enforced at release)."
+          [ "$SIZE" -le "$MAX" ] || { echo "::error::APK exceeds size budget"; exit 1; }
+
+      - name: Upload reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+          if-no-files-found: ignore
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

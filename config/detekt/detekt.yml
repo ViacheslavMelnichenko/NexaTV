@@ -1,0 +1,20 @@
+# NexaTV — detekt overrides (layered on buildUponDefaultConfig = true).
+# Only deviations from detekt's defaults live here.
+
+build:
+  maxIssues: 0
+
+naming:
+  # Token files intentionally hold a namespaced object (e.g. Color.kt -> NexaColors).
+  MatchingDeclarationName:
+    active: false
+  # @Composable functions are PascalCase by Compose convention.
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+
+style:
+  MaxLineLength:
+    maxLineLength: 120
+  # Design tokens are literal by nature (dp grid, sp sizes, color hex).
+  MagicNumber:
+    active: false
