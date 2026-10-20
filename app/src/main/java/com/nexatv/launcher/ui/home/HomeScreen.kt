@@ -14,7 +14,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.text.format.DateFormat
-import android.text.format.DateUtils
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -170,12 +169,14 @@ private fun AppsContent(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             HomeTopBar(onOpenAllApps = onOpenAllApps, onOpenSettings = onOpenSettings)
-            // The favorites row sits in the vertical centre of the space below the top bar.
+            // The favorites row anchors to the bottom-centre of the screen (the centre above it is left
+            // for the calendar + weather widgets); the LazyRow centres the tiles horizontally itself.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center,
+                    .weight(1f)
+                    .padding(bottom = NexaTheme.spacing.screenMargin),
+                contentAlignment = Alignment.BottomCenter,
             ) {
                 if (favoritesPresent) {
                     FavoritesRow(
@@ -237,7 +238,7 @@ private fun AppsContent(
 }
 
 /**
- * The cinematic Home top bar (M5): a live clock + date on the left, and on the right the All-apps button
+ * The cinematic Home top bar (M5): a live clock on the left, and on the right the All-apps button
  * followed by the Settings gear. It is a thin, content-justified row — the clock earns its vertical space
  * — so it reads as a status bar rather than the empty gear strip it replaces. Both buttons stay reachable
  * by a D-pad ▲ from the favorites row below.
@@ -275,9 +276,9 @@ private fun HomeTopBar(onOpenAllApps: () -> Unit, onOpenSettings: () -> Unit) {
 }
 
 /**
- * A live clock + long date, formatted through [DateFormat] so the 12/24-hour choice, locale and timezone
- * all follow the system. It ticks off `ACTION_TIME_TICK` (one broadcast a minute, on the minute) rather
- * than a polling loop, so it costs nothing between updates; the receiver is scoped to the composition.
+ * A live clock, formatted through [DateFormat] so the 12/24-hour choice, locale and timezone all follow
+ * the system. It ticks off `ACTION_TIME_TICK` (one broadcast a minute, on the minute) rather than a
+ * polling loop, so it costs nothing between updates; the receiver is scoped to the composition.
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -303,28 +304,12 @@ private fun Clock() {
 
     val moment = remember(now) { Date(now) }
     val timeText = remember(now, context) { DateFormat.getTimeFormat(context).format(moment) }
-    // Day + month only (no year), localized, sitting on one line after the time.
-    val dateText = remember(now, context) {
-        DateUtils.formatDateTime(context, now, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR)
-    }
 
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
-    ) {
-        Text(
-            text = timeText,
-            style = MaterialTheme.typography.displayLarge,
-            color = NexaTheme.colors.onSurface,
-        )
-        Text(
-            text = dateText,
-            style = MaterialTheme.typography.bodyMedium,
-            color = NexaTheme.colors.onSurfaceMuted,
-            // Lift the small date off the baseline so it rests level with the time's digits.
-            modifier = Modifier.padding(bottom = NexaTheme.spacing.sm),
-        )
-    }
+    Text(
+        text = timeText,
+        style = MaterialTheme.typography.displayLarge,
+        color = NexaTheme.colors.onSurface,
+    )
 }
 
 /**
