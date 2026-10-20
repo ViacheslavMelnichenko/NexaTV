@@ -71,7 +71,7 @@ Primary device — TCL Smart TV, Android TV OS 14 (audited specs in
 | CPU ABI | **armeabi-v7a only** (no arm64) | Pure-Kotlin/Compose app ships no `.so` → ABI-agnostic (ADR-0002) |
 | Cores / RAM | 4 cores / ~2.34 GiB | Launcher is always-resident → memory budget matters (NFR-002) |
 | Display | 4K panel, **UI at 1080p**, density 320 | Design target is 1080p 10-foot UI |
-| GPU | older 32-bit class (`UNKNOWN` exact part) | Real-time blur/translucency is a performance risk (NFR-017) |
+| SoC / GPU | MediaTek MT9689 (Cortex-A73); **ARM Mali-G52**, GL ES 3.2 | Low-mid GPU at 60 Hz/16.67 ms → real-time blur is a measured risk (NFR-017, ADR-0005) |
 | Input | Physical remote / D-pad only | No touch, no mouse (UX §9) |
 | Recovery | `com.android.tv.settings/.system.FallbackHome` | Safe fallback exists → install must stay reversible (NFR-007) |
 
