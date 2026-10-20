@@ -5,6 +5,8 @@
 
     <!-- Home / app grid (M2) -->
     <string name="home_apps_title">All apps</string>
+    <string name="home_open_all_apps">Open all apps</string>
+    <string name="home_favorites_empty">No favorites yet. Open all apps to pin the ones you use.</string>
     <!-- Favorites row (M4 / ADR-0008) -->
     <string name="home_favorites_title">Favorites</string>
     <string name="home_loading">Loading apps…</string>

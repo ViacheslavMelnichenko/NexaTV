@@ -5,6 +5,8 @@
 
     <!-- Home / app grid (M2) -->
     <string name="home_apps_title">Усі застосунки</string>
+    <string name="home_open_all_apps">Відкрити всі застосунки</string>
+    <string name="home_favorites_empty">Ще немає обраних. Відкрийте всі застосунки й закріпіть потрібні.</string>
     <!-- Favorites row (M4 / ADR-0008) -->
     <string name="home_favorites_title">Обране</string>
     <string name="home_loading">Завантаження застосунків…</string>

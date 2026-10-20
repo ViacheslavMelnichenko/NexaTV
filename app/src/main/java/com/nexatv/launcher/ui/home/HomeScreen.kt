@@ -15,6 +15,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.text.format.DateFormat
 import android.text.format.DateUtils
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,7 +27,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,12 +35,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed as itemsIndexedRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -57,7 +53,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -69,9 +64,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
@@ -81,8 +74,8 @@ import androidx.tv.material3.Text
 import com.nexatv.launcher.R
 import com.nexatv.launcher.data.AppEntry
 import com.nexatv.launcher.data.toFavoriteKey
+import com.nexatv.launcher.ui.components.AppContextMenu
 import com.nexatv.launcher.ui.components.AppTile
-import com.nexatv.launcher.ui.components.SectionHeader
 import com.nexatv.launcher.ui.theme.NexaTheme
 import com.nexatv.launcher.ui.theme.backdropBrush
 import com.nexatv.launcher.ui.theme.TileDimensions
@@ -99,6 +92,7 @@ internal fun HomeScreen(
     state: HomeUiState,
     actions: HomeActions,
     onRequestHome: () -> Unit,
+    onOpenAllApps: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -114,9 +108,9 @@ internal fun HomeScreen(
             HomeUiState.Empty -> EmptyState()
             is HomeUiState.Apps -> AppsContent(
                 favorites = state.favorites,
-                apps = state.apps,
                 tile = state.tileSize.dimensions(),
                 actions = actions,
+                onOpenAllApps = onOpenAllApps,
                 onOpenSettings = onOpenSettings,
             )
         }
@@ -142,24 +136,24 @@ private fun <T> List<T>.moved(from: Int, to: Int): List<T> {
 }
 
 /**
- * The Home content: an optional "Favorites" row (ADR-0008) above the full app grid. Favorites are
- * pinned apps the owner reaches first; the grid below lists every launchable app. Short OK launches;
- * long OK opens the context menu (pin/unpin, move, app info).
+ * The Home content: the cinematic top bar over the favorites row, which is the whole of Home now. Home
+ * shows only the owner's pinned apps (ADR-0008), centred on the screen; the full catalogue moved to its
+ * own All-apps page reached from the top bar. Short OK launches; long OK opens the context menu
+ * (pin/unpin, move, app info). When nothing is pinned yet, a hint points at the All-apps page.
  */
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun AppsContent(
     favorites: List<AppEntry>,
-    apps: List<AppEntry>,
     tile: TileDimensions,
     actions: HomeActions,
+    onOpenAllApps: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     var launchError by remember { mutableStateOf<String?>(null) }
     var menuTarget by remember { mutableStateOf<AppEntry?>(null) }
     var reorder by remember { mutableStateOf<ReorderSession?>(null) }
     val favoritesFocus = remember { FocusRequester() }
-    val gridFocus = remember { FocusRequester() }
     val failedTemplate = stringResource(R.string.home_launch_failed)
     val favoriteKeys = remember(favorites) { favorites.map { it.toFavoriteKey() }.toSet() }
 
@@ -171,35 +165,38 @@ private fun AppsContent(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeTopBar(onOpenSettings = onOpenSettings)
-            if (favoritesPresent) {
-                FavoritesRow(
-                    favorites = favorites,
-                    tile = tile,
-                    firstFocus = favoritesFocus,
-                    reorder = reorder,
-                    onLaunch = ::tryLaunch,
-                    onLongPress = { menuTarget = it },
-                    onReorderMove = { delta ->
-                        reorder?.let { s ->
-                            val next = (s.current + delta).coerceIn(0, favorites.lastIndex)
-                            if (next != s.current) reorder = ReorderSession(s.origin, next)
-                        }
-                    },
-                    onReorderCommit = {
-                        reorder?.let { actions.onMoveFavorite(it.origin, it.current) }
-                        reorder = null
-                    },
-                    onReorderCancel = { reorder = null },
-                )
+            HomeTopBar(onOpenAllApps = onOpenAllApps, onOpenSettings = onOpenSettings)
+            // The favorites row sits in the vertical centre of the space below the top bar.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (favoritesPresent) {
+                    FavoritesRow(
+                        favorites = favorites,
+                        tile = tile,
+                        firstFocus = favoritesFocus,
+                        reorder = reorder,
+                        onLaunch = ::tryLaunch,
+                        onLongPress = { menuTarget = it },
+                        onReorderMove = { delta ->
+                            reorder?.let { s ->
+                                val next = (s.current + delta).coerceIn(0, favorites.lastIndex)
+                                if (next != s.current) reorder = ReorderSession(s.origin, next)
+                            }
+                        },
+                        onReorderCommit = {
+                            reorder?.let { actions.onMoveFavorite(it.origin, it.current) }
+                            reorder = null
+                        },
+                        onReorderCancel = { reorder = null },
+                    )
+                } else {
+                    EmptyFavoritesHint()
+                }
             }
-            AppGridSection(
-                apps,
-                tile = tile,
-                gridFocus = gridFocus,
-                onLaunch = ::tryLaunch,
-                onLongPress = { menuTarget = it },
-            )
         }
         if (reorder != null) ReorderHint()
         launchError?.let { message -> TransientMessage(message) }
@@ -221,11 +218,10 @@ private fun AppsContent(
         )
     }
 
-    // FR-006/FR-011: land focus on the favorites row when present, otherwise the first grid tile,
-    // so the remote works immediately. Re-runs if the favorites row appears or disappears.
-    LaunchedEffect(favorites.isEmpty()) {
-        val target = if (favorites.isEmpty()) gridFocus else favoritesFocus
-        runCatching { target.requestFocus() }
+    // FR-006/FR-011: land focus on the favorites row when present, so the remote works immediately.
+    // With no favorites there is nothing to focus here; the top-bar buttons take the first press.
+    LaunchedEffect(favoritesPresent) {
+        if (favoritesPresent) runCatching { favoritesFocus.requestFocus() }
     }
     // FR-014: launch errors are shown in-UI (focus-preserving) and auto-dismiss.
     LaunchedEffect(launchError) {
@@ -237,13 +233,13 @@ private fun AppsContent(
 }
 
 /**
- * The cinematic Home top bar (M5): a live clock + date on the left, the Settings gear on the right. It is
- * a thin, content-justified row — the clock earns its vertical space — so it reads as a status bar rather
- * than the empty gear strip it replaces. The gear stays reachable by a D-pad ▲ from the rows below. Later
- * M5 steps add the status cluster (Search / Wi-Fi) beside the gear.
+ * The cinematic Home top bar (M5): a live clock + date on the left, and on the right the All-apps button
+ * followed by the Settings gear. It is a thin, content-justified row — the clock earns its vertical space
+ * — so it reads as a status bar rather than the empty gear strip it replaces. Both buttons stay reachable
+ * by a D-pad ▲ from the favorites row below.
  */
 @Composable
-private fun HomeTopBar(onOpenSettings: () -> Unit) {
+private fun HomeTopBar(onOpenAllApps: () -> Unit, onOpenSettings: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -256,7 +252,21 @@ private fun HomeTopBar(onOpenSettings: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Clock()
-        SettingsEntry(onClick = onOpenSettings)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TopBarIconButton(
+                iconRes = R.drawable.ic_apps,
+                contentDescription = stringResource(R.string.home_open_all_apps),
+                onClick = onOpenAllApps,
+            )
+            TopBarIconButton(
+                iconRes = R.drawable.ic_settings,
+                contentDescription = stringResource(R.string.home_open_settings),
+                onClick = onOpenSettings,
+            )
+        }
     }
 }
 
@@ -313,9 +323,16 @@ private fun Clock() {
     }
 }
 
-/** A focusable round Settings icon; the focus ring is the cue (no ripple). Opens the Settings screen. */
+/**
+ * A focusable round top-bar icon button; the focus ring is the cue (no ripple). Shared by the All-apps
+ * and Settings entries so both read identically — only the glyph and action differ.
+ */
 @Composable
-private fun SettingsEntry(onClick: () -> Unit) {
+private fun TopBarIconButton(
+    @DrawableRes iconRes: Int,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     val colors = NexaTheme.colors
@@ -337,8 +354,8 @@ private fun SettingsEntry(onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_settings),
-            contentDescription = stringResource(R.string.home_open_settings),
+            painter = painterResource(iconRes),
+            contentDescription = contentDescription,
             colorFilter = ColorFilter.tint(if (focused) colors.onAccent else colors.onSurface),
             modifier = Modifier.size(24.dp),
         )
@@ -346,9 +363,10 @@ private fun SettingsEntry(onClick: () -> Unit) {
 }
 
 /**
- * The horizontal "Favorites" row (ADR-0008). Normally the first tile holds the row's entry focus; in a
- * [reorder] session the row previews the moved order, keeps focus on the moving tile, and traps the
- * D-pad (◄ ► move, OK commit, BACK cancel) so the shuffle can't accidentally leave the row.
+ * The horizontal favorites row (ADR-0008) — the whole of Home now, so the tiles are centred. Normally the
+ * first tile holds the row's entry focus; in a [reorder] session the row previews the moved order, keeps
+ * focus on the moving tile, and traps the D-pad (◄ ► move, OK commit, BACK cancel) so the shuffle can't
+ * accidentally leave the row.
  */
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -366,23 +384,16 @@ private fun FavoritesRow(
     val display = if (reorder != null) favorites.moved(reorder.origin, reorder.current) else favorites
     val movingFocus = remember { FocusRequester() }
 
-    SectionHeader(
-        title = stringResource(R.string.home_favorites_title),
-        modifier = Modifier.padding(
-            start = NexaTheme.spacing.safeAreaHorizontal,
-            end = NexaTheme.spacing.safeAreaHorizontal,
-            // The top bar supplies the top margin, so this header only needs a small gap.
-            top = NexaTheme.spacing.sm,
-        ),
-    )
     LazyRow(
         contentPadding = PaddingValues(
             horizontal = NexaTheme.spacing.safeAreaHorizontal,
             // The row clips to its own bounds, so this vertical room is what keeps a focused tile's
-            // glow (see AppTile) from being sheared off at the top or the "All apps" edge below.
+            // glow (see AppTile) from being sheared off at the top or bottom edge.
             vertical = NexaTheme.spacing.md,
         ),
-        horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
+        // Centre the tiles horizontally: Home holds only favorites now, so a short row reads as a
+        // deliberate, balanced cluster rather than hugging the left safe-area margin.
+        horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md, Alignment.CenterHorizontally),
         modifier = Modifier
             .fillMaxWidth()
             .then(
@@ -471,111 +482,17 @@ private fun BoxScope.ReorderHint() {
     }
 }
 
-/** The full app grid (FR-002). Fills the remaining height; its first tile holds the grid's focus. */
-@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
+/** Shown on Home when nothing is pinned yet: a gentle pointer to the All-apps page to pin from. */
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun ColumnScope.AppGridSection(
-    apps: List<AppEntry>,
-    tile: TileDimensions,
-    gridFocus: FocusRequester,
-    onLaunch: (AppEntry) -> Unit,
-    onLongPress: (AppEntry) -> Unit,
-) {
-    SectionHeader(
-        title = stringResource(R.string.home_apps_title),
-        modifier = Modifier.padding(
-            start = NexaTheme.spacing.safeAreaHorizontal,
-            end = NexaTheme.spacing.safeAreaHorizontal,
-            top = NexaTheme.spacing.sm,
-        ),
+private fun EmptyFavoritesHint() {
+    Text(
+        text = stringResource(R.string.home_favorites_empty),
+        style = MaterialTheme.typography.bodyLarge,
+        color = NexaTheme.colors.onSurfaceMuted,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(horizontal = NexaTheme.spacing.safeAreaHorizontal),
     )
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = tile.width),
-        contentPadding = PaddingValues(
-            start = NexaTheme.spacing.safeAreaHorizontal,
-            end = NexaTheme.spacing.safeAreaHorizontal,
-            top = NexaTheme.spacing.md,
-            bottom = NexaTheme.spacing.screenMargin,
-        ),
-        horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md),
-        // Restore (or, on first entry, seed) focus to the first tile so the very first
-        // D-pad press moves instead of being absorbed re-entering the grid (FR-006).
-        modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)
-            .focusRestorer { gridFocus },
-    ) {
-        itemsIndexed(
-            items = apps,
-            key = { _, app -> app.component.flattenToShortString() },
-        ) { index, app ->
-            AppTile(
-                label = app.label,
-                icon = app.icon,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(tile.height)
-                    .then(if (index == 0) Modifier.focusRequester(gridFocus) else Modifier),
-                onClick = { onLaunch(app) },
-                onLongClick = { onLongPress(app) },
-            )
-        }
-    }
-}
-
-/**
- * The long-press OK context menu (ADR-0008). No "Menu" key exists on the TV remote, so a long OK on a
- * tile opens this: pin/unpin, move (favorites only), open App info, or cancel. Short OK always launches,
- * so this is the only destructive-free way to act on an item without opening it.
- */
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun AppContextMenu(
-    app: AppEntry,
-    isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
-    onMove: () -> Unit,
-    onAppInfo: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val firstAction = remember { FocusRequester() }
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(NexaTheme.radius.md),
-            modifier = Modifier.widthIn(min = 280.dp),
-        ) {
-            Column(
-                modifier = Modifier.padding(NexaTheme.spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
-            ) {
-                Text(
-                    text = app.label,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = NexaTheme.colors.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(bottom = NexaTheme.spacing.sm),
-                )
-                val pinLabel = if (isFavorite) R.string.home_menu_unpin else R.string.home_menu_pin
-                MenuAction(stringResource(pinLabel), onToggleFavorite, Modifier.focusRequester(firstAction))
-                // "Move" reorders within the Favorites row, so it only applies to a pinned app.
-                if (isFavorite) MenuAction(stringResource(R.string.home_menu_move), onMove)
-                MenuAction(stringResource(R.string.home_menu_app_info), onAppInfo)
-                MenuAction(stringResource(R.string.home_menu_cancel), onDismiss)
-            }
-        }
-    }
-    LaunchedEffect(Unit) { runCatching { firstAction.requestFocus() } }
-}
-
-/** A full-width, D-pad-focusable row in the context menu. */
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun MenuAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(onClick = onClick, modifier = modifier.fillMaxWidth()) {
-        Text(text)
-    }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
