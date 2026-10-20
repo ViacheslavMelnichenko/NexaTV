@@ -9,6 +9,11 @@
  */
 package com.nexatv.launcher.ui.home
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.text.format.DateFormat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,6 +42,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +63,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +83,7 @@ import com.nexatv.launcher.ui.components.SectionHeader
 import com.nexatv.launcher.ui.theme.NexaTheme
 import com.nexatv.launcher.ui.theme.TileDimensions
 import com.nexatv.launcher.ui.theme.dimensions
+import java.util.Date
 import kotlinx.coroutines.delay
 
 private const val ERROR_VISIBLE_MS = 3000L
@@ -151,20 +159,16 @@ private fun AppsContent(
     }
 
     val favoritesPresent = favorites.isNotEmpty()
-    // The Settings gear shares the first section's header row (no separate top bar), so it never claims
-    // a whole row of dead space above the content. It rides the "Favorites" header when favorites exist,
-    // otherwise the "All apps" header, so it is always present and reachable by a D-pad ▲.
-    val settingsGear: @Composable () -> Unit = { SettingsEntry(onClick = onOpenSettings) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            HomeTopBar(onOpenSettings = onOpenSettings)
             if (favoritesPresent) {
                 FavoritesRow(
                     favorites = favorites,
                     tile = tile,
                     firstFocus = favoritesFocus,
                     reorder = reorder,
-                    headerTrailing = settingsGear,
                     onLaunch = ::tryLaunch,
                     onLongPress = { menuTarget = it },
                     onReorderMove = { delta ->
@@ -184,7 +188,6 @@ private fun AppsContent(
                 apps,
                 tile = tile,
                 gridFocus = gridFocus,
-                headerTrailing = if (favoritesPresent) null else settingsGear,
                 onLaunch = ::tryLaunch,
                 onLongPress = { menuTarget = it },
             )
@@ -221,6 +224,75 @@ private fun AppsContent(
             delay(ERROR_VISIBLE_MS)
             launchError = null
         }
+    }
+}
+
+/**
+ * The cinematic Home top bar (M5): a live clock + date on the left, the Settings gear on the right. It is
+ * a thin, content-justified row — the clock earns its vertical space — so it reads as a status bar rather
+ * than the empty gear strip it replaces. The gear stays reachable by a D-pad ▲ from the rows below. Later
+ * M5 steps add the status cluster (Search / Wi-Fi) beside the gear.
+ */
+@Composable
+private fun HomeTopBar(onOpenSettings: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = NexaTheme.spacing.safeAreaHorizontal,
+                end = NexaTheme.spacing.safeAreaHorizontal,
+                top = NexaTheme.spacing.md,
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Clock()
+        SettingsEntry(onClick = onOpenSettings)
+    }
+}
+
+/**
+ * A live clock + long date, formatted through [DateFormat] so the 12/24-hour choice, locale and timezone
+ * all follow the system. It ticks off `ACTION_TIME_TICK` (one broadcast a minute, on the minute) rather
+ * than a polling loop, so it costs nothing between updates; the receiver is scoped to the composition.
+ */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun Clock() {
+    val context = LocalContext.current
+    var now by remember { mutableStateOf(System.currentTimeMillis()) }
+
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                now = System.currentTimeMillis()
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_TIME_CHANGED)
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        }
+        // Protected system broadcasts; NOT_EXPORTED keeps other apps from ever reaching this receiver.
+        context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        onDispose { context.unregisterReceiver(receiver) }
+    }
+
+    val moment = remember(now) { Date(now) }
+    val timeText = remember(now, context) { DateFormat.getTimeFormat(context).format(moment) }
+    val dateText = remember(now, context) { DateFormat.getLongDateFormat(context).format(moment) }
+
+    Column {
+        Text(
+            text = timeText,
+            style = MaterialTheme.typography.displayLarge,
+            color = NexaTheme.colors.onSurface,
+        )
+        Text(
+            text = dateText,
+            style = MaterialTheme.typography.bodyMedium,
+            color = NexaTheme.colors.onSurfaceMuted,
+        )
     }
 }
 
@@ -268,7 +340,6 @@ private fun FavoritesRow(
     tile: TileDimensions,
     firstFocus: FocusRequester,
     reorder: ReorderSession?,
-    headerTrailing: (@Composable () -> Unit)?,
     onLaunch: (AppEntry) -> Unit,
     onLongPress: (AppEntry) -> Unit,
     onReorderMove: (Int) -> Unit,
@@ -280,12 +351,11 @@ private fun FavoritesRow(
 
     SectionHeader(
         title = stringResource(R.string.home_favorites_title),
-        trailing = headerTrailing,
         modifier = Modifier.padding(
             start = NexaTheme.spacing.safeAreaHorizontal,
             end = NexaTheme.spacing.safeAreaHorizontal,
-            // First element on screen now (no separate top bar): a small top margin clears TV overscan.
-            top = NexaTheme.spacing.md,
+            // The top bar supplies the top margin, so this header only needs a small gap.
+            top = NexaTheme.spacing.sm,
         ),
     )
     LazyRow(
@@ -389,13 +459,11 @@ private fun ColumnScope.AppGridSection(
     apps: List<AppEntry>,
     tile: TileDimensions,
     gridFocus: FocusRequester,
-    headerTrailing: (@Composable () -> Unit)?,
     onLaunch: (AppEntry) -> Unit,
     onLongPress: (AppEntry) -> Unit,
 ) {
     SectionHeader(
         title = stringResource(R.string.home_apps_title),
-        trailing = headerTrailing,
         modifier = Modifier.padding(
             start = NexaTheme.spacing.safeAreaHorizontal,
             end = NexaTheme.spacing.safeAreaHorizontal,
