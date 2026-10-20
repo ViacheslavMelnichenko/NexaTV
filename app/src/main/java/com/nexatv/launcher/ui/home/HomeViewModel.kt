@@ -9,8 +9,7 @@
  */
 package com.nexatv.launcher.ui.home
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexatv.launcher.data.AppEntry
 import com.nexatv.launcher.data.InstalledAppsRepository
@@ -28,11 +27,10 @@ sealed interface HomeUiState {
 
 /**
  * Owns app discovery for the Home screen. Discovery runs off the UI thread in the repository
- * (NFR-003); this just drives the [HomeUiState] and forwards launch requests.
+ * (NFR-003); this just drives the [HomeUiState] and forwards launch requests. The repository is
+ * injected so the state machine is unit-testable without a device.
  */
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = InstalledAppsRepository(application)
+class HomeViewModel(private val repository: InstalledAppsRepository) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val state: StateFlow<HomeUiState> = _state.asStateFlow()

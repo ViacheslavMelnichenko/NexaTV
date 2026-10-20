@@ -57,6 +57,10 @@ android {
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -75,4 +79,9 @@ dependencies {
 
     // Compose-for-TV material (androidx.tv) — D-pad-first components (ADR-0002).
     implementation(libs.androidx.tv.material)
+
+    // Unit tests (JVM, run in CI — NFR-008). No device/Robolectric needed.
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
 }

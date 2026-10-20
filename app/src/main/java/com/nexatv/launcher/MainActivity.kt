@@ -13,8 +13,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.nexatv.launcher.data.InstalledAppsRepository
 import com.nexatv.launcher.ui.home.HomeScreen
 import com.nexatv.launcher.ui.home.HomeViewModel
 import com.nexatv.launcher.ui.theme.NexaTheme
@@ -29,7 +31,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NexaTheme {
-                val viewModel: HomeViewModel = viewModel()
+                val context = LocalContext.current.applicationContext
+                val viewModel: HomeViewModel = viewModel {
+                    HomeViewModel(InstalledAppsRepository(context))
+                }
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 HomeScreen(state = state, onLaunch = viewModel::launch)
             }
