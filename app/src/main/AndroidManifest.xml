@@ -42,6 +42,24 @@
             </intent-filter>
         </activity>
 
+        <!--
+          Prototype HOME override (ADR-0006 follow-up): Google TV pins its own launcher to the HOME
+          button, so NexaTV raises itself when the stock launcher appears. Reversible — the user must
+          enable this in Settings → Accessibility; the stock launcher is never disabled.
+        -->
+        <service
+            android:name=".override.NexaOverrideService"
+            android:exported="true"
+            android:label="@string/accessibility_override_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/nexa_accessibility_config" />
+        </service>
+
         <!-- Allows profiling (Macrobenchmark / Perfetto) without affecting release behavior. -->
         <profileable
             android:shell="true"

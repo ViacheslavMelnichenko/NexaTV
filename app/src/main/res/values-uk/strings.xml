@@ -14,4 +14,8 @@
     <string name="home_prompt_title">Зробіть NexaTV своїм Home</string>
     <string name="home_prompt_body">Зробіть NexaTV типовим Home-застосунком, щоб бачити всі застосунки й відкривати їх кнопкою HOME. Повернутися назад можна будь-коли в Налаштуваннях.</string>
     <string name="home_prompt_action">Зробити типовим Home</string>
+
+    <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
+    <string name="accessibility_override_label">Перехоплення Home для NexaTV</string>
+    <string name="accessibility_override_description">Дозволяє NexaTV відкриватися як Home при натисканні кнопки HOME. NexaTV лише визначає появу системного лаунчера; вміст екрана не зчитується. Вимкніть будь-коли, щоб повернути стоковий Home.</string>
 </resources>
