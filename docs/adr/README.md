@@ -32,6 +32,7 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0008](./ADR-0008-persistence-proto-datastore.md) | Local persistence | **Accepted** (2026-10-20) — **Proto DataStore** for favorites/categories/theme/settings; typed, `Flow`-native, additive schema evolution; local only (no INTERNET, `allowBackup=false`); Room deferred until categories need relational queries |
 | [ADR-0009](./ADR-0009-configuration-architecture.md) | Configuration architecture (user settings) | **Accepted** (2026-10-20) — settings as an additive `SettingsProto` in the ADR-0008 store (tag 4); `SettingsRepository` + Flow seam; state-based Home↔Settings nav (no nav library yet); tile size as a semantic S/M/L token; opens M5 |
 | [ADR-0010](./ADR-0010-weather-widget-network.md) | Home weather widget & the first outbound network call | **Accepted** (2026-10-20) — **amends NFR-021**: adds `INTERNET` for weather only (no telemetry/other network); Open-Meteo (keyless, no secret); `HttpURLConnection`+`org.json` (no new dep); fixed Wrocław coords (no GPS); lazy, fail-soft off the cold-start path |
+| [ADR-0011](./ADR-0011-tile-art-banner-first.md) | Uniform 16:9 tile art — banner first | **Accepted** (2026-10-20) — tiles become a uniform 16:9 card; prefer the TV `android:banner` (`getActivityBanner`/`getApplicationBanner` via ADR-0004), icon-on-card fallback, monogram last; no new dep, no bundled brand art (Hard Rule 5); `AppEntry.banner` additive; landscape S/M/L tokens |
 
 ## Planned / potential ADRs (per `initial.md` §25)
 
