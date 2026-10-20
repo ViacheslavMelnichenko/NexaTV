@@ -23,9 +23,13 @@ import com.nexatv.launcher.data.TileSize
 @Immutable
 internal data class TileDimensions(val width: Dp, val height: Dp)
 
-/** Resolve a semantic [TileSize] to its drawn dimensions. The S/M/L → dp map lives only here. */
+/**
+ * Resolve a semantic [TileSize] to its drawn dimensions. The S/M/L → dp map lives only here.
+ * Tiles are landscape now (ADR-0011): the width drives a 16:9 art card, and the height leaves room
+ * for that card (width × 9/16) plus one label line, so a focused banner reads cleanly across the row.
+ */
 internal fun TileSize.dimensions(): TileDimensions = when (this) {
-    TileSize.SMALL -> TileDimensions(width = 80.dp, height = 100.dp)
-    TileSize.MEDIUM -> TileDimensions(width = 96.dp, height = 120.dp)
-    TileSize.LARGE -> TileDimensions(width = 128.dp, height = 156.dp)
+    TileSize.SMALL -> TileDimensions(width = 140.dp, height = 112.dp)
+    TileSize.MEDIUM -> TileDimensions(width = 176.dp, height = 140.dp)
+    TileSize.LARGE -> TileDimensions(width = 224.dp, height = 168.dp)
 }

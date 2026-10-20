@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -61,10 +62,12 @@ private val OK_KEYCODES = setOf(
 )
 
 /**
- * The canonical NexaTV tile: a square art area over a single-line label (FR-013).
+ * The canonical NexaTV tile: a uniform 16:9 art card over a single-line label (FR-013, ADR-0011).
+ * A TV [banner] fills the card when the app ships one (the branded art Google TV shows); otherwise the
+ * app [icon] sits centred on the card, and an art-less app falls back to a monogram.
  * The D-pad focus treatment — a [NexaTheme.colors.focusRing] border plus a lifted surface — is
  * driven entirely by tokens, so every theme restyles it for free. `indication = null`: the ring
- * *is* the focus affordance (no Material ripple on TV). When [icon] is null a monogram is drawn.
+ * *is* the focus affordance (no Material ripple on TV).
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -72,6 +75,7 @@ internal fun AppTile(
     label: String,
     modifier: Modifier = Modifier,
     icon: ImageBitmap? = null,
+    banner: ImageBitmap? = null,
     moving: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
@@ -81,6 +85,9 @@ internal fun AppTile(
     val colors = NexaTheme.colors
     val radius = NexaTheme.radius.md
     val shape = remember(radius) { RoundedCornerShape(radius) }
+    // The inner 16:9 art card is rounded a touch less than the tile, so it nests cleanly inside the border.
+    val artRadius = NexaTheme.radius.sm
+    val artShape = remember(artRadius) { RoundedCornerShape(artRadius) }
     // While "picked up" for reordering a tile keeps an accent ring even without focus, so the item being
     // moved is always visible as the row shuffles around it. Hoisted so it only reallocates on a real
     // focus/moving/theme change, not on every composition.
@@ -131,33 +138,43 @@ internal fun AppTile(
         verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // The icon takes all the height the label leaves, so a square-ish tile stays balanced whether the
-        // name wraps to one line or two — rather than a fixed square that forces the tile taller.
+        // A uniform 16:9 art card fills the width the tile is given; the label sits on a single line
+        // beneath it, so the split stays identical across tiles and the banners read as one tidy row.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .clip(artShape)
+                .background(colors.surfaceVariant),
             contentAlignment = Alignment.Center,
         ) {
-            if (icon != null) {
-                Image(
+            when {
+                // Banners are 16:9; Crop lets a branded banner bleed to the card edges (the logo is
+                // centred, so the slight top/bottom trim never clips it).
+                banner != null -> Image(
+                    bitmap = banner,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                // A square app icon sits centred on the card, framed by the surrounding tint.
+                icon != null -> Image(
                     bitmap = icon,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f),
                 )
-            } else {
-                Monogram(label = label)
+                else -> Monogram(label = label)
             }
         }
         Text(
             text = label,
-            // Soft word-wrap over two lines lets a full name like "Play Store" sit whole instead of
-            // being cut with an ellipsis on the first line.
+            // One quiet line — the art carries the identity, so a long name is ellipsised rather than
+            // allowed to wrap and make this tile taller than its neighbours.
             style = labelStyle,
             color = colors.onSurfaceMuted,
-            softWrap = true,
-            maxLines = 2,
+            softWrap = false,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier

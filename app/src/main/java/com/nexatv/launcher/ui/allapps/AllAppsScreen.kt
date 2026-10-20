@@ -129,6 +129,7 @@ internal fun AllAppsScreen(
                         AppTile(
                             label = app.label,
                             icon = app.icon,
+                            banner = app.banner,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(tile.height)
