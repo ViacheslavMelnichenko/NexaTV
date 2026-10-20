@@ -38,10 +38,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -116,8 +118,15 @@ internal fun AppTile(
         }
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
-            color = colors.onSurface,
+            // A tile label is a *secondary* cue — the icon identifies the app — so it is kept light and
+            // quiet (regular weight, muted colour, 16sp) rather than the loud titleMedium: less visual
+            // shouting and narrower glyphs let more of the name fit before the ellipsis.
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Normal,
+            ),
+            color = colors.onSurfaceMuted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
