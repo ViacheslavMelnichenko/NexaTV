@@ -20,7 +20,6 @@ internal object NexaSpacing {
     val sm = 8.dp
     val md = 16.dp
     val lg = 24.dp
-    val xl = 48.dp
 
     /** Safe inset from top/bottom screen edges to clear TV overscan (FR-012, ~5% @1080p). */
     val screenMargin = 48.dp
@@ -32,5 +31,4 @@ internal object NexaSpacing {
 internal object NexaRadius {
     val sm = 8.dp
     val md = 16.dp
-    val lg = 24.dp
 }
