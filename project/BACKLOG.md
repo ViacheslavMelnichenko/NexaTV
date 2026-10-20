@@ -11,6 +11,7 @@
 - ☑ **P0** Verify/install ADB on the Windows dev host → standalone Google platform-tools (v37.0.1) at `C:\Users\ViacheslavM\platform-tools` (not on PATH; invoked by full path, no system change). 2026-10-20.
 - ☑ **P0** Wireless ADB connection to the TCL established — TV shows as `device` in `adb devices -l` (model `Smart_TV_Pro`, codename `G08`). 2026-10-20.
   - *Note:* pairing code/IP/port are runtime-only — never committed.
+- ☑ **P0** Android build toolchain obtained **without full Android Studio** — corporate policy blocks only the Studio installer CDN (`edgedl.me.gvt1.com`, 403), while the SDK repo (`dl.google.com`) is reachable. Installed via command-line `sdkmanager` into `%LOCALAPPDATA%\Android\Sdk`: cmdline-tools 22.0, platform-tools 37.0.1, `platforms;android-34`, `build-tools;34.0.0`. JDK 17.0.19 already on PATH (satisfies ADR-0003). 2026-10-20.
 
 ### Feature: Safe device audit (read-only)
 - ◐ **P0** Run read-only audit; record in `docs/technical/ANDROID-TV.md`. Identity, ABI, **SoC (MT9689)/GPU (Mali-G52)**, display/refresh (60 Hz fixed), HOME environment and TV inputs (7) captured 2026-10-20. *Remaining:* full `pm list packages`; §3 launcher-model behaviors (reboot/crash-recovery) need active verification.
