@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Window/splash colors. The Compose UI palette lives in ui/theme/Color.kt. -->
+<resources>
+    <color name="surface">#0F1419</color>
+    <color name="ic_launcher_background">#1B2430</color>
+</resources>

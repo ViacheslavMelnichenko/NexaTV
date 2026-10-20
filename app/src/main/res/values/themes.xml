@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Base window theme; the actual UI is drawn by Compose-for-TV (ui/theme/Theme.kt). -->
+<resources>
+    <style name="Theme.NexaTV" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/surface</item>
+    </style>
+</resources>

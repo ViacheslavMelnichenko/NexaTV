@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NFR-020: default (English) strings. Ukrainian lives in values-uk/. -->
+<resources>
+    <string name="app_name">NexaTV</string>
+    <string name="home_placeholder_title">NexaTV</string>
+    <string name="home_placeholder_subtitle">Foundation (M1) — launcher UI comes in M2.</string>
+</resources>

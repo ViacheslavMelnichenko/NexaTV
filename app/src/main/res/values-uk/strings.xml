@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NFR-020: Ukrainian strings. -->
+<resources>
+    <string name="app_name">NexaTV</string>
+    <string name="home_placeholder_title">NexaTV</string>
+    <string name="home_placeholder_subtitle">Фундамент (M1) — інтерфейс лаунчера з\'явиться в M2.</string>
+</resources>
