@@ -1,16 +1,18 @@
 # NexaTV — Test Plan
 
-> **Status:** ☐ Template. Expands once the architecture/stack is chosen. Android TV behavior depends on
-> the real device, so **manual TV testing is first-class**, not an afterthought.
+> **Status:** ☐ Template. Stack chosen (ADR-0002 → Kotlin + Jetpack Compose-for-TV). Android TV behavior
+> depends on the real device, so **manual TV testing is first-class**, not an afterthought. The per-FR/NFR
+> acceptance mapping lives in [TRACEABILITY.md](./TRACEABILITY.md) (PRD v2 §19).
 
 ## Test layers
 
 ### Unit tests
 Business logic (app discovery mapping, categorization, favorites/ordering, config parsing) where it has
-value. Framework: _TBD (depends on stack — Dart `test` / JUnit)._
+value. Framework: **JUnit** (JVM unit tests run in CI — ADR-0003/NFR-008).
 
 ### Widget / UI tests
-Important UI behavior where practical — especially **focus order and D-pad traversal**. Framework: _TBD._
+Important UI behavior where practical — especially **focus order and D-pad traversal** (FR-006/FR-011).
+Framework: **Compose UI test** / instrumented tests injecting `DPAD_*`/`BACK`/`CENTER` (PRD v2 §19).
 
 ### Integration tests
 Launcher behaviors where practical (discovery → render → launch; persistence across restart). _TBD._
@@ -36,6 +38,13 @@ Run on the actual TCL. Record evidence (logcat, photos/video where useful).
 | 13 | Uninstall | Remove NexaTV | Clean removal | ☐ | |
 | 14 | Fallback to stock launcher | Trigger fallback | Stock launcher reachable | ☐ | |
 
-## CI (later — do not over-engineer early)
-Once the app exists: format/lint, tests, static analysis (e.g. `flutter analyze`), build artifact,
-via GitHub Actions. Add CI when it provides value (`initial.md` §27).
+### Performance tests (on real device)
+Macrobenchmark + Baseline Profiles on the actual TCL (`armeabi-v7a`), never an emulator — cold-start p50/p95
+(NFR-001), idle PSS (NFR-002), scroll/focus frame budget incl. any translucency (NFR-017). Run as the manual
+pre-release gate (ADR-0003 D9 / NFR-013).
+
+## CI (ADR-0003)
+PR/main gate: `ktlint`/`detekt` + Android Lint + JVM unit tests + `assembleDebug` + `gitleaks` + ABI assert
+(no 64-bit `.so`) + APK-size budget, via GitHub Actions (NFR-008). Tag-driven signed release with provenance
+(NFR-009..011). Performance NFRs are gated **manually on-device** because CI has no 32-bit ARM device
+(NFR-013).

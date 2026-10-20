@@ -45,11 +45,11 @@
 ## EPIC: Phase 1 — Foundation (cont.)
 - ☑ **P0** Author PRD v1 — MVP locked to **FR-001..FR-009** under NFR-001..NFR-007 (`docs/product/PRD.md`, 2026-10-20, Draft v1 for review).
 - ☑ **P0** PRD critics review + author **PRD v2** — folded in MUST+MVP-blocking and SHOULD(doc-now) deltas from the 6-lens expert panel: new sections §15 Delivery/CI-CD, §16 Design System, §17 Accessibility, §18 Permissions, §19 Testability/Observability/DoD; added **FR-011..FR-017** and **NFR-008..NFR-023** (2026-10-20, Draft v2 for review).
-- ☐ **P1** Record the PRD-v2 follow-up ADRs (Hard Rule 6):
-  - ☐ ADR: CI/CD, signing, release & update/rollback strategy (manual sideload, offline key backup, reproducibility = non-goal) — covers NFR-008..015.
-  - ☐ ADR: App enumeration without `QUERY_ALL_PACKAGES` (visibility via `ROLE_HOME`) — covers FR-015.
-  - ☐ ADR: "Glass"/translucency technique (fake-glass vs measured real-time blur budget) — covers NFR-017.
-- ☐ **P1** Create the FR×Test traceability matrix stub (`docs/testing/TRACEABILITY.md`). *Depends on:* PRD v2.
+- ☑ **P1** Record the PRD-v2 follow-up ADRs (Hard Rule 6):
+  - ☑ **ADR-0003** — CI/CD, signing, release & update/rollback strategy (GitHub Actions, tag-driven signed releases, single long-lived key + offline backup, manual sideload, reproducibility = non-goal) — covers NFR-008..015. **Accepted** 2026-10-20.
+  - ☑ **ADR-0004** — App enumeration without `QUERY_ALL_PACKAGES` (`LauncherApps.getActivityList` via `ROLE_HOME`) — covers FR-015/016. **Accepted** 2026-10-20.
+  - ☑ **ADR-0005** — "Glass"/translucency technique (fake-glass default; real-time blur gated on-device) — covers NFR-017. **Accepted** (measurement-gated) 2026-10-20.
+- ☑ **P1** Create the FR×Test traceability matrix stub (`docs/testing/TRACEABILITY.md`) + refresh TEST-PLAN.md for the Kotlin stack. 2026-10-20.
 
 ## EPIC: Phase 2+ — Launcher capabilities  _(M2+, placeholder)_
 MVP target: **FR-001..FR-009** (see `docs/product/PRD.md`). Tasks per FR are broken out when M2 planning starts.
