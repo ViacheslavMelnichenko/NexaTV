@@ -38,6 +38,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
@@ -93,12 +94,15 @@ internal fun AllAppsScreen(
                     text = stringResource(R.string.home_apps_title),
                     style = MaterialTheme.typography.displayLarge,
                     color = NexaTheme.colors.onSurface,
-                    modifier = Modifier.padding(
-                        start = NexaTheme.spacing.safeAreaHorizontal,
-                        end = NexaTheme.spacing.safeAreaHorizontal,
-                        top = NexaTheme.spacing.screenMargin,
-                        bottom = NexaTheme.spacing.sm,
-                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = NexaTheme.spacing.safeAreaHorizontal,
+                            end = NexaTheme.spacing.safeAreaHorizontal,
+                            top = NexaTheme.spacing.screenMargin,
+                            bottom = NexaTheme.spacing.sm,
+                        ),
                 )
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = tile.width),
