@@ -2,6 +2,11 @@
 <!-- NFR-020: default (English) strings. Ukrainian lives in values-uk/. -->
 <resources>
     <string name="app_name">NexaTV</string>
-    <string name="home_placeholder_title">NexaTV</string>
-    <string name="home_placeholder_subtitle">Foundation (M1) — launcher UI comes in M2.</string>
+
+    <!-- Home / app grid (M2) -->
+    <string name="home_apps_title">Apps</string>
+    <string name="home_loading">Loading apps…</string>
+    <string name="home_empty_title">No apps to show yet</string>
+    <string name="home_empty_hint">Set NexaTV as the default Home to see all your apps.</string>
+    <string name="home_launch_failed">Couldn\'t open %1$s</string>
 </resources>

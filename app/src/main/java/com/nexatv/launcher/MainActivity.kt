@@ -12,54 +12,27 @@ package com.nexatv.launcher
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.tv.material3.ExperimentalTvMaterial3Api
-import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Surface
-import androidx.tv.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.nexatv.launcher.ui.home.HomeScreen
+import com.nexatv.launcher.ui.home.HomeViewModel
 import com.nexatv.launcher.ui.theme.NexaTheme
 
 /**
- * Home entry point. In M1 (Foundation) this renders a labelled placeholder only —
- * the real D-pad launcher UI (app list, focus, launch) arrives in M2.
+ * Home entry point. M2 (Minimal Launcher): discovers installed apps via [HomeViewModel]
+ * and renders a D-pad-navigable grid that launches on OK. HOME registration (M3), favorites
+ * and live updates (M4) build on this.
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             NexaTheme {
-                HomePlaceholder()
+                val viewModel: HomeViewModel = viewModel()
+                val state by viewModel.state.collectAsStateWithLifecycle()
+                HomeScreen(state = state, onLaunch = viewModel::launch)
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun HomePlaceholder() {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(NexaTheme.spacing.screenMargin),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start,
-        ) {
-            Text(
-                text = stringResource(R.string.home_placeholder_title),
-                style = MaterialTheme.typography.displayLarge,
-            )
-            Text(
-                text = stringResource(R.string.home_placeholder_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-            )
         }
     }
 }

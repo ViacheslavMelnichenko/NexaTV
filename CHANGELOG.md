@@ -16,3 +16,6 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
   grid, readable type scale (body ≥18sp), and core components (`SectionHeader`, focusable
   `AppTile`) with previews. Debug-only Design System gallery renders every token + component.
   Documented in `docs/design/DESIGN-SYSTEM.md`.
+- Minimal launcher (M2): app discovery via `LauncherApps` across profiles (ADR-0004, no
+  `QUERY_ALL_PACKAGES`), a D-pad-navigable app grid that launches on OK, canonical tiles with
+  icon + monogram fallback, safe-area insets, and Loading/Empty/launch-error states.

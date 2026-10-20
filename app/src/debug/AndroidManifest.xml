@@ -2,13 +2,22 @@
 <!--
   Debug-only overlay. Adds a separate TV launcher entry for the Design System gallery so it
   can be opened on-device during development. Merged ONLY into the debug variant; the release
-  APK never contains this activity.
+  APK never contains this activity. The TV uses-feature tags mirror the main manifest so lint's
+  leanback checks pass on the debug-variant merged manifest.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
 
     <application>
         <activity
             android:name="com.nexatv.launcher.designsystem.DesignSystemGalleryActivity"
+            android:banner="@drawable/banner"
             android:exported="true"
             android:label="NexaTV Design System"
             android:screenOrientation="landscape"

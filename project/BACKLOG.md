@@ -73,7 +73,22 @@
 - ☐ **P2** **Theme switcher UI** — a D-pad-friendly control (in Settings) to change theme live; selection
   takes effect immediately and is restored after reboot. *Depends on:* the two items above.
 
-## EPIC: Phase 2 — Minimal Launcher  _(M2)_
-MVP target: **FR-001..FR-009** (see `docs/product/PRD.md`). First real launcher behavior: Launcher Activity,
-app enumeration via `LauncherApps.getActivityList` over `ROLE_HOME` (ADR-0004), D-pad focus, launch.
-Tasks per FR are broken out when M2 planning starts (after the Design System step).
+## EPIC: Phase 2 — Minimal Launcher  _(M2 — in progress)_
+M2 goal (per MILESTONES) is deliberately narrow: **Launcher Activity, D-pad focus, app-list render +
+launch**. Favorites/categories/settings/persistence are **M4/M6**, HOME registration is **M3** — kept out
+of M2 for phase discipline. Covers **FR-002, FR-003, FR-006, FR-011, FR-012, FR-014** (partial); full
+MVP (FR-001..009) completes across M3/M4.
+- ☑ **P0** App discovery via `LauncherApps.getActivityList(null, user)` across profiles (ADR-0004) — no
+  `QUERY_ALL_PACKAGES`; dedup + sort; icons rasterized off the UI thread (NFR-003). `data/AppEntry` +
+  `data/InstalledAppsRepository`. 2026-10-20.
+- ☑ **P0** `HomeViewModel` + `HomeUiState` (Loading / Empty / Apps); first frame before discovery finishes
+  (FR-009/FR-014). 2026-10-20.
+- ☑ **P0** D-pad-navigable app grid (`ui/home/HomeScreen`) on the canonical `AppTile` (icon + monogram
+  fallback, FR-013), initial focus on first tile (FR-006/FR-011), safe-area insets (FR-012), launch on OK
+  with an in-UI, focus-preserving, auto-dismiss error (FR-003/FR-014). `MainActivity` renders it. 2026-10-20.
+- ☑ **P0** `assembleDebug` + `lintDebug` + `detekt` green locally. 2026-10-20.
+- ☐ **P0** **On-device verification** (owner-dependent): first install with a verified recovery path, then
+  confirm D-pad navigation + launch on the real TCL remote, and FR-011 (≥2 focus signals, ≤150 ms) from ~3 m.
+  *Note:* pre-`ROLE_HOME`, the grid may be partial (ADR-0004 / FR-015) — expected until M3.
+- ☐ **P1** Live app add/remove via `LauncherApps.Callback` (FR-002 ≤2 s) — **deferred to M4** (discovery
+  robustness); M2 loads once on start.

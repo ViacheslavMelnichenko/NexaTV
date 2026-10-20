@@ -2,6 +2,11 @@
 <!-- NFR-020: Ukrainian strings. -->
 <resources>
     <string name="app_name">NexaTV</string>
-    <string name="home_placeholder_title">NexaTV</string>
-    <string name="home_placeholder_subtitle">Фундамент (M1) — інтерфейс лаунчера з\'явиться в M2.</string>
+
+    <!-- Home / app grid (M2) -->
+    <string name="home_apps_title">Застосунки</string>
+    <string name="home_loading">Завантаження застосунків…</string>
+    <string name="home_empty_title">Поки немає застосунків</string>
+    <string name="home_empty_hint">Зробіть NexaTV типовим Home-застосунком, щоб побачити всі застосунки.</string>
+    <string name="home_launch_failed">Не вдалося відкрити %1$s</string>
 </resources>
