@@ -17,6 +17,7 @@ import com.nexatv.launcher.data.FavoritesRepository
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
 import com.nexatv.launcher.data.SettingsRepository
+import com.nexatv.launcher.data.ThemeChoice
 import com.nexatv.launcher.data.TileSize
 import com.nexatv.launcher.data.resolveFavorites
 import com.nexatv.launcher.data.toFavoriteKey
@@ -45,12 +46,14 @@ sealed interface HomeUiState {
      * NexaTV is Home and apps were discovered. [apps] is the full grid ("Усі застосунки"); [favorites]
      * is the user's pinned apps in pin/reorder order (ADR-0008), rendered as the "Обране" row above the
      * grid. [favorites] is empty until the user pins something. [tileSize] is the user's chosen tile
-     * size (ADR-0009); the UI maps it to concrete dimensions.
+     * size (ADR-0009); the UI maps it to concrete dimensions. [theme] is the user's chosen color theme
+     * (Theming EPIC); the Settings row reflects it (the palette itself is applied at the activity root).
      */
     data class Apps(
         val favorites: List<AppEntry>,
         val apps: List<AppEntry>,
         val tileSize: TileSize,
+        val theme: ThemeChoice,
     ) : HomeUiState
 }
 
@@ -86,6 +89,9 @@ class HomeViewModel(
     /** Latest persisted tile size (ADR-0009); defaults to MEDIUM until the store's first emission. */
     private var tileSize: TileSize = TileSize.MEDIUM
 
+    /** Latest persisted color theme (Theming EPIC); defaults until the store's first emission. */
+    private var theme: ThemeChoice = ThemeChoice.Default
+
     init {
         refresh()
         // Keep the grid live: re-evaluate whenever an app is installed/removed/changed (FR-002).
@@ -105,6 +111,13 @@ class HomeViewModel(
         viewModelScope.launch {
             settingsRepository.tileSize.collect { size ->
                 tileSize = size
+                if (_state.value is HomeUiState.Apps) emitApps()
+            }
+        }
+        // Keep the theme live: changing it in Settings re-emits so the UI reflects the selection.
+        viewModelScope.launch {
+            settingsRepository.theme.collect { choice ->
+                theme = choice
                 if (_state.value is HomeUiState.Apps) emitApps()
             }
         }
@@ -159,6 +172,7 @@ class HomeViewModel(
                 favorites = resolveFavorites(cachedApps, favoriteKeys),
                 apps = cachedApps,
                 tileSize = tileSize,
+                theme = theme,
             )
         }
     }
@@ -181,5 +195,10 @@ class HomeViewModel(
     /** Persist the home tile size (ADR-0009); the grid re-renders live via the settings Flow. */
     fun setTileSize(size: TileSize) {
         viewModelScope.launch { settingsRepository.setTileSize(size) }
+    }
+
+    /** Persist the color theme (Theming EPIC); the palette applies live via the theme Flow. */
+    fun setTheme(choice: ThemeChoice) {
+        viewModelScope.launch { settingsRepository.setTheme(choice) }
     }
 }

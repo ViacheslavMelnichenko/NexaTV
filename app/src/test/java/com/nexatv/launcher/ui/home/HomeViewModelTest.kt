@@ -16,6 +16,7 @@ import com.nexatv.launcher.data.FavoritesRepository
 import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
 import com.nexatv.launcher.data.SettingsRepository
+import com.nexatv.launcher.data.ThemeChoice
 import com.nexatv.launcher.data.TileSize
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -63,6 +64,7 @@ class HomeViewModelTest {
         every { repository.appChanges() } returns emptyFlow()
         every { favorites.favorites } returns emptyFlow()
         every { settings.tileSize } returns emptyFlow()
+        every { settings.theme } returns emptyFlow()
     }
 
     @Test
@@ -250,6 +252,43 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(TileSize.LARGE, (viewModel.state.value as HomeUiState.Apps).tileSize)
+    }
+
+    @Test
+    fun `theme defaults to the default when the store has not emitted`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns true
+        coEvery { repository.loadApps() } returns listOf(mockk<AppEntry>())
+
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings, mainDispatcherRule.dispatcher)
+        advanceUntilIdle()
+
+        assertEquals(ThemeChoice.Default, (viewModel.state.value as HomeUiState.Apps).theme)
+    }
+
+    @Test
+    fun `the persisted theme is reflected in the Apps state`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns true
+        coEvery { repository.loadApps() } returns listOf(mockk<AppEntry>())
+        every { settings.theme } returns flowOf(ThemeChoice.MAGENTA_NOIR)
+
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings, mainDispatcherRule.dispatcher)
+        advanceUntilIdle()
+
+        assertEquals(ThemeChoice.MAGENTA_NOIR, (viewModel.state.value as HomeUiState.Apps).theme)
+    }
+
+    @Test
+    fun `setTheme delegates the choice to the repository`() = runTest {
+        every { homeRole.isEffectivelyHome() } returns true
+        coEvery { repository.loadApps() } returns emptyList()
+
+        val viewModel = HomeViewModel(repository, homeRole, favorites, settings, mainDispatcherRule.dispatcher)
+        advanceUntilIdle()
+
+        viewModel.setTheme(ThemeChoice.OLED_BLACK)
+        advanceUntilIdle()
+
+        coVerify { settings.setTheme(ThemeChoice.OLED_BLACK) }
     }
 
     /** A mock [AppEntry] whose component/serial resolve to a stable [FavoriteKey]. */
