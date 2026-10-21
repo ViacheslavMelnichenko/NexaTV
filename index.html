@@ -122,59 +122,30 @@
   .meta-row span{display:inline-flex;align-items:center;gap:8px}
   .meta-row svg{color:var(--teal)}
 
-  /* TV mock */
+  /* Product screenshots */
   .tv-stage{position:relative}
   .tv-frame{
     background:linear-gradient(160deg,#17171f,#0d0d13);
     border:1px solid var(--border);border-radius:22px;padding:14px;
     box-shadow:var(--shadow), 0 0 80px -30px var(--glow);
   }
-  .tv-screen{
-    position:relative;border-radius:14px;overflow:hidden;aspect-ratio:16/10;
-    background:
-      radial-gradient(600px 300px at 85% -10%, rgba(124,58,237,.28), transparent 60%),
-      linear-gradient(180deg,#121219,#0b0b11);
-    border:1px solid #23232f;padding:18px;display:flex;flex-direction:column;gap:16px;
+  .shot{
+    width:100%;height:auto;border-radius:14px;
+    border:1px solid #23232f;background:#0b0b11;
   }
-  .tv-topbar{display:flex;align-items:center;justify-content:space-between}
-  .tv-clock{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
-  .tv-date{font-size:.75rem;color:var(--muted-2)}
-  /* weather widget */
-  .weather{
-    display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);
-    border:1px solid var(--border-soft);border-radius:12px;padding:8px 14px;
+
+  /* Screenshots gallery */
+  .shots{display:grid;grid-template-columns:1fr;gap:28px}
+  @media(min-width:760px){ .shots{grid-template-columns:repeat(2,1fr)} }
+  .shot-card{
+    background:linear-gradient(170deg,var(--panel),var(--bg-2));
+    border:1px solid var(--border-soft);border-radius:var(--radius);padding:16px;
   }
-  .weather .temp{font-size:1.5rem;font-weight:700}
-  .weather .wmeta{font-size:.68rem;color:var(--muted-2);line-height:1.4}
-  .row-label{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2)}
-  .tile-row{display:flex;gap:14px}
-  .tile{
-    flex:1;aspect-ratio:1/1;border-radius:14px;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:8px;
-    background:linear-gradient(160deg,#1c1c28,#141420);border:1px solid var(--border-soft);
-    position:relative;
-  }
-  .tile.focused{
-    border-color:var(--accent);
-    box-shadow:0 0 0 3px rgba(177,76,255,.35), 0 12px 30px -12px var(--glow);
-    transform:scale(1.04);
-  }
-  .tile .mono{
-    width:40%;aspect-ratio:1/1;border-radius:10px;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:1.1rem;color:#fff;
-  }
-  .tile .lbl{font-size:.62rem;color:var(--muted)}
-  .m1{background:linear-gradient(135deg,#7c3aed,#b14cff)}
-  .m2{background:linear-gradient(135deg,#2dd4bf,#0ea5e9)}
-  .m3{background:linear-gradient(135deg,#f59e0b,#ef4444)}
-  .m4{background:linear-gradient(135deg,#ec4899,#8b5cf6)}
-  .m5{background:linear-gradient(135deg,#22c55e,#16a34a)}
-  .grid-mini{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:2px}
-  .grid-mini .g{
-    aspect-ratio:1/1;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border-soft);
-    display:flex;align-items:center;justify-content:center;
-  }
-  .grid-mini .g span{width:42%;aspect-ratio:1/1;border-radius:7px;background:rgba(255,255,255,.12)}
+  .shot-card figure{margin:0}
+  .shot-card .shot{box-shadow:var(--shadow)}
+  .shot-card figcaption{margin-top:14px}
+  .shot-card figcaption strong{display:block;font-size:1.05rem;font-weight:700}
+  .shot-card figcaption span{color:var(--muted);font-size:.95rem}
 
   /* Sections */
   section{padding:68px 0}
@@ -266,7 +237,7 @@
 
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important;scroll-behavior:auto !important}
-    .card:hover,.btn:hover,.tile.focused{transform:none}
+    .card:hover,.btn:hover{transform:none}
   }
 </style>
 </head>
@@ -291,6 +262,7 @@
     </a>
     <div class="nav-links">
       <a class="ghost" href="#features">Features</a>
+      <a class="ghost" href="#screens">Screens</a>
       <a class="ghost" href="#home">How it works</a>
       <a class="ghost" href="#built">Built right</a>
       <a href="https://github.com/ViacheslavMelnichenko/NexaTV">GitHub</a>
@@ -325,47 +297,12 @@
         </div>
       </div>
 
-      <!-- TV MOCK -->
-      <div class="tv-stage" aria-hidden="true">
+      <!-- HERO SCREENSHOT -->
+      <div class="tv-stage">
         <div class="tv-frame">
-          <div class="tv-screen">
-            <div class="tv-topbar">
-              <div>
-                <div class="tv-clock">20:14</div>
-                <div class="tv-date">Tuesday, October 21</div>
-              </div>
-              <div class="weather">
-                <!-- sun/cloud glyph -->
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-                  <circle cx="9" cy="9" r="4" fill="#f59e0b"/>
-                  <path d="M17 19H8a3.5 3.5 0 01-.5-6.96A5 5 0 0117 14a2.5 2.5 0 010 5z" fill="#cfd3e6"/>
-                </svg>
-                <div>
-                  <div class="temp">14°</div>
-                  <div class="wmeta">H:17° L:9°<br>Wind 11 km/h</div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row-label">Favorites</div>
-              <div class="tile-row" style="margin-top:8px">
-                <div class="tile focused"><div class="mono m1">N</div><div class="lbl">Player</div></div>
-                <div class="tile"><div class="mono m2">S</div><div class="lbl">Stream</div></div>
-                <div class="tile"><div class="mono m3">A</div><div class="lbl">Arcade</div></div>
-                <div class="tile"><div class="mono m4">M</div><div class="lbl">Music</div></div>
-                <div class="tile"><div class="mono m5">L</div><div class="lbl">Live</div></div>
-              </div>
-            </div>
-
-            <div>
-              <div class="row-label">All apps</div>
-              <div class="grid-mini">
-                <div class="g"><span></span></div><div class="g"><span></span></div><div class="g"><span></span></div>
-                <div class="g"><span></span></div><div class="g"><span></span></div>
-              </div>
-            </div>
-          </div>
+          <img class="shot" src="docs/screenshots/home.png"
+               alt="NexaTV home screen: a clock and date beside a weather widget, with a Favorites row of app tiles below."
+               width="1920" height="1080" loading="eager" decoding="async">
         </div>
       </div>
     </div>
@@ -417,6 +354,41 @@
           <p>An owner-enabled accessibility service raises NexaTV when the stock launcher appears — fully reversible, and it never disables or removes the system launcher.</p>
         </article>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS -->
+  <section id="screens" aria-labelledby="screens-title">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">See it</span>
+        <h2 id="screens-title">A look at NexaTV</h2>
+        <p>Real screens from the launcher — the installed-app grid and on-device settings.</p>
+      </div>
+      <div class="shots">
+        <article class="shot-card">
+          <figure>
+            <img class="shot" src="docs/screenshots/allapps.png"
+                 alt="NexaTV All apps screen showing a grid of installed application icons."
+                 width="1920" height="1080" loading="lazy" decoding="async">
+            <figcaption>
+              <strong>All apps</strong>
+              <span>Every installed app in one D-pad-navigable grid, discovered via LauncherApps.</span>
+            </figcaption>
+          </figure>
+        </article>
+        <article class="shot-card">
+          <figure>
+            <img class="shot" src="docs/screenshots/settings.png"
+                 alt="NexaTV Settings screen with a tile-size control and a theme switcher offering four color themes."
+                 width="1920" height="1080" loading="lazy" decoding="async">
+            <figcaption>
+              <strong>Settings</strong>
+              <span>Adjust the tile size and switch between four built-in themes — all stored locally.</span>
+            </figcaption>
+          </figure>
+        </article>
       </div>
     </div>
   </section>
