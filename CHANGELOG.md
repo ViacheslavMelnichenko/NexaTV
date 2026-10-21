@@ -6,6 +6,10 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-21
+
+First tagged, signed release. Sideloaded on the real TCL (Android TV OS 14, `armeabi-v7a`).
+
 ### Added
 - Switchable color themes (Theming EPIC): a Settings "Theme" row picks from four dark palettes
   (Pastel Dark, OLED Black, Amber Ember, Magenta Noir). The choice persists via `SettingsProto.theme`
