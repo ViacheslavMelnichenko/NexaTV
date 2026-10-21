@@ -53,3 +53,5 @@ tmp/
 # Spike is a disposable build to validate the stack on the real TCL; never part of history.
 spike/
 tools/
+# …except our own checked-in scripts (the ignore above is for the downloaded Gradle, etc.).
+!tools/release.sh
