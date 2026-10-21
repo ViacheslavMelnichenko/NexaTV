@@ -72,6 +72,8 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
 import com.nexatv.launcher.R
+import com.nexatv.launcher.data.BackgroundSettings
+import com.nexatv.launcher.data.BackgroundMode
 import com.nexatv.launcher.data.AppEntry
 import com.nexatv.launcher.data.toFavoriteKey
 import com.nexatv.launcher.ui.components.AppContextMenu
@@ -90,6 +92,8 @@ private const val ERROR_VISIBLE_MS = 3000L
 @Composable
 internal fun HomeScreen(
     state: HomeUiState,
+    background: BackgroundSettings,
+    environment: HomeEnvironment,
     actions: HomeActions,
     onRequestHome: () -> Unit,
     onOpenAllApps: () -> Unit,
@@ -99,23 +103,29 @@ internal fun HomeScreen(
     val colors = NexaTheme.colors
     // The gradient wash allocates a Brush + color list; build it once per palette, not per composition.
     val backdrop = remember(colors) { colors.backdropBrush() }
-    Surface(
-        modifier = modifier
-            .fillMaxSize()
-            .background(backdrop),
-        colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
-    ) {
-        when (state) {
-            HomeUiState.Loading -> CenteredMessage(stringResource(R.string.home_loading))
-            HomeUiState.NeedsHomeRole -> PreHomePrompt(onRequestHome = onRequestHome)
-            HomeUiState.Empty -> EmptyState()
-            is HomeUiState.Apps -> AppsContent(
-                favorites = state.favorites,
-                tile = state.tileSize.dimensions(),
-                actions = actions,
-                onOpenAllApps = onOpenAllApps,
-                onOpenSettings = onOpenSettings,
-            )
+    Box(modifier.fillMaxSize().background(backdrop)) {
+        val landscape = background.mode != BackgroundMode.THEME
+        if (landscape && state is HomeUiState.Apps) {
+            AdaptiveBackground(background, resolveScene(background, environment.now, environment.weather))
+        }
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+        ) {
+            when (state) {
+                HomeUiState.Loading -> CenteredMessage(stringResource(R.string.home_loading))
+                HomeUiState.NeedsHomeRole -> PreHomePrompt(onRequestHome = onRequestHome)
+                HomeUiState.Empty -> EmptyState()
+                is HomeUiState.Apps -> AppsContent(
+                    favorites = state.favorites,
+                    tile = state.tileSize.dimensions(),
+                    actions = actions,
+                    environment = environment,
+                    landscape = landscape,
+                    onOpenAllApps = onOpenAllApps,
+                    onOpenSettings = onOpenSettings,
+                )
+            }
         }
     }
 }
@@ -150,6 +160,8 @@ private fun AppsContent(
     favorites: List<AppEntry>,
     tile: TileDimensions,
     actions: HomeActions,
+    environment: HomeEnvironment,
+    landscape: Boolean,
     onOpenAllApps: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -172,6 +184,8 @@ private fun AppsContent(
             // The centre holds the two equal widgets (calendar + weather); it takes the free vertical
             // space between the top bar and the bottom favorites band (ADR-0010).
             HomeWidgets(
+                environment = environment,
+                landscape = landscape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)

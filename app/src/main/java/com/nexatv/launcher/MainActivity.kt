@@ -23,6 +23,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.nexatv.launcher.data.BackgroundSettings
+import com.nexatv.launcher.ui.home.HomeEnvironmentViewModel
+import com.nexatv.launcher.ui.settings.BackgroundSettingsScreen
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -53,7 +58,7 @@ import com.nexatv.launcher.ui.theme.dimensions
  * and on every `ON_RESUME`, so becoming — or ceasing to be — Home is reflected without a restart.
  */
 /** The three state-based routes the launcher switches between (ADR-0009). */
-private enum class HomeDestination { HOME, ALL_APPS, SETTINGS }
+private enum class HomeDestination { HOME, ALL_APPS, SETTINGS, BACKGROUND }
 
 class MainActivity : ComponentActivity() {
     // Bumped whenever a HOME re-raise delivers ACTION_SHOW_HOME, so the UI snaps back to the Home
@@ -107,6 +112,7 @@ private fun LauncherApp(showHomeSignal: Int) {
             roleRepository,
             favoritesRepository(context),
             settingsRepository(context),
+            previewMode = BuildConfig.IS_PREVIEW,
         )
     }
 
@@ -149,15 +155,26 @@ private fun LauncherApp(showHomeSignal: Int) {
     // always lands home, even from All apps / Settings. Keyed on the signal bumped in onNewIntent;
     // the initial 0 just (re)asserts HOME, which is already the default.
     LaunchedEffect(showHomeSignal) { destination = HomeDestination.HOME }
+    val settings = remember { settingsRepository(context) }
+    val background by settings.background.collectAsStateWithLifecycle(initialValue = BackgroundSettings())
+    val scope = rememberCoroutineScope()
     val appsState = state as? HomeUiState.Apps
     when (destination) {
-        HomeDestination.HOME -> HomeScreen(
-            state = state,
-            actions = actions,
-            onRequestHome = { roleRequest.launch(roleRepository.requestHomeIntent()) },
-            onOpenAllApps = { destination = HomeDestination.ALL_APPS },
-            onOpenSettings = { destination = HomeDestination.SETTINGS },
-        )
+        HomeDestination.HOME -> {
+            val environmentModel: HomeEnvironmentViewModel = viewModel { HomeEnvironmentViewModel() }
+            val environment by environmentModel.state.collectAsStateWithLifecycle(
+                minActiveState = Lifecycle.State.RESUMED,
+            )
+            HomeScreen(
+                background = background,
+                environment = environment,
+                state = state,
+                actions = actions,
+                onRequestHome = { roleRequest.launch(roleRepository.requestHomeIntent()) },
+                onOpenAllApps = { destination = HomeDestination.ALL_APPS },
+                onOpenSettings = { destination = HomeDestination.SETTINGS },
+            )
+        }
         HomeDestination.ALL_APPS -> {
             BackHandler { destination = HomeDestination.HOME }
             AllAppsScreen(
@@ -169,6 +186,14 @@ private fun LauncherApp(showHomeSignal: Int) {
                 onAppInfo = { viewModel.openAppInfo(it) },
             )
         }
+        HomeDestination.BACKGROUND -> {
+            BackHandler { destination = HomeDestination.SETTINGS }
+            BackgroundSettingsScreen(
+                settings = background,
+                onChange = { value -> scope.launch { settings.setBackground(value) } },
+                onPreview = { destination = HomeDestination.HOME },
+            )
+        }
         HomeDestination.SETTINGS -> {
             BackHandler { destination = HomeDestination.HOME }
             SettingsScreen(
@@ -177,6 +202,7 @@ private fun LauncherApp(showHomeSignal: Int) {
                 theme = appsState?.theme ?: ThemeChoice.Default,
                 onSelectTheme = viewModel::setTheme,
                 versionName = BuildConfig.VERSION_NAME,
+                onOpenBackground = { destination = HomeDestination.BACKGROUND },
             )
         }
     }

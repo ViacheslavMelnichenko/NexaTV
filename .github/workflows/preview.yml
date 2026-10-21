@@ -1,0 +1,59 @@
+name: Preview APK
+
+on:
+  push:
+    branches: ['codex/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Verify and build NexaTV Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      # A separate disposable debug key; release signing secrets are never used here.
+      - name: Reuse preview debug signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: nexatv-preview-debug-key-v1
+      - name: Build, lint, test and analyze
+        run: ./gradlew :app:assemblePreview :app:lintPreview :app:testPreviewUnitTest detekt --stacktrace
+      - name: Check APK size and ABI
+        run: |
+          APK=app/build/outputs/apk/preview/app-preview.apk
+          test "$(stat -c%s "$APK")" -le $((30 * 1024 * 1024))
+          BAD=$(unzip -l "$APK" | awk '{print $4}' | grep '^lib/' | grep -vE '^lib/armeabi-v7a/' || true)
+          test -z "$BAD"
+      - name: Package preview
+        run: |
+          mkdir -p preview-output
+          cp app/build/outputs/apk/preview/app-preview.apk preview-output/NexaTV-Preview.apk
+          cp docs/testing/ADAPTIVE-BACKGROUND-PREVIEW.md preview-output/README.md
+          cd preview-output
+          sha256sum NexaTV-Preview.apk > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NexaTV-Preview-${{ github.sha }}
+          path: preview-output/
+          retention-days: 30
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-reports
+          path: app/build/reports/
+          if-no-files-found: ignore

@@ -21,6 +21,20 @@ import org.junit.Test
 class WeatherRepositoryTest {
 
     @Test
+    fun `parses epoch solar times and observation time for the shared background`() {
+        val json = """
+            {"current":{"temperature_2m":12,"time":1792576800},
+             "daily":{"temperature_2m_max":[15],"temperature_2m_min":[8],
+                      "sunrise":[1792558800],"sunset":[1792594800]}}
+        """.trimIndent()
+        val weather = parseWeather(json)!!
+        assertEquals(1792558800L, weather.sunriseEpochSeconds)
+        assertEquals(1792594800L, weather.sunsetEpochSeconds)
+        assertEquals(1792576800L, weather.observedEpochSeconds)
+        assertTrue(endpoint(0.0, 0.0).contains("timeformat=unixtime"))
+    }
+
+    @Test
     fun `parses current temperature and rounds the day's min and max`() {
         val json = """
             {

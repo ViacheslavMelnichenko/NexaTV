@@ -68,6 +68,16 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun `preview opens Home without claiming role even with no discovered apps`() = runTest {
+        coEvery { repository.loadApps() } returns emptyList()
+        val model = HomeViewModel(repository, homeRole, favorites, settings, mainDispatcherRule.dispatcher,
+            previewMode = true)
+        advanceUntilIdle()
+        assertTrue(model.state.value is HomeUiState.Apps)
+        coVerify(exactly = 0) { homeRole.isEffectivelyHome() }
+    }
+
+    @Test
     fun `not effectively Home yields NeedsHomeRole state and skips discovery`() = runTest {
         every { homeRole.isEffectivelyHome() } returns false
 

@@ -38,6 +38,7 @@ android {
         // git tag via -PversionCode/-PversionName in release CI; defaults above keep local builds working.
         versionCode = releaseVersionCode
         versionName = releaseVersionName
+        buildConfigField("boolean", "IS_PREVIEW", "false")
         vectorDrawables.useSupportLibrary = true
 
         // Single device target is 32-bit armeabi-v7a (ADR-0002), so keep only that ABI's native libs
@@ -67,6 +68,13 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             isMinifyEnabled = false
+        }
+        create("preview") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".preview"
+            versionNameSuffix = "-preview"
+            buildConfigField("boolean", "IS_PREVIEW", "true")
+            matchingFallbacks += listOf("debug")
         }
         release {
             isMinifyEnabled = true

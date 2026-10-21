@@ -145,6 +145,45 @@ class SettingsRepositoryTest {
         assertEquals(TileSizeProto.TILE_SIZE_LARGE, restored.settings.tileSize)
     }
 
+    @Test
+    fun `old stores keep theme background while preview can opt into adaptive`() = runTest {
+        val store = FakeLauncherStore()
+        assertEquals(BackgroundMode.THEME, SettingsRepository(store).background.first().mode)
+        val preview = SettingsRepository(store, BackgroundSettings(mode = BackgroundMode.ADAPTIVE))
+        assertEquals(BackgroundMode.ADAPTIVE, preview.background.first().mode)
+        preview.setBackground(BackgroundSettings())
+        assertEquals(BackgroundMode.THEME, preview.background.first().mode)
+    }
+
+    @Test
+    fun `background survives serialization without changing favorites or theme`() = runTest {
+        val store = FakeLauncherStore()
+        val settings = SettingsRepository(store)
+        val favorites = FavoritesRepository(store)
+        val key = FavoriteKey("pkg/.A", 0)
+        favorites.toggle(key)
+        settings.setTheme(ThemeChoice.OLED_BLACK)
+        val background = BackgroundSettings(BackgroundMode.MANUAL, DayPeriod.NIGHT, SceneWeather.SNOW,
+            BackgroundBlur.STRONG, 40, true)
+        settings.setBackground(background)
+        val bytes = ByteArrayOutputStream().also { LauncherStateSerializer.writeTo(store.data.first(), it) }
+        val restored = FakeLauncherStore(LauncherStateSerializer.readFrom(ByteArrayInputStream(bytes.toByteArray())))
+        assertEquals(background, SettingsRepository(restored).background.first())
+        assertEquals(ThemeChoice.OLED_BLACK, SettingsRepository(restored).theme.first())
+        assertEquals(listOf(key), FavoritesRepository(restored).favorites.first())
+    }
+
+    @Test
+    fun `unknown background values fall back and dimming is bounded`() {
+        val unknown = com.nexatv.launcher.data.proto.BackgroundSettingsProto.newBuilder()
+            .setMode("FUTURE_MODE").setPeriod("UNKNOWN").setBlur("UNKNOWN").setDimPercent(999).build()
+        val settings = unknown.toBackgroundSettings()
+        assertEquals(BackgroundMode.THEME, settings.mode)
+        assertEquals(DayPeriod.DAY, settings.period)
+        assertEquals(BackgroundBlur.SOFT, settings.blur)
+        assertEquals(70, settings.dimPercent)
+    }
+
     /** Minimal in-memory [DataStore] backed by a [MutableStateFlow] — no file, no Android. */
     private class FakeLauncherStore(
         initial: LauncherStateProto = LauncherStateProto.getDefaultInstance(),

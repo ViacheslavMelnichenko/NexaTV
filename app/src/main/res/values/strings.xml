@@ -47,4 +47,30 @@
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">NexaTV Home override</string>
     <string name="accessibility_override_description">Lets NexaTV open as your Home when you press the HOME button. NexaTV only detects when the system launcher appears; it never reads screen content. Turn this off any time to return to the stock Home.</string>
+    <string name="background_title">Background</string>
+    <string name="background_customize">Customize</string>
+    <string name="background_preview">View on Home</string>
+    <string name="background_description">Automatic follows the weather in Wrocław. Manual changes only the landscape; the weather card stays live.</string>
+    <string name="background_mode">Mode</string>
+    <string name="background_theme">Theme</string>
+    <string name="background_adaptive">Automatic</string>
+    <string name="background_manual">Manual</string>
+    <string name="background_period">Time of day</string>
+    <string name="background_dawn">Dawn</string>
+    <string name="background_day">Day</string>
+    <string name="background_sunset">Sunset</string>
+    <string name="background_night">Night</string>
+    <string name="background_weather">Weather</string>
+    <string name="background_clear">Clear</string>
+    <string name="background_cloudy">Cloudy</string>
+    <string name="background_rain">Rain</string>
+    <string name="background_snow">Snow</string>
+    <string name="background_blur">Blur</string>
+    <string name="background_blur_soft">Soft</string>
+    <string name="background_blur_strong">Strong</string>
+    <string name="background_dim">Dimming</string>
+    <string name="background_motion">Gentle motion</string>
+    <string name="background_off">Off</string>
+    <string name="background_on">On</string>
+    <string name="background_motion_hint">Subtle rain and snow only. Motion pauses whenever Home is hidden.</string>
 </resources>

@@ -28,6 +28,9 @@ data class Weather(
     val maxC: Int,
     val weatherCode: Int = 0,
     val windKmh: Int = 0,
+    val sunriseEpochSeconds: Long? = null,
+    val sunsetEpochSeconds: Long? = null,
+    val observedEpochSeconds: Long? = null,
 )
 
 /**
@@ -74,8 +77,8 @@ class WeatherRepository(
 internal fun endpoint(latitude: Double, longitude: Double): String =
     "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude" +
         "&current=temperature_2m,weather_code,wind_speed_10m" +
-        "&daily=temperature_2m_max,temperature_2m_min" +
-        "&timezone=auto&forecast_days=1"
+        "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset" +
+        "&timezone=auto&timeformat=unixtime&forecast_days=1"
 
 /**
  * Pure Open-Meteo JSON → [Weather]; `null` when temperature/min/max are missing or malformed. The
@@ -95,5 +98,8 @@ internal fun parseWeather(json: String): Weather? = runCatching {
         maxC = max.roundToInt(),
         weatherCode = current.optInt("weather_code", 0),
         windKmh = current.optDouble("wind_speed_10m", 0.0).roundToInt(),
+        sunriseEpochSeconds = daily.optJSONArray("sunrise")?.optLong(0)?.takeIf { it > 0 },
+        sunsetEpochSeconds = daily.optJSONArray("sunset")?.optLong(0)?.takeIf { it > 0 },
+        observedEpochSeconds = current.optLong("time").takeIf { it > 0 },
     )
 }.getOrNull()

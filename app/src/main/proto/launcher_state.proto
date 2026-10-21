@@ -35,6 +35,18 @@ message SettingsProto {
   // chose, which the repository resolves to Pastel Dark. Lives here (not root tag 3) per ADR-0009:
   // all settings belong in SettingsProto; root tag 3 stays reserved forever (ADR-0008, never reuse).
   ThemeId theme = 2;
+
+  // Optional message preserves defaults for installations created before adaptive backgrounds.
+  BackgroundSettingsProto background = 3;
+}
+
+message BackgroundSettingsProto {
+  string mode = 1;
+  string period = 2;
+  string weather = 3;
+  string blur = 4;
+  int32 dim_percent = 5;
+  bool motion = 6;
 }
 
 // Color theme identity (Theming EPIC). Semantic ids, not raw colors — the UI maps each to a

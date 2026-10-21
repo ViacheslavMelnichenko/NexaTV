@@ -10,6 +10,7 @@
 package com.nexatv.launcher.data
 
 import android.content.Context
+import com.nexatv.launcher.BuildConfig
 import androidx.datastore.core.DataStore
 import com.nexatv.launcher.data.proto.LauncherStateProto
 import com.nexatv.launcher.data.proto.ThemeId as ThemeIdProto
@@ -47,7 +48,20 @@ enum class ThemeChoice {
  * start, NFR-001/003), writes are transactional through [DataStore.updateData]. The store is
  * injected so this is testable with a fake DataStore, no device.
  */
-class SettingsRepository(private val dataStore: DataStore<LauncherStateProto>) {
+class SettingsRepository(
+    private val dataStore: DataStore<LauncherStateProto>,
+    private val backgroundDefault: BackgroundSettings = BackgroundSettings(),
+) {
+
+    val background: Flow<BackgroundSettings> = dataStore.data.map { state ->
+        if (state.settings.hasBackground()) state.settings.background.toBackgroundSettings() else backgroundDefault
+    }
+
+    suspend fun setBackground(value: BackgroundSettings) {
+        dataStore.updateData { state ->
+            state.toBuilder().setSettings(state.settings.toBuilder().setBackground(value.toProto())).build()
+        }
+    }
 
     /** The chosen home tile size; emits again on every change. Defaults to [TileSize.MEDIUM]. */
     val tileSize: Flow<TileSize> =
@@ -114,4 +128,7 @@ internal fun ThemeChoice.toProto(): ThemeIdProto = when (this) {
 
 /** Production factory: a [SettingsRepository] over the shared app-internal DataStore. */
 fun settingsRepository(context: Context): SettingsRepository =
-    SettingsRepository(context.applicationContext.launcherStateStore)
+    SettingsRepository(
+        context.applicationContext.launcherStateStore,
+        BackgroundSettings(mode = if (BuildConfig.IS_PREVIEW) BackgroundMode.ADAPTIVE else BackgroundMode.THEME),
+    )
