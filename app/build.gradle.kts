@@ -22,8 +22,8 @@ detekt {
 
 // Release versioning (ADR-0003 D5). CI passes -PversionName/-PversionCode derived from the git tag;
 // local/dev and CI non-release builds fall back to the in-file defaults so they always build.
-val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.2.1"
-val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt() ?: 201
+val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.3.0-preview.1"
+val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt() ?: 300
 
 android {
     namespace = "com.nexatv.launcher"
@@ -72,7 +72,7 @@ android {
         create("preview") {
             initWith(getByName("debug"))
             applicationIdSuffix = ".preview"
-            versionNameSuffix = "-preview"
+            versionNameSuffix = if (releaseVersionName.contains("-preview.")) "" else "-preview"
             buildConfigField("boolean", "IS_PREVIEW", "true")
             matchingFallbacks += listOf("debug")
         }

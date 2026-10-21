@@ -29,7 +29,11 @@ must be possible before merging and without replacing the owner's working launch
 - Add a `preview` build type: `.preview` package, separate app label/data, ordinary launcher entry,
   no HOME intent and no accessibility override service. Preview bypasses the Home-role gate only.
 - Build downloadable, disposable-debug-signed preview artifacts on `codex/**` branch pushes.
-  Keep the release signing and tag workflow unchanged. Main remains PR-only.
+  Promote a successful branch artifact to a GitHub prerelease with an annotated `vX.Y.Z-preview.N`
+  tag on that exact commit. The APK's version name matches the tag without `v`; it retains the
+  separate Preview package and debug signing identity. Publish its checksum and installation guide.
+  The production signing job skips `-preview.` tags, and its stable-version comparison excludes
+  prereleases so a standalone Preview cannot block the next production release. Main remains PR-only.
 
 ## Tradeoffs and validation
 

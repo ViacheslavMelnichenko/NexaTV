@@ -29,7 +29,12 @@ The clock and calendar continue using the device's timezone.
 The **Preview APK** GitHub Actions workflow runs on pushes to `codex/**` branches. Its artifact
 `NexaTV-Preview-<commit>` contains the APK, this guide and SHA256SUMS. It expires after 30 days.
 The workflow builds, runs JVM tests, Android Lint and detekt, then checks the ABI and 30 MiB size limit.
-The existing PR CI still verifies the ordinary debug build. No release tag or release signing key is used.
+The existing PR CI still verifies the ordinary debug build. Branch builds use no release signing key.
+
+Published previews are also available under GitHub Releases as prereleases with annotated
+`vX.Y.Z-preview.N` tags. Each tag points to the exact successful branch build commit; the published
+APK is copied from that run, with its checksum and this guide. These assets are independent of the
+30-day Actions artifact retention. Preview tags do not invoke the production signing job.
 
 Local build with JDK 17 and Android SDK 34:
 

@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   release:
+    # Preview tags promote the verified standalone Preview APK separately, without release signing.
+    if: ${{ !contains(github.ref_name, '-preview.') }}
     name: Build · Sign · Publish
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -50,7 +52,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          PREV_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || true)
+          PREV_TAG=$(gh release list --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || true)
           if [ -z "$PREV_TAG" ]; then echo "No prior release; skipping monotonic check."; exit 0; fi
           PREV_CORE="${PREV_TAG#v}"; PREV_CORE="${PREV_CORE%%-*}"
           IFS=. read -r a b c <<< "$PREV_CORE"
