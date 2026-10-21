@@ -53,5 +53,50 @@ internal val PastelDarkColors = NexaColorScheme(
     backdropBottom = NexaColors.BackdropBottom,
 )
 
+/** Maximum-contrast dark theme: pure-black surface, pastel accents, deepest backdrop. */
+internal val OledBlackColors = NexaColorScheme(
+    surface = NexaColors.OledSurface,
+    surfaceVariant = NexaColors.OledSurfaceVariant,
+    onSurface = NexaColors.OledOnSurface,
+    onSurfaceMuted = NexaColors.OnSurfaceMuted,
+    accent = NexaColors.Accent,
+    onAccent = NexaColors.OledSurface,
+    focusRing = NexaColors.Focus,
+    success = NexaColors.Success,
+    error = NexaColors.Error,
+    backdropTop = NexaColors.OledBackdropTop,
+    backdropBottom = NexaColors.OledBackdropBottom,
+)
+
+/** Warm/cozy dark theme: the default base with an amber accent; error cooled, focus pushed to coral. */
+internal val AmberEmberColors = NexaColorScheme(
+    surface = NexaColors.Surface,
+    surfaceVariant = NexaColors.SurfaceVariant,
+    onSurface = NexaColors.OnSurface,
+    onSurfaceMuted = NexaColors.OnSurfaceMuted,
+    accent = NexaColors.AmberAccent,
+    onAccent = NexaColors.Surface,
+    focusRing = NexaColors.AmberFocus,
+    success = NexaColors.Success,
+    error = NexaColors.AmberError,
+    backdropTop = NexaColors.BackdropTop,
+    backdropBottom = NexaColors.BackdropBottom,
+)
+
+/** OLED base with a muted rose-magenta accent; focus ring kept cool-blue to stay distinct from it. */
+internal val MagentaNoirColors = NexaColorScheme(
+    surface = NexaColors.OledSurface,
+    surfaceVariant = NexaColors.OledSurfaceVariant,
+    onSurface = NexaColors.OledOnSurface,
+    onSurfaceMuted = NexaColors.OnSurfaceMuted,
+    accent = NexaColors.MagentaAccent,
+    onAccent = NexaColors.OledSurface,
+    focusRing = NexaColors.Accent,
+    success = NexaColors.Success,
+    error = NexaColors.Error,
+    backdropTop = NexaColors.OledBackdropTop,
+    backdropBottom = NexaColors.OledBackdropBottom,
+)
+
 /** Active palette, provided by [NexaTheme]. Static: swapping it re-composes consumers. */
 internal val LocalNexaColors = staticCompositionLocalOf { PastelDarkColors }
