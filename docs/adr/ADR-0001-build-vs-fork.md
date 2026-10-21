@@ -8,7 +8,7 @@
 
 NexaTV needs its foundational decision: build the launcher from scratch, fork an existing open-source
 Android TV launcher, or take a hybrid path. Phase 0 research investigated six candidates directly from
-their repositories (see [`../research/`](../research/OPEN_SOURCE_LAUNCHERS.md)). The decisive findings:
+their repositories (Phase-0 research, now archived). The decisive findings:
 
 - **Licensing (FACT):** every launcher that could realistically serve as a fork base is **GPL-3.0**:
   FLauncher, all LTvLauncher forks (incl. Extended), and the strongest native candidate `tv-launcher`.
@@ -16,7 +16,7 @@ their repositories (see [`../research/`](../research/OPEN_SOURCE_LAUNCHERS.md)).
   The only permissively-licensed code is **LauncherCompose (Apache-2.0)**, whose scope is a hotel/IPTV
   guest launcher (narrow reuse value), and **Yukuza (MIT declared in README but with no `LICENSE` file)**,
   which is a due-diligence blocker until a real license file exists.
-  See [`../research/LICENSE_ANALYSIS.md`](../research/LICENSE_ANALYSIS.md).
+  See the Phase-0 license analysis (archived).
 - **Device constraints (FACT, from the audit):** target TCL is **32-bit ARM only** (`armeabi-v7a`),
   4 cores, ~2.3 GiB RAM, UI at 1080p. Favors a lean implementation; both Flutter and Kotlin/Compose-for-TV
   remain viable. See [`../technical/ANDROID-TV.md`](../technical/ANDROID-TV.md).
@@ -42,7 +42,7 @@ build-vs-fork and deserves its own evidence-based decision.
 ## Alternatives
 
 Evaluated against license · effort · maintainability · architecture · UX flexibility · TV compatibility ·
-independence · upgrade path. (Full evidence in [`../research/ARCHITECTURE_COMPARISON.md`](../research/ARCHITECTURE_COMPARISON.md).)
+independence · upgrade path. (Full evidence in the Phase-0 architecture comparison, archived.)
 
 | Option | License outcome | Effort | Independence | Verdict |
 |--------|-----------------|--------|--------------|---------|

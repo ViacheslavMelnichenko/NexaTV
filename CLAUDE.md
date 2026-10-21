@@ -1,7 +1,6 @@
 # NexaTV — AI Operating Rules
 
-These rules govern AI-assisted work in this repository. They complement (never override)
-[`initial.md`](./initial.md), which is the project's source of truth.
+These rules are the sole source of truth for AI-assisted work in this repository.
 
 ## The roles ("team of experts")
 
@@ -15,13 +14,14 @@ when it matters:
 
 ## Hard rules
 
-1. **Phase discipline & autonomy.** Phase 0 (Discovery) is **complete** — all five ADRs accepted, the
-   permissive license chosen (Apache-2.0), and the ADR-0002 validation spike passed on the real TCL. Work
-   now proceeds into **M1 — Foundation** (launcher code is allowed). Keep work coherent within the current
-   phase, but **do not gate on an explicit "go" for obvious, low-risk next steps** — continue automatically
-   from one task to the next. **Stop and ask only** when a decision is non-trivial or owner-dependent, when
-   a step needs the owner's verification (e.g. a visual or on-device check), or when an observed result
-   contradicts expectations.
+1. **Phase discipline & autonomy.** M1 (Foundation), M2 (minimal launcher), M3 (HOME via the
+   accessibility override), the Design System, Theming, and the CI + release pipeline are **done and
+   verified on the real TCL**. The project is now in **M4 — Application Discovery**; M5–M8 are deferred
+   (owner paused — do not start them). Keep work coherent within the current milestone, but **do not gate
+   on an explicit "go" for obvious, low-risk next steps** — continue automatically from one task to the
+   next. **Stop and ask only** when a decision is non-trivial or owner-dependent, when a step needs the
+   owner's verification (e.g. a visual or on-device check), or when an observed result contradicts
+   expectations.
 2. **Evidence over memory.** When researching a repo, use the actual repository (README, source,
    LICENSE, releases, issues, commits) — never recall its state from memory. Label every claim
    `FACT`, `INFERENCE`, `ASSUMPTION`, or `UNKNOWN`.

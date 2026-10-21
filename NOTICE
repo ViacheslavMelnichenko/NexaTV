@@ -5,11 +5,9 @@ This product is licensed under the Apache License, Version 2.0 (see the LICENSE 
 
 NexaTV is an independent, clean-room implementation. GPL-3.0 launchers (FLauncher,
 LTvLauncher, nielsvanvelzen/tv-launcher, …) were studied only as design references —
-no code from them is included (see docs/adr/ADR-0001-build-vs-fork.md and
-docs/research/LICENSE_ANALYSIS.md).
+no code from them is included (see docs/adr/ADR-0001-build-vs-fork.md).
 
 Third-party components reused under permissive licenses are listed below as they are
-added. Each entry must also have a corresponding row in the Reuse Clearance Log in
-docs/research/LICENSE_ANALYSIS.md.
+added. Each entry must also have a corresponding row in the project's Reuse Clearance Log.
 
   (none yet)

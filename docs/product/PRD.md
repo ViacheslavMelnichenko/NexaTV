@@ -12,7 +12,7 @@
 ## 1. Problem statement
 
 The TCL unit ships with the stock Google TV / TCL launcher as its Home experience. The project owner's
-motivation (`initial.md` §1) is that it does **not** provide the Home experience they want: it is
+motivation is that it does **not** provide the Home experience they want: it is
 content/recommendation-and-ad-oriented rather than an app-first, fast, fully owner-controlled surface.
 
 - `ASSUMPTION` (owner-stated, not yet itemised against this firmware): the stock launcher emphasises
@@ -22,7 +22,7 @@ content/recommendation-and-ad-oriented rather than an app-first, fast, fully own
 
 NexaTV replaces the Home experience with a **polished, fast, D-pad-first, offline-first, ad-free launcher**
 the owner fully controls — standing alongside the stock launcher (installed reversibly, never disabling or
-removing system apps per `initial.md` §16).
+removing system apps).
 
 ## 2. Vision
 
@@ -138,7 +138,7 @@ major functionality usable from the remote (Up/Down/Left/Right/OK/Back/Home, lon
 
 - `FACT` — 32-bit `armeabi-v7a` only; ~2.34 GiB RAM; 1080p UI; SDK 34 (§5). Favor lean implementation.
 - `FACT` — License: Apache-2.0; greenfield; GPL launchers are clean-room references only (no code reuse).
-- `FACT` — Device safety (`initial.md` §16): read-only first; never disable the stock launcher, uninstall
+- `FACT` — Device safety: read-only first; never disable the stock launcher, uninstall
   system apps, or modify system partitions; first install must be reversible.
 - `FACT` — Hosted GitHub CI runners have **no** 32-bit `armeabi-v7a` device, and device-safety keeps the
   real TCL out of CI → performance NFRs can only be gated by a manual on-device pre-release step (NFR-013).

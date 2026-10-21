@@ -35,7 +35,7 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0011](./ADR-0011-tile-art-banner-first.md) | Uniform 16:9 tile art — banner first | **Superseded** by [ADR-0012](./ADR-0012-tile-icon-and-label.md) (2026-10-21) — the banner grid read as "wide plates" on the TCL and overflowed the favorites row; reverted. Analysis kept for the record |
 | [ADR-0012](./ADR-0012-tile-icon-and-label.md) | Tiles revert to a square icon over a label | **Accepted** (2026-10-21) — supersedes ADR-0011; restores the FR-013 square-icon-over-label tile, deletes the `AppEntry.banner`/`loadBanner` path, resets S/M/L tokens to portrait (80×100/96×120/128×156) so four favorites fit the row; unmasked-adaptive-icon look accepted, icon normalisation a later optional follow-up |
 
-## Planned / potential ADRs (per `initial.md` §25)
+## Planned / potential ADRs
 
 Resolved: Flutter vs. Kotlin/Compose (ADR-0002) · Application discovery strategy (ADR-0004) ·
 CI/CD, signing & release (ADR-0003) · "Glass"/translucency (ADR-0005) ·

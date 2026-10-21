@@ -54,7 +54,7 @@ query packages, and launch activities. Over a TV we use **wireless debugging** (
 ## Commands reserved for later (NOT in early read-only phase)
 
 `pm install` / `pm uninstall`, `am start` (launching our activity), changing default HOME. These modify
-the device — follow the safety checklist in `initial.md` §16 before using any of them.
+the device — follow the device-safety rules before using any of them.
 
 ## Updating NexaTV on the TV
 
@@ -66,8 +66,8 @@ Updates are sideloaded (ADR-0003 D7). The signed APK comes from the GitHub Relea
 | First switch off debug | `adb install -r nexatv-X.Y.Z.apk` | Release id `com.nexatv.launcher` is a **separate** package from the `.debug` build; after installing, re-point the accessibility-HOME override to it (then optionally `adb uninstall com.nexatv.launcher.debug`) |
 | Roll back | `adb install -r nexatv-<prev>.apk` | Previous release APK is kept on GitHub |
 
-> The release build is **minified (R8)**; always run the on-device smoke test in
-> [RELEASE-CHECKLIST.md](../testing/RELEASE-CHECKLIST.md) before trusting a new version.
+> The release build is **minified (R8)**; always run the on-device smoke test before trusting a new
+> version (the manual on-device gate is described in `.github/workflows/release.yml`).
 
 ## Command log (evidence)
 

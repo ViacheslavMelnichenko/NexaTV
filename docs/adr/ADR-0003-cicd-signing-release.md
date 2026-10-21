@@ -155,13 +155,13 @@ needs.
 - Author the GitHub Actions workflows: `ci.yml` (PR/main gate — D1) and `release.yml` (tag-driven — D2/D6).
 - Configure branch protection on `main` and the protected **`release`** Environment.
 - Generate the release keystore **offline**; store base64 + passwords in GH encrypted secrets **and** two
-  offline backups; write the key backup/rotation procedure (`docs/technical/RELEASE-SIGNING.md`) — no secret
+  offline backups; write the key backup/rotation procedure — no secret
   values in Git.
 - Add `CHANGELOG.md` ("Keep a Changelog") and wire release notes + SHA-256 + cert fingerprint + git SHA.
 - Implement the Gradle `versionCode`/`versionName`-from-tag logic and the non-increasing-version CI check.
 - Add CI asserts: `gitleaks`, ABI (no 64-bit `.so`), APK-size budget, Baseline-Profile freshness.
 - Document the manual pre-release gate (on-device Macrobenchmark + cold-start smoke + reboot) as a release
-  checklist (`docs/testing/RELEASE-CHECKLIST.md`).
+  checklist.
 - **[Deferred / potential future ADR]** in-app/OTA self-update (would introduce `REQUEST_INSTALL_PACKAGES`
   and a distribution endpoint) — only if sideload becomes a real pain point post-MVP.
 - Accepted under owner delegation (2026-10-20); the **[ADJUSTABLE]** points may be revisited via a

@@ -1,6 +1,6 @@
 # NexaTV — tag-driven signed release (ADR-0003 D2/D4/D5/D6). Sideload distribution: the published
 # APK is installed with `adb install -r`. Never runs on fork PRs; signing secrets live only in the
-# protected `release` Environment. Performance NFRs are a manual on-device gate (docs/testing/RELEASE-CHECKLIST.md).
+# protected `release` Environment. Performance NFRs are a manual on-device gate.
 name: Release
 
 on:

@@ -31,7 +31,7 @@ android {
 
     defaultConfig {
         applicationId = "com.nexatv.launcher"
-        // Single device target: TCL Android TV OS 14 (API 34). See ADR-0002 / initial.md §19.
+        // Single device target: TCL Android TV OS 14 (API 34). See ADR-0002.
         minSdk = 34
         targetSdk = 34
         // NFR-011: versionCode = MAJOR*10000 + MINOR*100 + PATCH (0.1.0 -> 100). Overridable from the

@@ -10,12 +10,12 @@
 
 | Field | Value | Source |
 |-------|-------|--------|
-| Manufacturer | TCL | FACT (initial.md) |
-| Android TV OS | 14 | FACT (initial.md) |
-| Security patch | 2025-12-05 | FACT (initial.md) |
-| Kernel | 5.15.180-android14-11 | FACT (initial.md) |
-| Build | tcl9618-user 14 UTT2.250416.001 AU02 release-keys | FACT (initial.md) |
-| Product information | V8-0012T01-LF1V643.003175 | FACT (initial.md) |
+| Manufacturer | TCL | FACT (seed) |
+| Android TV OS | 14 | FACT (seed) |
+| Security patch | 2025-12-05 | FACT (seed) |
+| Kernel | 5.15.180-android14-11 | FACT (seed) |
+| Build | tcl9618-user 14 UTT2.250416.001 AU02 release-keys | FACT (seed) |
+| Product information | V8-0012T01-LF1V643.003175 | FACT (seed) |
 | Model | Smart TV Pro | FACT (ADB 2026-10-20) |
 | Product / device codename | G08_4K_GB / G08 | FACT (ADB) |
 | SDK level | 34 | FACT (ADB) |
@@ -42,7 +42,7 @@
 | TV input services | **7** (`android.media.tv.TvInputService`): `com.mediatek.AirplayAPK/.AirPlayTvInputService` (AirPlay); `com.tcl.channelplus/…InputService` (IPTV); `com.tcl.tvinput/.TvPassThroughService`; `com.tcl.tvinput/.TunerInputService`; Google Videos `…tvinput.playback.TvInputService` + `…VideoPreviewInputService` | FACT (ADB `cmd package query-services` 2026-10-20) |
 | Installed launcher packages | _see HOME activities above; full `pm list packages` not yet captured_ | ADB to confirm |
 
-## 3. Android launcher model (research notes — `initial.md` §17)
+## 3. Android launcher model (research notes)
 
 To document (verified on the actual TCL where noted):
 - HOME intent; `MAIN` + `HOME` + `DEFAULT` categories
@@ -142,7 +142,7 @@ launcher coming to the foreground (what HOME triggers) and raises NexaTV over it
 
 Daily-use production device. Early phase is **read-only**. Do not disable the stock launcher, uninstall
 system apps, or modify system partitions. Keep Settings reachable at all times. First NexaTV install must
-be reversible. See `initial.md` §16.
+be reversible.
 
 **Recovery insight (FACT):** the system exposes `com.android.tv.settings/.system.FallbackHome` as a HOME
 activity. This is the natural fallback if a custom launcher is ever set as default and misbehaves — but

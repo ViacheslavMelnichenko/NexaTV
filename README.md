@@ -1,64 +1,79 @@
 # NexaTV
 
-A custom, fast, D-pad-first **Android TV launcher** targeting a TCL Smart TV (Android TV OS 14).
+**A fast, private, D-pad-first launcher for Android TV.**
 
-> **Status:** Phase 0 — Discovery. No launcher code is being written yet. The current goal is to
-> understand the existing open-source ecosystem and the target device, then make an explicit,
-> documented architecture decision (build vs. fork) before implementation begins.
+Live product page: **https://viacheslavmelnichenko.github.io/NexaTV/**
 
-## Vision
+![NexaTV Home — clock, calendar and weather widgets, and a favorites row](docs/screenshots/home.png)
 
-Deliver a polished Home experience that is faster, cleaner, and more customizable than the stock
-Google TV / TCL launcher — remote-first, offline-first, privacy-friendly, and low-resource.
+## What it is
 
-See [`initial.md`](./initial.md) for the full project master instructions (the source of truth for
-scope, principles, and process).
+NexaTV is a working custom Home launcher for a TCL Google TV (Android TV OS 14).
+It replaces the stock Home with a cleaner, faster, remote-first experience: a
+focusable app grid, favorites, and glanceable widgets. It is offline-first with
+no ads, accounts, or tracking, and runs light — idle memory is about 48.6 MB PSS
+on the TCL. Built with Kotlin and Jetpack Compose for TV, and verified on the
+real device.
 
-## Engineering process
+## Features
 
-```
-RESEARCH → REQUIREMENTS → ARCHITECTURE → DECISION → PLAN → IMPLEMENT
-  → BUILD → INSTALL → TEST ON REAL TV → OBSERVE → LOG/EVIDENCE → FIX → DOCUMENT → COMMIT
-```
+- **App grid** — installed apps enumerated via `LauncherApps` across profiles
+  (ADR-0004, no `QUERY_ALL_PACKAGES`); D-pad navigation, launch on **OK**.
+- **Live app list** — apps appear and disappear as they are installed or removed
+  (`LauncherApps.Callback`).
+- **States** — Loading, Empty, and launch-error handling.
+- **Favorites** — pin / unpin / reorder (built; final on-device visual check still
+  pending).
+- **Screens** — Home plus a dedicated **All apps** grid.
+- **Home widgets** — clock, calendar, and weather (ADR-0010).
+- **Theming** — four dark themes (Pastel Dark, OLED Black, Amber Ember, Magenta
+  Noir) and three tile sizes (Small / Medium / Large), persisted and applied live.
+- **Persistence** — settings and favorites stored via Proto DataStore (ADR-0008).
+- **Design System** — semantic `NexaColorScheme`, focusable `AppTile`,
+  `SectionHeader`, and a debug-only component gallery.
 
-AI-generated code is acceptable. AI-generated architecture *without reasoning* is not. Decisions are
-captured in ADRs; research is backed by evidence, not memory.
+## Screenshots
 
-## Repository layout
+![All apps — grid of installed applications](docs/screenshots/allapps.png)
 
-| Path | Purpose |
-|------|---------|
-| `initial.md` | Project master instructions (constitution). |
-| `CLAUDE.md` | Operating rules for AI-assisted work in this repo. |
-| `docs/research/` | Open-source launcher research, feature matrix, license & architecture comparison. |
-| `docs/adr/` | Architecture Decision Records. |
-| `docs/product/` | Product Requirements Document (PRD). |
-| `docs/technical/` | ADB reference and Android TV device/launcher notes. |
-| `docs/testing/` | Test plan (unit, widget, integration, manual TV scenarios). |
-| `project/` | Backlog and milestones. |
+*All apps: the full grid of installed applications.*
 
-## Current phase checklist (M0 — Discovery & Device Audit)
+![Settings — tile size and theme switcher](docs/screenshots/settings.png)
 
-1. Establish ADB connectivity to the TCL TV
-2. Perform a safe, read-only device audit
-3. Research existing launchers (FLauncher, LTvLauncher & forks, Yukuza, Tarang, TV Launcher, LauncherCompose)
-4. Analyze licenses
-5. Analyze architectures
-6. Build the feature matrix
-7. Compare architectures
-8. Author ADR-0001 (Build vs. Fork)
-9. Decide the implementation direction
-10. Only then create the NexaTV code foundation
+*Settings: tile size and the four-theme switcher.*
 
-## Safety
+## How it becomes HOME
 
-The TV is a **daily-use production device**. All early work is read-only. The stock launcher is never
-disabled, nothing is uninstalled, and the first NexaTV install must be reversible. Runtime/pairing
-information (IP, port, pairing codes) is **never** committed. See `initial.md` §16.
+This TCL firmware blocks third-party apps from taking the normal `ROLE_HOME`
+(ADR-0006). NexaTV instead becomes Home through a reversible accessibility
+override (`NexaOverrideService`, ADR-0007). The stock launcher is never disabled,
+and the change can be undone at any time. Verified on the real TCL.
+
+## Build & tech
+
+- **Stack** — Kotlin + Jetpack Compose for TV, `minSdk`/`targetSdk` API 34,
+  `armeabi-v7a` (32-bit).
+- **CI** (`.github/workflows/ci.yml`) — assemble, Android Lint, unit tests,
+  detekt, ABI assert, APK-size budget, and gitleaks secret scan.
+- **Release** (`.github/workflows/release.yml`, ADR-0003) — a tag-driven pipeline
+  builds, signs, verifies, and publishes a GitHub Release. Validated end-to-end
+  with the real signing key; no public release is cut yet (next is `v0.1.0`).
+- Architecture decisions live in [`docs/adr/`](docs/adr/).
+
+## Docs
+
+| Document | Purpose |
+|----------|---------|
+| [CHANGELOG.md](CHANGELOG.md) | Release notes and change history. |
+| [docs/adr/](docs/adr/) | Architecture Decision Records. |
+| [docs/product/PRD.md](docs/product/PRD.md) | Product requirements. |
+| [docs/design/DESIGN-SYSTEM.md](docs/design/DESIGN-SYSTEM.md) | Design system and tokens. |
+| [docs/technical/ADB.md](docs/technical/ADB.md) | ADB reference. |
+| [docs/technical/ANDROID-TV.md](docs/technical/ANDROID-TV.md) | Android TV device and launcher notes. |
+| [docs/testing/TEST-PLAN.md](docs/testing/TEST-PLAN.md) | Test plan. |
+| [project/MILESTONES.md](project/MILESTONES.md) | Milestones. |
+| [project/BACKLOG.md](project/BACKLOG.md) | Backlog. |
 
 ## License
 
-**Apache License 2.0** (see [`LICENSE`](./LICENSE) and [`NOTICE`](./NOTICE)). Chosen 2026-10-20 per
-ADR-0001 (permissive) and ADR-0002 (Kotlin + Compose-for-TV) — Apache-2.0 provides an explicit patent
-grant and matches the Android/Jetpack/`androidx.tv` ecosystem. Third-party reuse is tracked in
-[`docs/research/LICENSE_ANALYSIS.md`](./docs/research/LICENSE_ANALYSIS.md).
+Apache License 2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
