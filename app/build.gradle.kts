@@ -22,7 +22,7 @@ detekt {
 
 // Release versioning (ADR-0003 D5). CI passes -PversionName/-PversionCode derived from the git tag;
 // local/dev and CI non-release builds fall back to the in-file defaults so they always build.
-val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.3.0-preview.1"
+val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.3.0"
 val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt() ?: 300
 
 android {
