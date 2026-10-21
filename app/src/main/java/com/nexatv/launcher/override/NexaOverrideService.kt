@@ -33,7 +33,10 @@ class NexaOverrideService : AccessibilityService() {
         if (event == null || !isStockHomeForegrounded(event)) return
 
         // Stock Google TV HOME just came to the front (HOME press / wake) — raise NexaTV over it.
+        // ACTION_SHOW_HOME tells MainActivity.onNewIntent to reset the nav to the Home grid, so HOME
+        // works even when a sub-screen (All apps / Settings) was open.
         val home = Intent(this, MainActivity::class.java)
+            .setAction(MainActivity.ACTION_SHOW_HOME)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         startActivity(home)
     }

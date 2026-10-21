@@ -6,6 +6,14 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-21
+
+### Fixed
+- HOME now returns to the Home grid from the All apps and Settings sub-screens. The HOME override
+  (ADR-0007) only reorders the singleTask `MainActivity` to the front, which preserved the open
+  sub-screen; the override's re-raise intent now carries `ACTION_SHOW_HOME`, and `onNewIntent` resets
+  the nav state to the Home route so HOME always lands home.
+
 ## [0.2.0] - 2026-10-21
 
 ### Changed

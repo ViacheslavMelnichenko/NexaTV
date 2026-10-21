@@ -9,6 +9,7 @@
  */
 package com.nexatv.launcher
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -17,6 +18,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +56,11 @@ import com.nexatv.launcher.ui.theme.dimensions
 private enum class HomeDestination { HOME, ALL_APPS, SETTINGS }
 
 class MainActivity : ComponentActivity() {
+    // Bumped whenever a HOME re-raise delivers ACTION_SHOW_HOME, so the UI snaps back to the Home
+    // grid instead of staying on whatever sub-screen was open. Needed because the HOME override only
+    // reorders this singleTask activity to the front (no recreate), preserving its Compose nav state.
+    private val showHomeSignal = mutableStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -65,9 +72,24 @@ class MainActivity : ComponentActivity() {
             // in a single frame (colors only, no relayout) when DataStore emits.
             val theme by settings.theme.collectAsStateWithLifecycle(initialValue = ThemeChoice.Default)
             NexaTheme(colors = theme.colorScheme()) {
-                LauncherApp()
+                LauncherApp(showHomeSignal = showHomeSignal.value)
             }
         }
+    }
+
+    // The HOME override (ADR-0007) re-raises this singleTask activity rather than recreating it, so
+    // onNewIntent is the only signal that HOME was pressed. Bump showHomeSignal on the override's
+    // ACTION_SHOW_HOME so LauncherApp resets to the Home grid (fixes HOME doing nothing from All
+    // apps / Settings).
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.action == ACTION_SHOW_HOME) showHomeSignal.value++
+    }
+
+    companion object {
+        /** Action NexaOverrideService sets on its re-raise intent so HOME returns to the Home grid. */
+        const val ACTION_SHOW_HOME = "com.nexatv.launcher.action.SHOW_HOME"
     }
 }
 
@@ -76,7 +98,7 @@ class MainActivity : ComponentActivity() {
  * and switches between the three state-based routes (Home / All apps / Settings; ADR-0009).
  */
 @Composable
-private fun LauncherApp() {
+private fun LauncherApp(showHomeSignal: Int) {
     val context = LocalContext.current.applicationContext
     val roleRepository = remember { HomeRoleRepository(context) }
     val viewModel: HomeViewModel = viewModel {
@@ -123,6 +145,10 @@ private fun LauncherApp() {
     // State-based navigation (ADR-0009): three routes, still too few to justify a nav library.
     // BACK on any sub-page returns to Home.
     var destination by remember { mutableStateOf(HomeDestination.HOME) }
+    // A HOME press re-raises this activity (override, ADR-0007); snap back to the Home grid so HOME
+    // always lands home, even from All apps / Settings. Keyed on the signal bumped in onNewIntent;
+    // the initial 0 just (re)asserts HOME, which is already the default.
+    LaunchedEffect(showHomeSignal) { destination = HomeDestination.HOME }
     val appsState = state as? HomeUiState.Apps
     when (destination) {
         HomeDestination.HOME -> HomeScreen(
