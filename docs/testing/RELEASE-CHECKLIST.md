@@ -6,6 +6,9 @@
 >
 > One-time owner setup (keystore, GitHub secrets, branch protection) lives in
 > [`../technical/RELEASE-SIGNING.md`](../technical/RELEASE-SIGNING.md) and must be done before the first tag.
+>
+> **Guided shortcut:** `bash tools/release.sh` walks every step below interactively (setup, cut a
+> release, install on the TV, verify an APK), telling you what to do and what to copy.
 
 ## Pre-tag
 

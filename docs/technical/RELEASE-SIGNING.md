@@ -20,8 +20,12 @@ Treat the keystore like the master key it is: generate it once, back it up twice
 
 ## 2. Generate the keystore (offline)
 
-Run on a trusted machine (not in CI). Pick strong, **distinct** store and key passwords and record them
-in a password manager as you go.
+Run on a trusted machine (not in CI). Pick a strong password and record it in a password manager as you
+go. A PKCS12 keystore uses **one** password for both the store and the key, so `KEYSTORE_PASSWORD` and
+`KEY_PASSWORD` below are the same value.
+
+> **Tip:** `bash tools/release.sh` → *First-time setup* runs this whole section interactively — it
+> generates the keystore, sets the four secrets (via `gh`), and points you at the branch-protection UI.
 
 ```bash
 keytool -genkeypair -v \
@@ -50,9 +54,9 @@ Repo → **Settings → Environments → `release`** → *Add secret*. Four secr
 | Secret | Value |
 |--------|-------|
 | `KEYSTORE_BASE64` | base64 of the `.jks` file (command below) |
-| `KEYSTORE_PASSWORD` | the store password from step 2 |
+| `KEYSTORE_PASSWORD` | the password from step 2 |
 | `KEY_ALIAS` | `nexatv` |
-| `KEY_PASSWORD` | the key password from step 2 |
+| `KEY_PASSWORD` | the same password (PKCS12 → store and key share one) |
 
 Encode the keystore to a single line:
 
