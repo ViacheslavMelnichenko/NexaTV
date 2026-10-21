@@ -9,6 +9,14 @@ reversibility/device-safety stance, and "no boot receiver" (FR-009) — remains 
 owner's standing delegation on non-blocking choices, and on the owner's explicit direction (2026-10-20) to
 make the override the primary mechanism after the prototype was validated on the real TCL.
 
+> **Persistence caveat (2026-10-21, v0.2.0 clean install).** The override works in daily use and
+> **survives sleep/wake**, but **does not survive a true reboot/power-loss** on this firmware: TCL's
+> `TclAppBoot` forbids the boot-time bind (missing `OP_AUTO_START`) and resets the op, there is **no UI**
+> to grant `OP_AUTO_START` persistently, and even when bound the service can only **reorder a live**
+> NexaTV task (a cold background launch is BAL-blocked on Android 14). Full evidence and the adb recovery
+> recipe are in `docs/technical/ANDROID-TV.md` §3d. The decision below is unchanged — this records a
+> firmware limitation on the reboot path, not a reversal.
+
 ## Context
 
 ADR-0006 assumed `ROLE_HOME` was "present and functional" on the TCL and that granting it would make
@@ -83,6 +91,11 @@ without disabling the stock launcher?**
   scary consent dialog is unavoidable.
 - **Firmware-fragile (INFERENCE):** a 2025 Google TV update reportedly broke this override on some firmware;
   it works on this TCL today but could regress on an OTA. The secondary-launcher fallback is the mitigation.
+- **No reboot persistence (FACT, 2026-10-21):** a true reboot drops the binding and the live NexaTV task.
+  `TclAppBoot` forbids the boot-bind and resets `OP_AUTO_START`; there is no UI to grant it persistently; and
+  a cold background raise is BAL-blocked (only a live task can be reordered). Recovery today is a one-time
+  adb recipe after each reboot (`docs/technical/ANDROID-TV.md` §3d). Sleep/wake — the daily remote-power
+  path — is unaffected.
 - **Brief visual transition:** HOME momentarily shows the stock launcher before NexaTV is raised. Observed as
   a quick transition on this device; a longer flash is possible on slower hardware.
 - **Back behavior:** from NexaTV, Back re-triggers the stock launcher, which the override re-catches — so the
@@ -108,4 +121,8 @@ thing on both Google TV (override) and any device where `ROLE_HOME` genuinely wo
 - **Back-stack hygiene:** confirm the fresh-task-on-Back behavior does not accumulate tasks over long use;
   tighten `launchMode`/flags if needed.
 - **Validation record:** on-device results (bind-only-via-UI, HOME→NexaTV, grid populates, Back stays,
-  stable no-loop) are logged in `docs/technical/ANDROID-TV.md` §3b/§3c (2026-10-20).
+  stable no-loop) are logged in `docs/technical/ANDROID-TV.md` §3b/§3c (2026-10-20); the v0.2.0 clean-install
+  regression + persistence limits (TclAppBoot/`OP_AUTO_START`, BAL, sleep/wake vs. reboot) in §3d (2026-10-21).
+- **Reboot recovery (open):** decide a within-safety story for the reboot path — a one-shot adb helper the
+  owner runs, an in-app nudge that keeps a live task so the override always has something to reorder, or
+  formalizing the secondary-launcher fallback for post-reboot only.

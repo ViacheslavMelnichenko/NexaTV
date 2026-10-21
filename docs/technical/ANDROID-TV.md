@@ -138,6 +138,31 @@ launcher coming to the foreground (what HOME triggers) and raises NexaTV over it
   regress on OTA); the accessibility-consent dialog is a heavy one-time setup step; a brief stock-launcher
   flash precedes NexaTV. Secondary-launcher instructions remain the fallback.
 
+## 3d. HOME override — clean-install regression & persistence limits (2026-10-21, v0.2.0)
+
+After the first **signed release** (`com.nexatv.launcher`, `versionCode=200`) was **clean-installed**
+(wiped + fresh sideload), the override no longer became HOME by the §3c recipe. Root-caused on the real
+TCL with `logcat` + `dumpsys`. All rows `FACT` (ADB, release variant, 2026-10-21) unless marked.
+
+| Observation | Result |
+|-------------|--------|
+| Why `adb`/UI-toggle enable didn't bind | `TclAppBoot` vetoes the accessibility bind: `[TclAppBoot]:forbid bind service …NexaOverrideService`, `reason='callee doesn't have OP_AUTO_START permission'`. The blocking appop is **`AUTO_START`** (default `ignore` for sideloaded apps) |
+| Working bind recipe (adb) | `appops set com.nexatv.launcher AUTO_START allow` **+ force a delta** in the service list (set `enabled_accessibility_services` to a dummy, then back to the real service) **+** `accessibility_enabled 1`. Plain `settings put` with the same value does **not** rebind — no delta → `AccessibilityManagerService` never re-evaluates. (This refines §3c: `AUTO_START allow` *is* sufficient, but only with the forced delta.) |
+| Survives **sleep/wake** (remote power = suspend) | ✅ **Yes.** The NexaTV task and the binding both survive; HOME keeps raising NexaTV. This is the daily case |
+| Survives a **true reboot / power-loss** | ❌ **No.** On boot the pending bind is forbidden by `TclAppBoot`, which **resets** `AUTO_START` → `ignore` and `accessibility_enabled` → `0`. Isolation test: the `AUTO_START allow` op *does* persist across reboot **when no accessibility bind is pending at boot** — so it is the forbidden boot-bind itself that resets the op; the boot-bind is forbidden regardless |
+| UI to grant `OP_AUTO_START` persistently | **None on this build.** TCL Guard → PermissionShield exposes only Camera / Record audio / Location; App Manager only App Installation / Uninstallation. `adb` grant is the only path, and it is reset by the boot-bind (above) |
+| Override + **cold** NexaTV (no live task) | **BAL-blocked.** Even when bound, the service raises NexaTV with `startActivity(FLAG_ACTIVITY_NEW_TASK \| REORDER_TO_FRONT)`. With no existing NexaTV task (post-reboot / after process eviction) this is a cold **background** activity launch, which Android 14 **BAL silently blocks** (no log, no `ActivityTaskManager` START) → HOME shows the stock launcher. The override can only **reorder an already-live** task to front |
+
+**Conclusions:**
+- **In daily use the override works:** HOME opens NexaTV and the state survives sleep/wake. The prior
+  §3c "validated" status held because `AUTO_START` was granted / the task stayed alive at that time; the
+  clean reinstall reset `OP_AUTO_START` and exposed the regression (FACT→INFERENCE).
+- **A true reboot breaks HOME** and currently requires re-running the adb recipe once, then opening NexaTV
+  once to create a live task. No within-safety, device-only way to persist the boot-bind exists on this
+  firmware (no `OP_AUTO_START` UI; stock launcher must not be disabled — §4).
+- Open mitigations to weigh with the owner: a one-shot post-reboot adb helper; an in-app foreground nudge
+  so a task always exists; revisit the secondary-launcher fallback for the reboot case.
+
 ## 4. Safety notes
 
 Daily-use production device. Early phase is **read-only**. Do not disable the stock launcher, uninstall
