@@ -6,6 +6,18 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-21
+
+### Changed
+- Settings redesign: each setting is now a compact card row — its name on the left, smaller
+  option chips (18sp) on the right — so the screen reads like a real TV settings menu instead of
+  loose oversized blocks. The screen sits on the base surface so the cards lift off it, and
+  unselected chips keep a muted outline for visibility.
+
+### Added
+- A faint build version (`NexaTV v<version>`) pinned to the bottom-right of Settings, read from
+  `BuildConfig.VERSION_NAME` (BuildConfig enabled for this one field).
+
 ## [0.1.0] - 2026-10-21
 
 First tagged, signed release. Sideloaded on the real TCL (Android TV OS 14, `armeabi-v7a`).

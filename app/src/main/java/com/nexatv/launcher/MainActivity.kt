@@ -150,6 +150,7 @@ private fun LauncherApp() {
                 onSelectTileSize = viewModel::setTileSize,
                 theme = appsState?.theme ?: ThemeChoice.Default,
                 onSelectTheme = viewModel::setTheme,
+                versionName = BuildConfig.VERSION_NAME,
             )
         }
     }

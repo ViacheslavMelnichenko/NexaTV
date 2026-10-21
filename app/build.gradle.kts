@@ -22,8 +22,8 @@ detekt {
 
 // Release versioning (ADR-0003 D5). CI passes -PversionName/-PversionCode derived from the git tag;
 // local/dev and CI non-release builds fall back to the in-file defaults so they always build.
-val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.1.0"
-val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt() ?: 100
+val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.2.0"
+val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt() ?: 200
 
 android {
     namespace = "com.nexatv.launcher"
@@ -86,7 +86,12 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        // Expose versionName to the UI (Settings shows a faint build version). BuildConfig is off by
+        // default in AGP 8; enable only this one field, nothing else depends on it.
+        buildConfig = true
+    }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
