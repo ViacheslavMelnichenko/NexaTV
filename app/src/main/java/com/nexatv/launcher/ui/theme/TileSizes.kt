@@ -29,7 +29,7 @@ internal data class TileDimensions(val width: Dp, val height: Dp)
  * for that card (width × 9/16) plus one label line, so a focused banner reads cleanly across the row.
  */
 internal fun TileSize.dimensions(): TileDimensions = when (this) {
-    TileSize.SMALL -> TileDimensions(width = 140.dp, height = 112.dp)
-    TileSize.MEDIUM -> TileDimensions(width = 176.dp, height = 140.dp)
-    TileSize.LARGE -> TileDimensions(width = 224.dp, height = 168.dp)
+    TileSize.SMALL -> TileDimensions(width = 80.dp, height = 84.dp)
+    TileSize.MEDIUM -> TileDimensions(width = 96.dp, height = 92.dp)
+    TileSize.LARGE -> TileDimensions(width = 128.dp, height = 112.dp)
 }

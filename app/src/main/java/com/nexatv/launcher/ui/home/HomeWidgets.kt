@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -56,6 +57,9 @@ import java.util.Locale
 /** Fixed height so the two centre cards read as one balanced, equal-sized pair (ADR-0010). */
 private val WIDGET_HEIGHT = 220.dp
 
+/** Fixed width so the pair stays a compact, centred cluster rather than stretching across the row. */
+private val WIDGET_WIDTH = 280.dp
+
 /**
  * The centre of Home (ADR-0010): two equal-width cards — an offline month calendar with today
  * highlighted, and a local weather card for the configured city. Purely informational, so neither is
@@ -65,11 +69,11 @@ private val WIDGET_HEIGHT = 220.dp
 internal fun HomeWidgets(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.lg),
+        horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.lg, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CalendarWidget(modifier = Modifier.weight(1f))
-        WeatherWidget(modifier = Modifier.weight(1f))
+        CalendarWidget(modifier = Modifier.width(WIDGET_WIDTH))
+        WeatherWidget(modifier = Modifier.width(WIDGET_WIDTH))
     }
 }
 
