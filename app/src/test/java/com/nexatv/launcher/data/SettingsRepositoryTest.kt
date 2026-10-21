@@ -12,6 +12,7 @@ package com.nexatv.launcher.data
 import androidx.datastore.core.DataStore
 import com.nexatv.launcher.data.proto.LauncherStateProto
 import com.nexatv.launcher.data.proto.LauncherStateSerializer
+import com.nexatv.launcher.data.proto.ThemeId as ThemeIdProto
 import com.nexatv.launcher.data.proto.TileSize as TileSizeProto
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -76,6 +77,56 @@ class SettingsRepositoryTest {
 
         assertEquals(listOf(key), favorites.favorites.first())
         assertEquals(TileSize.LARGE, settings.tileSize.first())
+    }
+
+    @Test
+    fun `theme maps across the domain-proto boundary both ways`() {
+        for (choice in ThemeChoice.entries) {
+            assertEquals(choice, choice.toProto().toDomain())
+        }
+        assertEquals(ThemeIdProto.THEME_ID_PASTEL_DARK, ThemeChoice.PASTEL_DARK.toProto())
+        assertEquals(ThemeIdProto.THEME_ID_OLED_BLACK, ThemeChoice.OLED_BLACK.toProto())
+        assertEquals(ThemeIdProto.THEME_ID_AMBER_EMBER, ThemeChoice.AMBER_EMBER.toProto())
+        assertEquals(ThemeIdProto.THEME_ID_MAGENTA_NOIR, ThemeChoice.MAGENTA_NOIR.toProto())
+    }
+
+    @Test
+    fun `unspecified and unknown themes resolve to the default`() {
+        assertEquals(ThemeChoice.Default, ThemeIdProto.THEME_ID_UNSPECIFIED.toDomain())
+        assertEquals(ThemeChoice.Default, ThemeIdProto.UNRECOGNIZED.toDomain())
+    }
+
+    @Test
+    fun `theme defaults to Pastel Dark on an unset store`() = runTest {
+        val repository = SettingsRepository(FakeLauncherStore())
+        assertEquals(ThemeChoice.PASTEL_DARK, repository.theme.first())
+    }
+
+    @Test
+    fun `setTheme persists through the store and the flow reflects it`() = runTest {
+        val repository = SettingsRepository(FakeLauncherStore())
+
+        repository.setTheme(ThemeChoice.AMBER_EMBER)
+        assertEquals(ThemeChoice.AMBER_EMBER, repository.theme.first())
+
+        repository.setTheme(ThemeChoice.MAGENTA_NOIR)
+        assertEquals(ThemeChoice.MAGENTA_NOIR, repository.theme.first())
+    }
+
+    @Test
+    fun `setTheme leaves tile size and favorites untouched`() = runTest {
+        val store = FakeLauncherStore()
+        val favorites = FavoritesRepository(store)
+        val settings = SettingsRepository(store)
+        val key = FavoriteKey("pkg/.A", userSerial = 0)
+
+        favorites.toggle(key)
+        settings.setTileSize(TileSize.LARGE)
+        settings.setTheme(ThemeChoice.OLED_BLACK)
+
+        assertEquals(listOf(key), favorites.favorites.first())
+        assertEquals(TileSize.LARGE, settings.tileSize.first())
+        assertEquals(ThemeChoice.OLED_BLACK, settings.theme.first())
     }
 
     @Test

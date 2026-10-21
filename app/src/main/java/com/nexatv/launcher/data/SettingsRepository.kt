@@ -12,6 +12,7 @@ package com.nexatv.launcher.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import com.nexatv.launcher.data.proto.LauncherStateProto
+import com.nexatv.launcher.data.proto.ThemeId as ThemeIdProto
 import com.nexatv.launcher.data.proto.TileSize as TileSizeProto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,6 +22,24 @@ import kotlinx.coroutines.flow.map
  * dimensions, so storage stays layout-free. Android-free so the proto mapping is unit-testable.
  */
 enum class TileSize { SMALL, MEDIUM, LARGE }
+
+/**
+ * Color-theme choice (Theming EPIC). A semantic id, not raw colors — the ui/theme layer maps each to a
+ * [NexaColorScheme][com.nexatv.launcher.ui.theme.NexaColorScheme], so storage stays color-free (ADR-0009).
+ * Android-free so the proto mapping is unit-testable. [Default] is the palette used when the owner never
+ * chose (and for any unknown/future stored value).
+ */
+enum class ThemeChoice {
+    PASTEL_DARK,
+    OLED_BLACK,
+    AMBER_EMBER,
+    MAGENTA_NOIR,
+    ;
+
+    companion object {
+        val Default: ThemeChoice = PASTEL_DARK
+    }
+}
 
 /**
  * Owns user settings, persisted via the shared Proto DataStore (ADR-0008/0009). Mirrors
@@ -42,6 +61,19 @@ class SettingsRepository(private val dataStore: DataStore<LauncherStateProto>) {
                 .build()
         }
     }
+
+    /** The chosen color theme; emits again on every change. Defaults to [ThemeChoice.Default]. */
+    val theme: Flow<ThemeChoice> =
+        dataStore.data.map { it.settings.theme.toDomain() }
+
+    /** Persist the color theme. Writes only the `settings` sub-message, leaving favorites + tile size intact. */
+    suspend fun setTheme(choice: ThemeChoice) {
+        dataStore.updateData { state ->
+            state.toBuilder()
+                .setSettings(state.settings.toBuilder().setTheme(choice.toProto()))
+                .build()
+        }
+    }
 }
 
 /**
@@ -59,6 +91,25 @@ internal fun TileSize.toProto(): TileSizeProto = when (this) {
     TileSize.SMALL -> TileSizeProto.TILE_SIZE_SMALL
     TileSize.MEDIUM -> TileSizeProto.TILE_SIZE_MEDIUM
     TileSize.LARGE -> TileSizeProto.TILE_SIZE_LARGE
+}
+
+/**
+ * Resolve the persisted proto enum to the domain enum. `THEME_ID_UNSPECIFIED` (owner never chose),
+ * an explicit `PASTEL_DARK`, and any unknown/future value all resolve to [ThemeChoice.Default].
+ */
+internal fun ThemeIdProto.toDomain(): ThemeChoice = when (this) {
+    ThemeIdProto.THEME_ID_OLED_BLACK -> ThemeChoice.OLED_BLACK
+    ThemeIdProto.THEME_ID_AMBER_EMBER -> ThemeChoice.AMBER_EMBER
+    ThemeIdProto.THEME_ID_MAGENTA_NOIR -> ThemeChoice.MAGENTA_NOIR
+    else -> ThemeChoice.Default
+}
+
+/** Map the domain enum to its persisted proto value. */
+internal fun ThemeChoice.toProto(): ThemeIdProto = when (this) {
+    ThemeChoice.PASTEL_DARK -> ThemeIdProto.THEME_ID_PASTEL_DARK
+    ThemeChoice.OLED_BLACK -> ThemeIdProto.THEME_ID_OLED_BLACK
+    ThemeChoice.AMBER_EMBER -> ThemeIdProto.THEME_ID_AMBER_EMBER
+    ThemeChoice.MAGENTA_NOIR -> ThemeIdProto.THEME_ID_MAGENTA_NOIR
 }
 
 /** Production factory: a [SettingsRepository] over the shared app-internal DataStore. */
