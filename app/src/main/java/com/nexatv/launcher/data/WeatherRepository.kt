@@ -18,12 +18,16 @@ import kotlin.math.roundToInt
 
 /**
  * Current conditions plus the day's range for the configured location, in whole degrees Celsius.
+ * [weatherCode] is the WMO code Open-Meteo returns (drives the condition glyph); [windKmh] is the
+ * current wind speed rounded to whole km/h. Both default to 0 so older/sparse payloads still map.
  * Android-free so the Open-Meteo mapping is unit-testable without a device or network (ADR-0010).
  */
 data class Weather(
     val currentC: Int,
     val minC: Int,
     val maxC: Int,
+    val weatherCode: Int = 0,
+    val windKmh: Int = 0,
 )
 
 /**
@@ -63,21 +67,33 @@ class WeatherRepository(
     }
 }
 
-/** The Open-Meteo request URL: current temperature plus today's min/max, in the device's timezone. */
+/**
+ * The Open-Meteo request URL: current temperature, condition code and wind, plus today's min/max,
+ * in the device's timezone. Wind is returned in km/h (Open-Meteo's default for `wind_speed_10m`).
+ */
 internal fun endpoint(latitude: Double, longitude: Double): String =
     "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude" +
-        "&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min" +
+        "&current=temperature_2m,weather_code,wind_speed_10m" +
+        "&daily=temperature_2m_max,temperature_2m_min" +
         "&timezone=auto&forecast_days=1"
 
 /**
- * Pure Open-Meteo JSON → [Weather]; `null` on any missing or malformed field. Extracted and
- * Android-free so it is unit-tested against sample payloads with no network (ADR-0010).
+ * Pure Open-Meteo JSON → [Weather]; `null` when temperature/min/max are missing or malformed. The
+ * condition code and wind are optional (default 0) so a sparse payload still yields a usable reading.
+ * Extracted and Android-free so it is unit-tested against sample payloads with no network (ADR-0010).
  */
 internal fun parseWeather(json: String): Weather? = runCatching {
     val root = JSONObject(json)
-    val current = root.getJSONObject("current").getDouble("temperature_2m")
+    val current = root.getJSONObject("current")
+    val temperature = current.getDouble("temperature_2m")
     val daily = root.getJSONObject("daily")
     val max = daily.getJSONArray("temperature_2m_max").getDouble(0)
     val min = daily.getJSONArray("temperature_2m_min").getDouble(0)
-    Weather(currentC = current.roundToInt(), minC = min.roundToInt(), maxC = max.roundToInt())
+    Weather(
+        currentC = temperature.roundToInt(),
+        minC = min.roundToInt(),
+        maxC = max.roundToInt(),
+        weatherCode = current.optInt("weather_code", 0),
+        windKmh = current.optDouble("wind_speed_10m", 0.0).roundToInt(),
+    )
 }.getOrNull()

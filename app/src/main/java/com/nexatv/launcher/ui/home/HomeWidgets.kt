@@ -209,16 +209,26 @@ private fun WeatherWidget(modifier: Modifier = Modifier) {
     }
 }
 
-/** The current temperature over the day's low/high. */
+/** The condition glyph and current temperature, over the day's low/high and the wind speed. */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun WeatherReadout(weather: Weather) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "${weather.currentC}°",
-            style = MaterialTheme.typography.displayMedium,
-            color = NexaTheme.colors.onSurface,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm),
+        ) {
+            WeatherGlyph(
+                condition = wmoToCondition(weather.weatherCode),
+                tint = NexaTheme.colors.onSurface,
+                modifier = Modifier.size(44.dp),
+            )
+            Text(
+                text = "${weather.currentC}°",
+                style = MaterialTheme.typography.displayMedium,
+                color = NexaTheme.colors.onSurface,
+            )
+        }
         Spacer(modifier = Modifier.height(NexaTheme.spacing.xs))
         Row(horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md)) {
             Text(
@@ -229,6 +239,21 @@ private fun WeatherReadout(weather: Weather) {
             Text(
                 text = "↑ ${weather.maxC}°",
                 style = MaterialTheme.typography.bodyLarge,
+                color = NexaTheme.colors.onSurfaceMuted,
+            )
+        }
+        Spacer(modifier = Modifier.height(NexaTheme.spacing.sm))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.xs),
+        ) {
+            WindGlyph(
+                tint = NexaTheme.colors.onSurfaceMuted,
+                modifier = Modifier.size(20.dp),
+            )
+            Text(
+                text = "${weather.windKmh} km/h",
+                style = MaterialTheme.typography.bodyMedium,
                 color = NexaTheme.colors.onSurfaceMuted,
             )
         }
