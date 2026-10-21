@@ -26,9 +26,9 @@ Settings switcher row, and the activity wiring — **without regressing cold-sta
 - No change to the token *contract* (semantic roles) or to any screen's color usage — screens keep reading
   `NexaTheme.colors` only.
 
-## Theme catalog (first cut — 3 dark themes)
+## Theme catalog (first cut — 4 dark themes)
 
-All three are dark (zero glare risk) and each differs on a **different axis** so the switcher feels
+All four are dark (zero glare risk) and each differs on a **different axis** so the switcher feels
 meaningful. Contrast verified against NFR-018 (body ≥ 4.5:1; large text / focus ring ≥ 3:1) on the worst
 rendered backdrop. Each theme is a complete set of the 11 existing `NexaColorScheme` roles.
 
@@ -96,6 +96,31 @@ Legibility: amber is high-luminance → dark `onAccent` passes easily; accent-on
 floor. `error` is cooled to `#F09393` and `focusRing` pushed to coral so the three warm hues (accent / focus /
 error) stay distinguishable at 10 ft — **verify the accent-vs-error distinction on-device**.
 
+### 4. Magenta Noir
+
+The OLED base (pure-black surface, deepest backdrop) with a **muted rose-magenta** accent instead of cool blue —
+a noble, dusty pink in the pastel family (not neon). The focus ring is kept **cool blue** (`#8EC5FF`) so the
+navigation cue never collides with the magenta accent on the selected tile. Owner-approved accent (2026-10-21):
+`#E692C0`, deliberately desaturated from the first `#FF5EB4` neon pass.
+
+| Role | Value |
+|---|---|
+| surface | `#000000` |
+| surfaceVariant | `#11161D` |
+| onSurface | `#ECEFF4` |
+| onSurfaceMuted | `#9AA6B2` |
+| accent | `#E692C0` |
+| onAccent | `#000000` |
+| focusRing | `#8EC5FF` |
+| success | `#A6E3B5` |
+| error | `#F2A9A9` |
+| backdropTop | `#0A0E14` |
+| backdropBottom | `#000000` |
+
+Legibility: onSurface≈18:1; the muted magenta accent on pure black ≈9:1 (clears the 3:1 large/ring floor with
+room). Accent (`#E692C0`, cool-leaning pink) vs `error` (`#F2A9A9`, warm salmon) stay distinguishable because the
+accent is desaturated and bluer — **verify the accent-vs-error distinction on-device**, same check as Amber Ember.
+
 > Deferred, trivial drop-ins later (same pattern): **Evergreen** (teal accent `#7FD8C9`), a Light theme.
 
 ## Components
@@ -112,11 +137,12 @@ error) stay distinguishable at 10 ft — **verify the accent-vs-error distinctio
   }
 
   enum ThemeId {
-    THEME_ID_UNSPECIFIED = 0;      // owner never chose -> Pastel Dark
-    THEME_ID_PASTEL_DARK = 1;
-    THEME_ID_OLED_BLACK  = 2;
-    THEME_ID_AMBER_EMBER = 3;
-    // future palettes: 4, 5, … (additive, never renumber)
+    THEME_ID_UNSPECIFIED  = 0;     // owner never chose -> Pastel Dark
+    THEME_ID_PASTEL_DARK  = 1;
+    THEME_ID_OLED_BLACK   = 2;
+    THEME_ID_AMBER_EMBER  = 3;
+    THEME_ID_MAGENTA_NOIR = 4;
+    // future palettes: 5, 6, … (additive, never renumber)
   }
   ```
 - **Type:** a proto enum (mirrors `TileSize`), not a free string — type-safe exhaustive mapping, additive
@@ -192,9 +218,9 @@ cold start: first frame = PastelDark default (sync); stored default ⇒ no swap;
 - **Mapping:** every `ThemeChoice` maps to a non-null `NexaColorScheme`; `UNSPECIFIED`→Pastel Dark.
 - **Contrast guard (lightweight):** a unit test asserting each palette's onSurface/surface contrast ≥ 4.5:1
   and accent/focus ≥ 3:1 (cheap luminance math) so a future palette can't silently regress NFR-018.
-- **On-device (owner, manual):** switch across all three themes live; confirm the one-frame recolor (no
-  relayout); reboot restores the chosen theme; **Amber Ember accent-vs-error distinction** verified at 10 ft;
-  StartupBenchmark unchanged with a stored default.
+- **On-device (owner, manual):** switch across all four themes live; confirm the one-frame recolor (no
+  relayout); reboot restores the chosen theme; **Amber Ember and Magenta Noir accent-vs-error distinction**
+  verified at 10 ft; StartupBenchmark unchanged with a stored default.
 
 ## Out of scope / deferred
 
