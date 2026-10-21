@@ -38,6 +38,15 @@ jobs:
           test "$(stat -c%s "$APK")" -le $((30 * 1024 * 1024))
           BAD=$(unzip -l "$APK" | awk '{print $4}' | grep '^lib/' | grep -vE '^lib/armeabi-v7a/' || true)
           test -z "$BAD"
+      - name: Verify preview isolation
+        run: |
+          APK=app/build/outputs/apk/preview/app-preview.apk
+          AAPT="$ANDROID_SDK_ROOT/build-tools/34.0.0/aapt"
+          "$AAPT" dump xmltree "$APK" AndroidManifest.xml > preview-manifest.txt
+          grep -q 'com.nexatv.launcher.preview' preview-manifest.txt
+          grep -q 'android.intent.category.LEANBACK_LAUNCHER' preview-manifest.txt
+          ! grep -q 'android.intent.category.HOME' preview-manifest.txt
+          ! grep -q 'NexaOverrideService' preview-manifest.txt
       - name: Package preview
         run: |
           mkdir -p preview-output

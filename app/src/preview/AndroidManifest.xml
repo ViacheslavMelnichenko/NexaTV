@@ -2,7 +2,9 @@
 <!-- Preview is an ordinary app: it cannot claim HOME or install an accessibility override. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <application>
+    <uses-feature android:name="android.software.leanback" android:required="true" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <application android:banner="@drawable/banner">
         <activity
             android:name=".MainActivity"
             android:exported="true"
