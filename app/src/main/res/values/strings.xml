@@ -34,6 +34,11 @@
     <string name="settings_tile_size_small">Small</string>
     <string name="settings_tile_size_medium">Medium</string>
     <string name="settings_tile_size_large">Large</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_pastel_dark">Pastel Dark</string>
+    <string name="settings_theme_oled_black">OLED Black</string>
+    <string name="settings_theme_amber_ember">Amber Ember</string>
+    <string name="settings_theme_magenta_noir">Magenta Noir</string>
 
     <!-- Home centre widgets (M5 / ADR-0010) -->
     <string name="home_weather_location">Wrocław</string>

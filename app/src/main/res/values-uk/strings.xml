@@ -34,6 +34,11 @@
     <string name="settings_tile_size_small">Малий</string>
     <string name="settings_tile_size_medium">Середній</string>
     <string name="settings_tile_size_large">Великий</string>
+    <string name="settings_theme">Тема</string>
+    <string name="settings_theme_pastel_dark">Пастельна</string>
+    <string name="settings_theme_oled_black">OLED чорна</string>
+    <string name="settings_theme_amber_ember">Бурштин</string>
+    <string name="settings_theme_magenta_noir">Маджента</string>
 
     <!-- Home centre widgets (M5 / ADR-0010) -->
     <string name="home_weather_location">Вроцлав</string>

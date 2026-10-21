@@ -36,6 +36,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.nexatv.launcher.R
+import com.nexatv.launcher.data.ThemeChoice
 import com.nexatv.launcher.data.TileSize
 import com.nexatv.launcher.ui.components.SectionHeader
 import com.nexatv.launcher.ui.theme.NexaTheme
@@ -50,6 +51,8 @@ import com.nexatv.launcher.ui.theme.NexaTheme
 internal fun SettingsScreen(
     tileSize: TileSize,
     onSelectTileSize: (TileSize) -> Unit,
+    theme: ThemeChoice,
+    onSelectTheme: (ThemeChoice) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
@@ -68,6 +71,7 @@ internal fun SettingsScreen(
                 color = NexaTheme.colors.onSurface,
             )
             TileSizeRow(selected = tileSize, onSelect = onSelectTileSize)
+            ThemeRow(selected = theme, onSelect = onSelectTheme)
         }
     }
 }
@@ -81,7 +85,7 @@ private fun TileSizeRow(selected: TileSize, onSelect: (TileSize) -> Unit) {
         SectionHeader(title = stringResource(R.string.settings_tile_size))
         Row(horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md)) {
             TileSize.entries.forEachIndexed { index, size ->
-                TileSizeOption(
+                SettingOptionChip(
                     label = stringResource(size.labelRes()),
                     selected = size == selected,
                     onClick = { onSelect(size) },
@@ -94,13 +98,32 @@ private fun TileSizeRow(selected: TileSize, onSelect: (TileSize) -> Unit) {
     LaunchedEffect(Unit) { runCatching { firstOption.requestFocus() } }
 }
 
+/** The "Theme" setting: a label above the selectable color-theme options that write on select. */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun ThemeRow(selected: ThemeChoice, onSelect: (ThemeChoice) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(NexaTheme.spacing.sm)) {
+        SectionHeader(title = stringResource(R.string.settings_theme))
+        Row(horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md)) {
+            ThemeChoice.entries.forEach { choice ->
+                SettingOptionChip(
+                    label = stringResource(choice.labelRes()),
+                    selected = choice == selected,
+                    onClick = { onSelect(choice) },
+                )
+            }
+        }
+    }
+}
+
 /**
- * One selectable option chip. The focus ring is the navigation cue; a persistent accent border marks
- * the currently-selected value even without focus, so the active choice is always visible. No ripple.
+ * One selectable option chip, shared by every settings row. The focus ring is the navigation cue; a
+ * persistent accent border marks the currently-selected value even without focus, so the active choice
+ * is always visible. No ripple.
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun TileSizeOption(
+private fun SettingOptionChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
@@ -143,4 +166,12 @@ private fun TileSize.labelRes(): Int = when (this) {
     TileSize.SMALL -> R.string.settings_tile_size_small
     TileSize.MEDIUM -> R.string.settings_tile_size_medium
     TileSize.LARGE -> R.string.settings_tile_size_large
+}
+
+/** The display label for a color theme. */
+private fun ThemeChoice.labelRes(): Int = when (this) {
+    ThemeChoice.PASTEL_DARK -> R.string.settings_theme_pastel_dark
+    ThemeChoice.OLED_BLACK -> R.string.settings_theme_oled_black
+    ThemeChoice.AMBER_EMBER -> R.string.settings_theme_amber_ember
+    ThemeChoice.MAGENTA_NOIR -> R.string.settings_theme_magenta_noir
 }

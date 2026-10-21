@@ -32,6 +32,7 @@ import com.nexatv.launcher.data.HomeRoleRepository
 import com.nexatv.launcher.data.InstalledAppsRepository
 import com.nexatv.launcher.data.favoritesRepository
 import com.nexatv.launcher.data.settingsRepository
+import com.nexatv.launcher.data.ThemeChoice
 import com.nexatv.launcher.data.TileSize
 import com.nexatv.launcher.ui.allapps.AllAppsScreen
 import com.nexatv.launcher.ui.home.HomeActions
@@ -40,6 +41,7 @@ import com.nexatv.launcher.ui.home.HomeUiState
 import com.nexatv.launcher.ui.home.HomeViewModel
 import com.nexatv.launcher.ui.settings.SettingsScreen
 import com.nexatv.launcher.ui.theme.NexaTheme
+import com.nexatv.launcher.ui.theme.colorScheme
 import com.nexatv.launcher.ui.theme.dimensions
 
 /**
@@ -55,7 +57,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NexaTheme {
+            val context = LocalContext.current.applicationContext
+            val settings = remember { settingsRepository(context) }
+            // Resolve the theme one level above LauncherApp. The first frame draws the synchronous
+            // in-memory default (Pastel Dark) — the theme read stays off the cold-start critical path
+            // (performance rules 2-4). A stored default produces no swap; a stored non-default recolors
+            // in a single frame (colors only, no relayout) when DataStore emits.
+            val theme by settings.theme.collectAsStateWithLifecycle(initialValue = ThemeChoice.Default)
+            NexaTheme(colors = theme.colorScheme()) {
                 LauncherApp()
             }
         }
@@ -139,6 +148,8 @@ private fun LauncherApp() {
             SettingsScreen(
                 tileSize = appsState?.tileSize ?: TileSize.MEDIUM,
                 onSelectTileSize = viewModel::setTileSize,
+                theme = appsState?.theme ?: ThemeChoice.Default,
+                onSelectTheme = viewModel::setTheme,
             )
         }
     }
