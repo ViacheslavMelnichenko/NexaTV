@@ -7,6 +7,11 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 ## [Unreleased]
 
 ### Added
+- Release pipeline (ADR-0003): tag-driven `.github/workflows/release.yml` builds, signs (env-fed
+  keystore from the protected `release` Environment), asserts ABI + 20 MB size budget, verifies the
+  signature, and publishes a GitHub Release with SHA-256 + cert fingerprint + git SHA. Gradle gains an
+  env-fed release `signingConfig` and tag-derived `versionName`/`versionCode`. Owner setup in
+  `docs/technical/RELEASE-SIGNING.md`; manual on-device gate in `docs/testing/RELEASE-CHECKLIST.md`.
 - Project foundation (M1): Gradle setup, version catalog, wrapper 8.9, and the
   `:app` module (`com.nexatv.launcher`, SDK 34) with a Compose-for-TV scaffold —
   HOME + LEANBACK_LAUNCHER manifest, design tokens, en/uk strings, placeholder Home.
