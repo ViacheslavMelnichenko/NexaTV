@@ -25,11 +25,11 @@ internal data class TileDimensions(val width: Dp, val height: Dp)
 
 /**
  * Resolve a semantic [TileSize] to its drawn dimensions. The S/M/L → dp map lives only here.
- * Tiles are landscape now (ADR-0011): the width drives a 16:9 art card, and the height leaves room
- * for that card (width × 9/16) plus one label line, so a focused banner reads cleanly across the row.
+ * Tiles are a square app icon over a one/two-line label (FR-013), so each size is portrait: the width
+ * is the icon's footprint and the extra height is the label room beneath it.
  */
 internal fun TileSize.dimensions(): TileDimensions = when (this) {
-    TileSize.SMALL -> TileDimensions(width = 80.dp, height = 84.dp)
-    TileSize.MEDIUM -> TileDimensions(width = 96.dp, height = 92.dp)
-    TileSize.LARGE -> TileDimensions(width = 128.dp, height = 112.dp)
+    TileSize.SMALL -> TileDimensions(width = 80.dp, height = 100.dp)
+    TileSize.MEDIUM -> TileDimensions(width = 96.dp, height = 120.dp)
+    TileSize.LARGE -> TileDimensions(width = 128.dp, height = 156.dp)
 }

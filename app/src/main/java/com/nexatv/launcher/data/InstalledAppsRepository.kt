@@ -18,7 +18,6 @@ import android.content.pm.ResolveInfo
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
@@ -125,7 +124,6 @@ class InstalledAppsRepository(context: Context) {
             user = user,
             userSerial = userManager?.getSerialNumberForUser(user) ?: 0L,
             icon = icon,
-            banner = loadBanner(componentName, applicationInfo.packageName),
         )
     }
 
@@ -143,29 +141,12 @@ class InstalledAppsRepository(context: Context) {
             user = user,
             userSerial = serial,
             icon = icon,
-            banner = loadBanner(component, info.packageName),
         )
     }
-
-    /**
-     * The app's wide 16:9 TV banner (the branded art shown in Google TV rows), rasterized off the UI
-     * thread to a bounded size (NFR-002/NFR-003). Activity banner first, then the application banner;
-     * null when the app declares no `android:banner`, which the tile handles by showing the icon on a
-     * card. Visibility of these packages comes from the `<queries>` launcher intents in the manifest.
-     */
-    private fun loadBanner(component: ComponentName, packageName: String): ImageBitmap? = runCatching {
-        val banner = packageManager.getActivityBanner(component)
-            ?: packageManager.getApplicationBanner(packageName)
-        banner?.toBitmap(width = BANNER_W_PX, height = BANNER_H_PX)?.asImageBitmap()
-    }.getOrNull()
 
     private companion object {
         /** Downsample icons to a bounded size (FR-013 memory-bounded art, NFR-002). */
         const val ICON_PX = 128
-
-        /** Bounded 16:9 banner raster (320×180 — the TV banner guideline aspect). */
-        const val BANNER_W_PX = 320
-        const val BANNER_H_PX = 180
     }
 }
 

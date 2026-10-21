@@ -2,6 +2,11 @@
 
 ## Status
 
+**Superseded** by [ADR-0012](./ADR-0012-tile-icon-and-label.md) — 2026-10-21. On the real TCL the uniform
+16:9 banner grid read as "wide plates" the owner disliked; the tile reverts to the FR-013 square icon over a
+label. The analysis below is kept for the record (why banners were tried, the `getActivityBanner` source, the
+`Crop` trade-off); ADR-0012 records the reversal and why.
+
 **Accepted** — 2026-10-20. Refines the FR-013 tile ("square art over a label") into a landscape 16:9 card.
 Builds on [ADR-0004](./ADR-0004-app-enumeration-visibility.md) (the `<queries>` launcher-intent visibility
 that also exposes banners) and resizes the S/M/L tokens from [ADR-0009](./ADR-0009-configuration-architecture.md).

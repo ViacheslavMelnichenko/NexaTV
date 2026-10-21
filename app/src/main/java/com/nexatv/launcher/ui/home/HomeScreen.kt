@@ -410,7 +410,6 @@ private fun FavoritesRow(
             AppTile(
                 label = app.label,
                 icon = app.icon,
-                banner = app.banner,
                 moving = isMoving,
                 modifier = Modifier
                     .width(tile.width)
