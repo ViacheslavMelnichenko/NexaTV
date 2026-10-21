@@ -1,7 +1,7 @@
 # Design — NexaTV switchable color themes (persisted)
 
 **Date:** 2026-10-21
-**Status:** Approved (brainstorm) — ready for an implementation plan
+**Status:** Implemented (2026-10-21) — see `docs/superpowers/plans/2026-10-21-theming-switchable-color-themes.md`
 **Implements:** the **Theming** EPIC in [`project/BACKLOG.md`](../../project/BACKLOG.md) (owner directive 2026-10-20:
 easy theme switching that survives restart). Extends [ADR-0009](../../adr/ADR-0009-configuration-architecture.md)
 (configuration architecture) and [ADR-0008](../../adr/ADR-0008-persistence-proto-datastore.md) (Proto DataStore),

@@ -7,6 +7,11 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 ## [Unreleased]
 
 ### Added
+- Switchable color themes (Theming EPIC): a Settings "Theme" row picks from four dark palettes
+  (Pastel Dark, OLED Black, Amber Ember, Magenta Noir). The choice persists via `SettingsProto.theme`
+  (ADR-0008/0009) and applies live — the palette is resolved at the activity root, so the first frame
+  always draws the default and a stored non-default recolors in one frame (no relayout, no cold-start
+  cost). Design: `docs/superpowers/specs/2026-10-21-theming-switchable-color-themes-design.md`.
 - Release pipeline (ADR-0003): tag-driven `.github/workflows/release.yml` builds, signs (env-fed
   keystore from the protected `release` Environment), asserts ABI + 20 MB size budget, verifies the
   signature, and publishes a GitHub Release with SHA-256 + cert fingerprint + git SHA. Gradle gains an
