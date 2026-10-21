@@ -32,6 +32,19 @@ real device.
 - **Design System** — semantic `NexaColorScheme`, focusable `AppTile`,
   `SectionHeader`, and a debug-only component gallery.
 
+## Adaptive background preview
+
+The `codex/adaptive-background` branch adds an optional river-city landscape with 16 time/weather
+variants, smooth transitions, blur/dimming controls and optional subtle rain/snow. Existing regular
+installations keep their theme background until enabled in Settings → Background.
+
+**NexaTV Preview** is a separate app with separate settings/favorites. It opens from the TV app list
+and does not claim HOME or include the accessibility override. Download the APK artifact from the
+branch's **Preview APK** Actions run, or build `./gradlew :app:assemblePreview` with JDK 17 / SDK 34.
+See [installation and device checks](docs/testing/ADAPTIVE-BACKGROUND-PREVIEW.md),
+[architecture](docs/adr/ADR-0013-adaptive-backgrounds.md) and
+[artwork provenance](docs/design/BACKGROUND-ARTWORK.md). Real-TV performance verification is pending.
+
 ## Screenshots
 
 ![All apps — grid of installed applications](docs/screenshots/allapps.png)

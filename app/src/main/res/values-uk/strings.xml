@@ -47,4 +47,30 @@
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">Перехоплення Home для NexaTV</string>
     <string name="accessibility_override_description">Дозволяє NexaTV відкриватися як Home при натисканні кнопки HOME. NexaTV лише визначає появу системного лаунчера; вміст екрана не зчитується. Вимкніть будь-коли, щоб повернути стоковий Home.</string>
+    <string name="background_title">Фон</string>
+    <string name="background_customize">Налаштувати</string>
+    <string name="background_preview">Переглянути</string>
+    <string name="background_description">Автоматично — за погодою у Вроцлаві. Вручну — змінює лише пейзаж; віджет показує справжню погоду.</string>
+    <string name="background_mode">Режим</string>
+    <string name="background_theme">Тема</string>
+    <string name="background_adaptive">Автоматично</string>
+    <string name="background_manual">Вручну</string>
+    <string name="background_period">Час доби</string>
+    <string name="background_dawn">Світанок</string>
+    <string name="background_day">День</string>
+    <string name="background_sunset">Захід</string>
+    <string name="background_night">Ніч</string>
+    <string name="background_weather">Погода</string>
+    <string name="background_clear">Ясно</string>
+    <string name="background_cloudy">Хмарно</string>
+    <string name="background_rain">Дощ</string>
+    <string name="background_snow">Сніг</string>
+    <string name="background_blur">Розмиття</string>
+    <string name="background_blur_soft">Легке</string>
+    <string name="background_blur_strong">Сильне</string>
+    <string name="background_dim">Затемнення</string>
+    <string name="background_motion">Легка анімація</string>
+    <string name="background_off">Вимкнено</string>
+    <string name="background_on">Увімкнено</string>
+    <string name="background_motion_hint">Ненав’язливий дощ і сніг. Рух зупиняється, коли домашній екран приховано.</string>
 </resources>

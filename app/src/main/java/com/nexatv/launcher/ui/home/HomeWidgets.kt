@@ -27,11 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,7 +43,6 @@ import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
 import com.nexatv.launcher.R
 import com.nexatv.launcher.data.Weather
-import com.nexatv.launcher.data.WeatherRepository
 import com.nexatv.launcher.ui.theme.NexaTheme
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
@@ -66,25 +61,31 @@ private val WIDGET_WIDTH = 280.dp
  * focusable; a D-pad ▲ from the favorites row passes through them to the top bar.
  */
 @Composable
-internal fun HomeWidgets(modifier: Modifier = Modifier) {
+internal fun HomeWidgets(environment: HomeEnvironment, landscape: Boolean, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.lg, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CalendarWidget(modifier = Modifier.width(WIDGET_WIDTH))
-        WeatherWidget(modifier = Modifier.width(WIDGET_WIDTH))
+        CalendarWidget(landscape = landscape, modifier = Modifier.width(WIDGET_WIDTH))
+        WeatherWidget(environment, landscape, modifier = Modifier.width(WIDGET_WIDTH))
     }
 }
 
 /** The shared card chrome: a fixed-height, rounded surface both widgets fill. */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun WidgetCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+private fun WidgetCard(
+    landscape: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Surface(
         modifier = modifier.height(WIDGET_HEIGHT),
         shape = RoundedCornerShape(NexaTheme.radius.md),
-        colors = SurfaceDefaults.colors(containerColor = NexaTheme.colors.surfaceVariant),
+        colors = SurfaceDefaults.colors(
+            containerColor = NexaTheme.colors.surfaceVariant.copy(alpha = if (landscape) 0.88f else 1f),
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -98,7 +99,7 @@ private fun WidgetCard(modifier: Modifier = Modifier, content: @Composable Colum
 /** A month calendar for the current month with today highlighted; fully offline. */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun CalendarWidget(modifier: Modifier = Modifier) {
+private fun CalendarWidget(landscape: Boolean, modifier: Modifier = Modifier) {
     val calendar = remember { Calendar.getInstance() }
     val today = remember { calendar.get(Calendar.DAY_OF_MONTH) }
     val monthLabel = remember {
@@ -108,7 +109,7 @@ private fun CalendarWidget(modifier: Modifier = Modifier) {
     val headers = remember { weekdayHeaders(calendar) }
     val weeks = remember { monthMatrix(calendar) }
 
-    WidgetCard(modifier = modifier) {
+    WidgetCard(landscape = landscape, modifier = modifier) {
         Text(
             text = monthLabel,
             style = MaterialTheme.typography.titleMedium,
@@ -175,17 +176,8 @@ private fun RowScope.CalendarDay(day: Int?, isToday: Boolean) {
 /** Local weather (ADR-0010): fetched lazily, fail-soft — "unavailable" never blocks or crashes Home. */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun WeatherWidget(modifier: Modifier = Modifier) {
-    val repository = remember { WeatherRepository() }
-    var weather by remember { mutableStateOf<Weather?>(null) }
-    var loaded by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        weather = repository.fetch()
-        loaded = true
-    }
-
-    WidgetCard(modifier = modifier) {
+private fun WeatherWidget(environment: HomeEnvironment, landscape: Boolean, modifier: Modifier = Modifier) {
+    WidgetCard(landscape = landscape, modifier = modifier) {
         Text(
             text = stringResource(R.string.home_weather_location),
             style = MaterialTheme.typography.titleMedium,
@@ -195,10 +187,10 @@ private fun WeatherWidget(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth().weight(1f),
             contentAlignment = Alignment.Center,
         ) {
-            val current = weather
+            val current = environment.weather
             when {
                 current != null -> WeatherReadout(current)
-                loaded -> Text(
+                environment.loaded -> Text(
                     text = stringResource(R.string.home_weather_unavailable),
                     style = MaterialTheme.typography.bodyMedium,
                     color = NexaTheme.colors.onSurfaceMuted,

@@ -69,6 +69,7 @@ class HomeViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val settingsRepository: SettingsRepository,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val previewMode: Boolean = false,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -161,11 +162,11 @@ class HomeViewModel(
 
     /** Resolve the HOME role (two binder round-trips) off the UI thread so the first frame isn't blocked. */
     private suspend fun isEffectivelyHome(): Boolean =
-        withContext(defaultDispatcher) { homeRole.isEffectivelyHome() }
+        withContext(defaultDispatcher) { previewMode || homeRole.isEffectivelyHome() }
 
     /** Project the cached apps + current favorites into the UI state (favorites resolved in order). */
     private fun emitApps() {
-        _state.value = if (cachedApps.isEmpty()) {
+        _state.value = if (cachedApps.isEmpty() && !previewMode) {
             HomeUiState.Empty
         } else {
             HomeUiState.Apps(

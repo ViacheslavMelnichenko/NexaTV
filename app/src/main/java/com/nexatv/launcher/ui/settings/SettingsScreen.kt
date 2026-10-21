@@ -59,6 +59,7 @@ internal fun SettingsScreen(
     theme: ThemeChoice,
     onSelectTheme: (ThemeChoice) -> Unit,
     versionName: String,
+    onOpenBackground: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -81,6 +82,9 @@ internal fun SettingsScreen(
             )
             TileSizeRow(selected = tileSize, onSelect = onSelectTileSize)
             ThemeRow(selected = theme, onSelect = onSelectTheme)
+            SettingRow(label = stringResource(R.string.background_title)) {
+                SettingOptionChip(stringResource(R.string.background_customize), false, onOpenBackground)
+            }
         }
 
         // Faint build version, low-emphasis, pinned to the bottom-right corner.
@@ -133,7 +137,7 @@ private fun ThemeRow(selected: ThemeChoice, onSelect: (ThemeChoice) -> Unit) {
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun SettingRow(
+internal fun SettingRow(
     label: String,
     options: @Composable RowScope.() -> Unit,
 ) {
@@ -163,7 +167,7 @@ private fun SettingRow(
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun SettingOptionChip(
+internal fun SettingOptionChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,

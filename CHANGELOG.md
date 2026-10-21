@@ -6,6 +6,24 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+## [0.3.0-preview.1] - 2026-10-21
+
+First adaptive-background prerelease, distributed as the standalone **NexaTV Preview** app
+(`com.nexatv.launcher.preview`). It has separate settings and favorites, opens from the TV apps
+menu, and does not register as HOME or include the accessibility override service.
+
+### Added
+- Sixteen bundled landscape scenes: dawn, day, sunset and night in clear, cloudy, rainy and snowy weather.
+- Automatic and manual scene selection, four-second transitions, blur and dimming controls.
+- Optional subtle rain and snow, disabled by default and paused while Home is hidden.
+- Shared, lifecycle-bound weather updates with sunrise/sunset and stale-observation handling.
+- Downloadable Preview APK with checksum and installation guide.
+
+### Validation
+- Preview and ordinary debug CI cover compilation, JVM tests, Android Lint and detekt.
+- Preview packaging checks size, ABI and absence of HOME/accessibility registration.
+- Actual TCL visual review, D-pad responsiveness and memory/frame measurements remain pending.
+
 ## [0.2.1] - 2026-10-21
 
 ### Fixed

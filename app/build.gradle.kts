@@ -22,8 +22,8 @@ detekt {
 
 // Release versioning (ADR-0003 D5). CI passes -PversionName/-PversionCode derived from the git tag;
 // local/dev and CI non-release builds fall back to the in-file defaults so they always build.
-val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.2.1"
-val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt() ?: 201
+val releaseVersionName = (project.findProperty("versionName") as String?) ?: "0.3.0-preview.1"
+val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt() ?: 300
 
 android {
     namespace = "com.nexatv.launcher"
@@ -38,6 +38,7 @@ android {
         // git tag via -PversionCode/-PversionName in release CI; defaults above keep local builds working.
         versionCode = releaseVersionCode
         versionName = releaseVersionName
+        buildConfigField("boolean", "IS_PREVIEW", "false")
         vectorDrawables.useSupportLibrary = true
 
         // Single device target is 32-bit armeabi-v7a (ADR-0002), so keep only that ABI's native libs
@@ -67,6 +68,13 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             isMinifyEnabled = false
+        }
+        create("preview") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".preview"
+            versionNameSuffix = if (releaseVersionName.contains("-preview.")) "" else "-preview"
+            buildConfigField("boolean", "IS_PREVIEW", "true")
+            matchingFallbacks += listOf("debug")
         }
         release {
             isMinifyEnabled = true
