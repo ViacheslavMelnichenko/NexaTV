@@ -17,8 +17,10 @@ message LauncherStateProto {
   // User settings (ADR-0009). Unset on old files -> reads the default SettingsProto (MEDIUM tiles).
   SettingsProto settings = 4;
 
-  // Reserved for upcoming state so their tags stay stable across schema growth:
-  //   2 = category assignments (M4), 3 = theme id (Theming EPIC).
+  // Reserved for upcoming / retired tags so they stay stable across schema growth. Tag 3 was
+  // originally earmarked for a root-level theme id; the theme now lives in SettingsProto.theme
+  // instead (ADR-0009), so tag 3 stays reserved forever (ADR-0008: never reuse a tag).
+  //   2 = category assignments (M4), 3 = retired theme-id slot.
   reserved 2, 3;
 }
 
@@ -28,6 +30,21 @@ message SettingsProto {
   // How large home tiles are drawn. TILE_SIZE_UNSPECIFIED (the default) means the owner never
   // chose, which the repository resolves to MEDIUM.
   TileSize tile_size = 1;
+
+  // The chosen color theme (Theming EPIC). THEME_ID_UNSPECIFIED (the default) means the owner never
+  // chose, which the repository resolves to Pastel Dark. Lives here (not root tag 3) per ADR-0009:
+  // all settings belong in SettingsProto; root tag 3 stays reserved forever (ADR-0008, never reuse).
+  ThemeId theme = 2;
+}
+
+// Color theme identity (Theming EPIC). Semantic ids, not raw colors — the UI maps each to a
+// NexaColorScheme, so storage stays color-free. Grows additively; never renumber or reuse a value.
+enum ThemeId {
+  THEME_ID_UNSPECIFIED = 0;
+  THEME_ID_PASTEL_DARK = 1;
+  THEME_ID_OLED_BLACK = 2;
+  THEME_ID_AMBER_EMBER = 3;
+  THEME_ID_MAGENTA_NOIR = 4;
 }
 
 // Home tile size presets (ADR-0009). Semantic S/M/L, not raw dp — the UI maps each to dimensions,
