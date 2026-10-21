@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -64,7 +65,11 @@ internal fun AdaptiveBackground(settings: BackgroundSettings, scene: BackgroundS
     Box(Modifier.fillMaxSize()) {
         previous?.let { BackgroundImage(it, Modifier.fillMaxSize()) }
         current?.let {
-            BackgroundImage(it, Modifier.fillMaxSize().graphicsLayer { alpha = opacity.value })
+            BackgroundImage(it, Modifier.fillMaxSize().graphicsLayer {
+                alpha = opacity.value
+                // This layer contains one image; modulate it directly without a full-screen offscreen buffer.
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            })
         }
         if (current != null) {
             Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = settings.dimPercent / 100f)))
