@@ -32,47 +32,37 @@ internal suspend fun loadBackground(assets: AssetManager, path: String, blur: Ba
 private fun blurBitmap(bitmap: Bitmap, radius: Int): Bitmap {
     val width = bitmap.width
     val height = bitmap.height
-    var pixels = IntArray(width * height)
-    var scratch = IntArray(pixels.size)
+    val pixels = IntArray(width * height)
+    val scratch = IntArray(pixels.size)
     bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
     repeat(2) {
-        blurPass(pixels, scratch, width, height, radius, horizontal = true)
-        val swap = pixels
-        pixels = scratch
-        scratch = swap
-        blurPass(pixels, scratch, width, height, radius, horizontal = false)
-        val verticalSwap = pixels
-        pixels = scratch
-        scratch = verticalSwap
+        blurPass(pixels, scratch, width, height, radius)
+        blurPass(scratch, pixels, height, width, radius)
     }
     return Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
 }
 
-private fun blurPass(
-    input: IntArray,
-    output: IntArray,
-    width: Int,
-    height: Int,
-    radius: Int,
-    horizontal: Boolean,
-) {
-    val lineCount = if (horizontal) height else width
-    val lineLength = if (horizontal) width else height
+/** Sliding box average, transposed on output so the same bounded pass handles both axes. */
+private fun blurPass(input: IntArray, output: IntArray, width: Int, height: Int, radius: Int) {
     val count = radius * 2 + 1
-    for (line in 0 until lineCount) {
-        for (position in 0 until lineLength) {
-            var red = 0
-            var green = 0
-            var blue = 0
-            for (offset in -radius..radius) {
-                val sample = (position + offset).coerceIn(0, lineLength - 1)
-                val color = input[if (horizontal) line * width + sample else sample * width + line]
-                red += color shr 16 and 255
-                green += color shr 8 and 255
-                blue += color and 255
-            }
-            val index = if (horizontal) line * width + position else position * width + line
-            output[index] = (255 shl 24) or ((red / count) shl 16) or ((green / count) shl 8) or (blue / count)
+    for (y in 0 until height) {
+        var red = 0
+        var green = 0
+        var blue = 0
+        for (offset in -radius..radius) {
+            val color = input[y * width + offset.coerceIn(0, width - 1)]
+            red += color shr 16 and 255
+            green += color shr 8 and 255
+            blue += color and 255
+        }
+        for (x in 0 until width) {
+            output[x * height + y] =
+                (255 shl 24) or ((red / count) shl 16) or ((green / count) shl 8) or (blue / count)
+            val outgoing = input[y * width + (x - radius).coerceIn(0, width - 1)]
+            val incoming = input[y * width + (x + radius + 1).coerceIn(0, width - 1)]
+            red += (incoming shr 16 and 255) - (outgoing shr 16 and 255)
+            green += (incoming shr 8 and 255) - (outgoing shr 8 and 255)
+            blue += (incoming and 255) - (outgoing and 255)
         }
     }
 }

@@ -64,7 +64,9 @@ class SceneResolverTest {
     @Test
     fun `every selectable scene has a bundled asset within the artwork budget`() {
         val files = DayPeriod.entries.flatMap { period ->
-            SceneWeather.entries.map { condition -> File("src/main/assets/" + BackgroundScene(period, condition).asset) }
+            SceneWeather.entries.map { condition ->
+                File("src/main/assets/" + BackgroundScene(period, condition).asset)
+            }
         }
         files.forEach { assertTrue("Missing scene: $it", it.isFile && it.length() > 0) }
         assertTrue("Artwork exceeds 5 MiB budget", files.sumOf { it.length() } <= 5 * 1024 * 1024)
