@@ -55,8 +55,8 @@ class InstalledAppsRepository(context: Context) {
         // (Prime Video, Google TV, Play Games, …) ship a CATEGORY_LEANBACK_LAUNCHER entry *only*, so
         // they are otherwise invisible. Supplement with the leanback launcher set for packages the
         // standard query didn't already cover (FR-002 "see every launchable app").
-        val seen = launchable.mapTo(HashSet()) { it.toFavoriteKey() }
-        val leanbackOnly = leanbackLauncherEntries().filterNot { it.toFavoriteKey() in seen }
+        val seen = launchable.mapTo(HashSet()) { it.component to it.userSerial }
+        val leanbackOnly = leanbackLauncherEntries().filterNot { (it.component to it.userSerial) in seen }
         orderInstalledApps(launchable + leanbackOnly, selfPackage)
     }
 
@@ -159,12 +159,12 @@ class InstalledAppsRepository(context: Context) {
 
 /**
  * Pure ordering seam for the installed-apps list: drops [selfPackage], de-duplicates by
- * [AppEntry.component], and sorts case-insensitively by [AppEntry.label]. Extracted from
+ * [AppEntry.component] + [AppEntry.userSerial], and sorts case-insensitively by [AppEntry.label]. Extracted from
  * [InstalledAppsRepository.loadApps] so the (Android-free) semantics are unit-testable.
  */
 internal fun orderInstalledApps(apps: List<AppEntry>, selfPackage: String): List<AppEntry> =
     apps.asSequence()
         .filter { it.packageName != selfPackage }
-        .distinctBy { it.toFavoriteKey() }
+        .distinctBy { it.component to it.userSerial }
         .sortedBy { it.label.lowercase() }
         .toList()
