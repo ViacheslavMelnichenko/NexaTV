@@ -14,7 +14,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
+import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.compose.ui.graphics.asImageBitmap
@@ -36,6 +38,7 @@ class InstalledAppsRepository(context: Context) {
     private val launcherApps =
         appContext.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     private val userManager = appContext.getSystemService(UserManager::class.java)
+    private val packageManager = appContext.packageManager
 
     /** Package to hide from its own grid (debug builds carry the `.debug` suffix). */
     private val selfPackage = appContext.packageName
@@ -63,16 +66,14 @@ class InstalledAppsRepository(context: Context) {
      * visibility of these packages comes from the `<queries>` launcher intents in the manifest.
      */
     private fun leanbackLauncherEntries(): List<AppEntry> {
-        return launcherApps.profiles.flatMap { user ->
-            val userContext = runCatching { appContext.createContextAsUser(user, 0) }.getOrNull()
-                ?: return@flatMap emptyList()
-            val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
-            val resolved = runCatching {
-                userContext.packageManager.queryIntentActivities(intent, 0)
-            }.getOrDefault(emptyList())
-            val serial = userManager?.getSerialNumberForUser(user) ?: 0L
-            resolved.mapNotNull { it.toEntry(userContext.packageManager, user, serial) }
-        }
+        // PackageManager only exposes intent resolution for this app's user. Cross-profile applications
+        // are still discovered through LauncherApps.getActivityList above, which is the public profile-aware
+        // launcher API; there is no public cross-profile equivalent of queryIntentActivities.
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
+        val resolved = runCatching { packageManager.queryIntentActivities(intent, 0) }.getOrDefault(emptyList())
+        val user = Process.myUserHandle()
+        val serial = userManager?.getSerialNumberForUser(user) ?: 0L
+        return resolved.mapNotNull { it.toEntry(user, serial) }
     }
 
     /**
@@ -132,7 +133,6 @@ class InstalledAppsRepository(context: Context) {
 
     /** Map a leanback [ResolveInfo] to an [AppEntry]; null if it carries no activity. */
     private fun ResolveInfo.toEntry(
-        packageManager: android.content.pm.PackageManager,
         user: UserHandle,
         serial: Long,
     ): AppEntry? {
