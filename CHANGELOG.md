@@ -6,6 +6,17 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-22
+
+### Fixed
+- The Home calendar now refreshes its highlighted day and month at midnight instead of retaining the
+  date from the first composition.
+- App discovery now keeps the same launcher activity from separate Android profiles distinct.
+
+### Changed
+- Weather, dimming and build-version labels are localized through Android string resources.
+- App-tile labels now use the shared TV-readable typography token rather than a component-local size.
+
 ## [0.3.0] - 2026-10-21
 
 Adaptive backgrounds reach the main NexaTV launcher. The Home screen now renders a
