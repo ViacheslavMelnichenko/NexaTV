@@ -17,8 +17,8 @@ import org.junit.Test
 
 /**
  * JVM unit tests for the pure [orderInstalledApps] seam. Android-typed fields ([ComponentName],
- * [UserHandle]) are mocked; component identity relies on mock referential equality, which satisfies
- * the `distinctBy { it.component }` collapse.
+ * [UserHandle]) are mocked; component identity relies on mock referential equality. A component plus
+ * profile serial is the durable app identity, so the same activity can appear once per profile.
  */
 class InstalledAppsRepositoryTest {
 
@@ -28,12 +28,13 @@ class InstalledAppsRepositoryTest {
         label: String,
         pkg: String,
         comp: ComponentName = mockk(),
+        userSerial: Long = 0L,
     ): AppEntry = AppEntry(
         label = label,
         packageName = pkg,
         component = comp,
         user = user,
-        userSerial = 0L,
+        userSerial = userSerial,
         icon = null,
     )
 
@@ -60,6 +61,19 @@ class InstalledAppsRepositoryTest {
         val result = orderInstalledApps(apps, selfPackage = "com.nexatv.launcher")
 
         assertEquals(1, result.size)
+    }
+
+    @Test
+    fun `same component in separate profiles is retained once per profile`() {
+        val shared = mockk<ComponentName>()
+        val apps = listOf(
+            entry("Alpha", "com.dup.app", shared, userSerial = 0),
+            entry("Alpha work", "com.dup.app", shared, userSerial = 10),
+        )
+
+        val result = orderInstalledApps(apps, selfPackage = "com.nexatv.launcher")
+
+        assertEquals(listOf(0L, 10L), result.map { it.userSerial })
     }
 
     @Test

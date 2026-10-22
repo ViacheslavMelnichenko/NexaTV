@@ -43,6 +43,10 @@
     <!-- Home centre widgets (M5 / ADR-0010) -->
     <string name="home_weather_location">Вроцлав</string>
     <string name="home_weather_unavailable">Погода недоступна</string>
+    <string name="home_weather_temperature">%1$d°</string>
+    <string name="home_weather_low">↓ %1$d°</string>
+    <string name="home_weather_high">↑ %1$d°</string>
+    <string name="home_weather_wind">%1$d км/год</string>
 
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">Перехоплення Home для NexaTV</string>
@@ -69,8 +73,10 @@
     <string name="background_blur_soft">Легке</string>
     <string name="background_blur_strong">Сильне</string>
     <string name="background_dim">Затемнення</string>
+    <string name="background_dim_percent">%1$d%%</string>
     <string name="background_motion">Легка анімація</string>
     <string name="background_off">Вимкнено</string>
     <string name="background_on">Увімкнено</string>
     <string name="background_motion_hint">Ненав’язливий дощ і сніг. Рух зупиняється, коли домашній екран приховано.</string>
+    <string name="settings_version">NexaTV  v%1$s</string>
 </resources>

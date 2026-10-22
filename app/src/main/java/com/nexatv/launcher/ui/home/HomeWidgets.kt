@@ -67,7 +67,7 @@ internal fun HomeWidgets(environment: HomeEnvironment, landscape: Boolean, modif
         horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.lg, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CalendarWidget(landscape = landscape, modifier = Modifier.width(WIDGET_WIDTH))
+        CalendarWidget(now = environment.now, landscape = landscape, modifier = Modifier.width(WIDGET_WIDTH))
         WeatherWidget(environment, landscape, modifier = Modifier.width(WIDGET_WIDTH))
     }
 }
@@ -99,15 +99,17 @@ private fun WidgetCard(
 /** A month calendar for the current month with today highlighted; fully offline. */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun CalendarWidget(landscape: Boolean, modifier: Modifier = Modifier) {
-    val calendar = remember { Calendar.getInstance() }
-    val today = remember { calendar.get(Calendar.DAY_OF_MONTH) }
-    val monthLabel = remember {
+private fun CalendarWidget(now: java.time.Instant, landscape: Boolean, modifier: Modifier = Modifier) {
+    // HomeEnvironment emits every minute, including across midnight. Key all date-derived values to it
+    // so the calendar never stays on yesterday until the activity is recreated.
+    val calendar = remember(now) { Calendar.getInstance().apply { timeInMillis = now.toEpochMilli() } }
+    val today = calendar.get(Calendar.DAY_OF_MONTH)
+    val monthLabel = remember(now) {
         SimpleDateFormat("LLLL yyyy", Locale.getDefault()).format(calendar.time)
             .replaceFirstChar { it.uppercase() }
     }
-    val headers = remember { weekdayHeaders(calendar) }
-    val weeks = remember { monthMatrix(calendar) }
+    val headers = remember(now) { weekdayHeaders(calendar) }
+    val weeks = remember(now) { monthMatrix(calendar) }
 
     WidgetCard(landscape = landscape, modifier = modifier) {
         Text(
@@ -216,7 +218,7 @@ private fun WeatherReadout(weather: Weather) {
                 modifier = Modifier.size(44.dp),
             )
             Text(
-                text = "${weather.currentC}°",
+                text = stringResource(R.string.home_weather_temperature, weather.currentC),
                 style = MaterialTheme.typography.displayMedium,
                 color = NexaTheme.colors.onSurface,
             )
@@ -224,12 +226,12 @@ private fun WeatherReadout(weather: Weather) {
         Spacer(modifier = Modifier.height(NexaTheme.spacing.xs))
         Row(horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md)) {
             Text(
-                text = "↓ ${weather.minC}°",
+                text = stringResource(R.string.home_weather_low, weather.minC),
                 style = MaterialTheme.typography.bodyLarge,
                 color = NexaTheme.colors.onSurfaceMuted,
             )
             Text(
-                text = "↑ ${weather.maxC}°",
+                text = stringResource(R.string.home_weather_high, weather.maxC),
                 style = MaterialTheme.typography.bodyLarge,
                 color = NexaTheme.colors.onSurfaceMuted,
             )
@@ -244,7 +246,7 @@ private fun WeatherReadout(weather: Weather) {
                 modifier = Modifier.size(20.dp),
             )
             Text(
-                text = "${weather.windKmh} km/h",
+                text = stringResource(R.string.home_weather_wind, weather.windKmh),
                 style = MaterialTheme.typography.bodyMedium,
                 color = NexaTheme.colors.onSurfaceMuted,
             )

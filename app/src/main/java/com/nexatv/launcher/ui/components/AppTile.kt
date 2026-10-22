@@ -42,12 +42,10 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -102,12 +100,9 @@ internal fun AppTile(
     // padding inside their (clipping) scroll bounds, or the halo is sheared off at the container edge.
     val glow by animateDpAsState(targetValue = if (focused) 8.dp else 0.dp, label = "tileGlow")
 
-    // A tile label is a *secondary* cue — the icon identifies the app — so it is kept light and quiet
-    // (regular weight, muted colour, small). Hoisted so it is built once, not rebuilt every composition.
-    val bodyMedium = MaterialTheme.typography.bodyMedium
-    val labelStyle = remember(bodyMedium) {
-        bodyMedium.copy(fontSize = 14.sp, lineHeight = 17.sp, fontWeight = FontWeight.Normal)
-    }
+    // Keep text on the shared, couch-readable typography scale rather than introducing a hard-coded
+    // component-local size. The icon remains the primary cue; muted colour provides hierarchy.
+    val labelStyle = MaterialTheme.typography.labelLarge
 
     Column(
         modifier = modifier

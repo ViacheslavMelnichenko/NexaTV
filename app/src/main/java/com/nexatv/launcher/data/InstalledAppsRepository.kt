@@ -15,7 +15,6 @@ import android.content.Intent
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.content.pm.ResolveInfo
-import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.compose.ui.graphics.asImageBitmap
@@ -37,7 +36,6 @@ class InstalledAppsRepository(context: Context) {
     private val launcherApps =
         appContext.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     private val userManager = appContext.getSystemService(UserManager::class.java)
-    private val packageManager = appContext.packageManager
 
     /** Package to hide from its own grid (debug builds carry the `.debug` suffix). */
     private val selfPackage = appContext.packageName
@@ -54,8 +52,8 @@ class InstalledAppsRepository(context: Context) {
         // (Prime Video, Google TV, Play Games, …) ship a CATEGORY_LEANBACK_LAUNCHER entry *only*, so
         // they are otherwise invisible. Supplement with the leanback launcher set for packages the
         // standard query didn't already cover (FR-002 "see every launchable app").
-        val seen = launchable.mapTo(HashSet()) { it.packageName }
-        val leanbackOnly = leanbackLauncherEntries().filterNot { it.packageName in seen }
+        val seen = launchable.mapTo(HashSet()) { it.toFavoriteKey() }
+        val leanbackOnly = leanbackLauncherEntries().filterNot { it.toFavoriteKey() in seen }
         orderInstalledApps(launchable + leanbackOnly, selfPackage)
     }
 
@@ -65,11 +63,16 @@ class InstalledAppsRepository(context: Context) {
      * visibility of these packages comes from the `<queries>` launcher intents in the manifest.
      */
     private fun leanbackLauncherEntries(): List<AppEntry> {
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
-        val resolved = runCatching { packageManager.queryIntentActivities(intent, 0) }.getOrDefault(emptyList())
-        val user = Process.myUserHandle()
-        val serial = userManager?.getSerialNumberForUser(user) ?: 0L
-        return resolved.mapNotNull { it.toEntry(user, serial) }
+        return launcherApps.profiles.flatMap { user ->
+            val userContext = runCatching { appContext.createContextAsUser(user, 0) }.getOrNull()
+                ?: return@flatMap emptyList()
+            val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
+            val resolved = runCatching {
+                userContext.packageManager.queryIntentActivities(intent, 0)
+            }.getOrDefault(emptyList())
+            val serial = userManager?.getSerialNumberForUser(user) ?: 0L
+            resolved.mapNotNull { it.toEntry(userContext.packageManager, user, serial) }
+        }
     }
 
     /**
@@ -128,7 +131,11 @@ class InstalledAppsRepository(context: Context) {
     }
 
     /** Map a leanback [ResolveInfo] to an [AppEntry]; null if it carries no activity. */
-    private fun ResolveInfo.toEntry(user: UserHandle, serial: Long): AppEntry? {
+    private fun ResolveInfo.toEntry(
+        packageManager: android.content.pm.PackageManager,
+        user: UserHandle,
+        serial: Long,
+    ): AppEntry? {
         val info = activityInfo ?: return null
         val component = ComponentName(info.packageName, info.name)
         val icon = runCatching {
@@ -158,6 +165,6 @@ class InstalledAppsRepository(context: Context) {
 internal fun orderInstalledApps(apps: List<AppEntry>, selfPackage: String): List<AppEntry> =
     apps.asSequence()
         .filter { it.packageName != selfPackage }
-        .distinctBy { it.component }
+        .distinctBy { it.toFavoriteKey() }
         .sortedBy { it.label.lowercase() }
         .toList()

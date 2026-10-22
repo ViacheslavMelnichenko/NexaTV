@@ -43,6 +43,10 @@
     <!-- Home centre widgets (M5 / ADR-0010) -->
     <string name="home_weather_location">Wrocław</string>
     <string name="home_weather_unavailable">Weather unavailable</string>
+    <string name="home_weather_temperature">%1$d°</string>
+    <string name="home_weather_low">↓ %1$d°</string>
+    <string name="home_weather_high">↑ %1$d°</string>
+    <string name="home_weather_wind">%1$d km/h</string>
 
     <!-- HOME-override accessibility service (prototype; ADR-0006 follow-up) -->
     <string name="accessibility_override_label">NexaTV Home override</string>
@@ -69,8 +73,10 @@
     <string name="background_blur_soft">Soft</string>
     <string name="background_blur_strong">Strong</string>
     <string name="background_dim">Dimming</string>
+    <string name="background_dim_percent">%1$d%%</string>
     <string name="background_motion">Gentle motion</string>
     <string name="background_off">Off</string>
     <string name="background_on">On</string>
     <string name="background_motion_hint">Subtle rain and snow only. Motion pauses whenever Home is hidden.</string>
+    <string name="settings_version">NexaTV  v%1$s</string>
 </resources>

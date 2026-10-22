@@ -68,7 +68,7 @@ internal fun BackgroundSettingsScreen(
             }
             SettingRow(stringResource(R.string.background_dim)) {
                 listOf(0, 15, 25, 40, 60).forEach { dim ->
-                    SettingOptionChip("$dim%", settings.dimPercent == dim,
+                    SettingOptionChip(stringResource(R.string.background_dim_percent, dim), settings.dimPercent == dim,
                         { onChange(settings.copy(dimPercent = dim)) })
                 }
             }

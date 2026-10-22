@@ -89,7 +89,7 @@ internal fun SettingsScreen(
 
         // Faint build version, low-emphasis, pinned to the bottom-right corner.
         Text(
-            text = "NexaTV  v$versionName",
+            text = stringResource(R.string.settings_version, versionName),
             style = MaterialTheme.typography.bodyMedium,
             color = NexaTheme.colors.onSurfaceMuted,
             modifier = Modifier.align(Alignment.BottomEnd),
