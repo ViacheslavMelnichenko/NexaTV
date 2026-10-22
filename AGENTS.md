@@ -1,6 +1,7 @@
-# NexaTV — AI Operating Rules
+# NexaTV — Agent Operating Rules
 
-These rules are the sole source of truth for AI-assisted work in this repository.
+This file is the sole source of truth for work performed by AI agents in this
+repository. It is tool- and provider-agnostic.
 
 ## The roles ("team of experts")
 

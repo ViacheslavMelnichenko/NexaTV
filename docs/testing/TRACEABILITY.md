@@ -62,4 +62,4 @@
 
 - `—` under Test ref = no dedicated scenario authored yet; add one in TEST-PLAN.md when the FR/NFR is scheduled.
 - Automated test IDs (`U#`/`UI#`/`P#`) are assigned when the suites are created in M1+ (code not written yet —
-  Phase 0 discipline, PRD §13 / CLAUDE.md Hard Rule 1).
+  Phase 0 discipline, PRD §13 / AGENTS.md Hard Rule 1).
