@@ -6,6 +6,20 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-28
+
+### Fixed
+- All apps and favorites use profile-aware tile keys, preventing a crash when the same activity is
+  available in multiple Android profiles.
+
+### Changed
+- App tiles use the lighter theme surface at rest and an accent tint while focused or being reordered.
+
+### Validation
+- Debug build, 64 JVM tests, Android Lint and detekt passed locally.
+- The original duplicate-key crash was confirmed from the TCL crash log.
+- Post-fix TCL smoke, visual and performance checks were not run; the owner requested release without installing the test build.
+
 ## [0.3.1] - 2026-10-22
 
 ### Fixed
