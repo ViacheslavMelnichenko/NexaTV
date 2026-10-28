@@ -31,3 +31,6 @@ data class AppEntry(
     val userSerial: Long,
     val icon: ImageBitmap?,
 )
+
+/** Stable, saveable identity for app tiles in lazy layouts. */
+internal fun AppEntry.lazyItemKey(): String = "$userSerial:${component.flattenToShortString()}"
