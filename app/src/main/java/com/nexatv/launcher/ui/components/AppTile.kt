@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -118,7 +119,10 @@ internal fun AppTile(
                 spotShadowColor = colors.focusRing
             }
             .clip(shape)
-            .background(if (focused || moving) colors.surfaceVariant else colors.surface)
+            .background(
+                if (focused || moving) lerp(colors.surfaceVariant, colors.accent, 0.12f)
+                else colors.surfaceVariant,
+            )
             .border(border = border, shape = shape)
             // Short OK launches; long OK (no "Menu" key on the TV remote) opens the context menu.
             .okClickable(interaction = interaction, onClick = onClick, onLongClick = onLongClick)

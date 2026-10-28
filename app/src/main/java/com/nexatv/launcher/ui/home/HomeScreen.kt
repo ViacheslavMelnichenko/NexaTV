@@ -75,6 +75,7 @@ import com.nexatv.launcher.R
 import com.nexatv.launcher.data.BackgroundSettings
 import com.nexatv.launcher.data.BackgroundMode
 import com.nexatv.launcher.data.AppEntry
+import com.nexatv.launcher.data.lazyItemKey
 import com.nexatv.launcher.data.toFavoriteKey
 import com.nexatv.launcher.ui.components.AppContextMenu
 import com.nexatv.launcher.ui.components.AppTile
@@ -418,7 +419,7 @@ private fun FavoritesRow(
     ) {
         itemsIndexedRow(
             items = display,
-            key = { _, app -> "fav:" + app.component.flattenToShortString() },
+            key = { _, app -> "fav:" + app.lazyItemKey() },
         ) { index, app ->
             val isMoving = reorder != null && index == reorder.current
             AppTile(

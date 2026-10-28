@@ -46,6 +46,7 @@ import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
 import com.nexatv.launcher.R
 import com.nexatv.launcher.data.AppEntry
+import com.nexatv.launcher.data.lazyItemKey
 import com.nexatv.launcher.data.toFavoriteKey
 import com.nexatv.launcher.ui.components.AppContextMenu
 import com.nexatv.launcher.ui.components.AppTile
@@ -124,7 +125,7 @@ internal fun AllAppsScreen(
                 ) {
                     itemsIndexed(
                         items = apps,
-                        key = { _, app -> app.component.flattenToShortString() },
+                        key = { _, app -> app.lazyItemKey() },
                     ) { index, app ->
                         AppTile(
                             label = app.label,

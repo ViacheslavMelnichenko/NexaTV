@@ -12,6 +12,7 @@ package com.nexatv.launcher.data
 import android.content.ComponentName
 import android.os.UserHandle
 import io.mockk.mockk
+import io.mockk.every
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -37,6 +38,23 @@ class InstalledAppsRepositoryTest {
         userSerial = userSerial,
         icon = null,
     )
+
+    @Test
+    fun `lazy layouts retain distinct keys for the same app across profiles`() {
+        val shared = mockk<ComponentName> {
+            every { flattenToShortString() } returns "com.example/.Main"
+        }
+        val apps = orderInstalledApps(
+            listOf(
+                entry("Personal", "com.example", shared, userSerial = 0),
+                entry("Work", "com.example", shared, userSerial = 10),
+            ),
+            selfPackage = "com.nexatv.launcher",
+        )
+
+        assertEquals(2, apps.map { it.lazyItemKey() }.toSet().size)
+        assertEquals(apps.first().lazyItemKey(), apps.first().copy(label = "Renamed").lazyItemKey())
+    }
 
     @Test
     fun `self package is removed`() {
