@@ -236,7 +236,8 @@ private fun AppsContent(
             app = target,
             isFavorite = key in favoriteKeys,
             onToggleFavorite = {
-                if (key in favoriteKeys) refocusFavorites = true
+                // Only an unpin removes the focused tile; pinning adds one and needs no refocus.
+                refocusFavorites = key in favoriteKeys
                 actions.onToggleFavorite(target)
                 menuTarget = null
             },
@@ -257,10 +258,8 @@ private fun AppsContent(
     }
     // Unpinning disposes the focused tile; put focus back on the row instead of letting it drift.
     LaunchedEffect(favorites.size) {
-        if (refocusFavorites) {
-            refocusFavorites = false
-            if (favoritesPresent) runCatching { favoritesFocus.requestFocus() }
-        }
+        favoritesFocus.refocusAfterUnpin(pending = refocusFavorites, rowPresent = favoritesPresent)
+        refocusFavorites = false
     }
     // FR-014: launch errors are shown in-UI (focus-preserving) and auto-dismiss.
     LaunchedEffect(launchError) {
@@ -482,6 +481,11 @@ private fun reorderKey(
         }
     }
     return handled
+}
+
+/** Re-focus the favorites row after an unpin removed the focused tile (kept out of AppsContent's branches). */
+private fun FocusRequester.refocusAfterUnpin(pending: Boolean, rowPresent: Boolean) {
+    if (pending && rowPresent) runCatching { requestFocus() }
 }
 
 private val REORDER_KEYS = setOf(
