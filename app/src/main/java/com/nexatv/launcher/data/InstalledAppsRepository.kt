@@ -22,9 +22,12 @@ import android.os.UserManager
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.withContext
 
 /**
@@ -48,9 +51,15 @@ class InstalledAppsRepository(context: Context) {
      * Icons are rasterized here (off the UI thread) so composition stays cheap (NFR-003).
      */
     suspend fun loadApps(): List<AppEntry> = withContext(Dispatchers.Default) {
-        val launchable = launcherApps.profiles
+        val serials = HashMap<UserHandle, Long>()
+        val profiles = runCatching { launcherApps.profiles }.getOrDefault(listOf(Process.myUserHandle()))
+        val launchable = profiles
             .flatMap { user -> runCatching { launcherApps.getActivityList(null, user) }.getOrDefault(emptyList()) }
-            .map { it.toEntry() }
+            .map { info ->
+                // Icon rasterization is the expensive part; stop promptly when a newer reload superseded us.
+                ensureActive()
+                info.toEntry(serials.getOrPut(info.user) { serialOf(info.user) })
+            }
         // LauncherApps.getActivityList only returns CATEGORY_LAUNCHER activities; TV-native apps
         // (Prime Video, Google TV, Play Games, …) ship a CATEGORY_LEANBACK_LAUNCHER entry *only*, so
         // they are otherwise invisible. Supplement with the leanback launcher set for packages the
@@ -72,9 +81,12 @@ class InstalledAppsRepository(context: Context) {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
         val resolved = runCatching { packageManager.queryIntentActivities(intent, 0) }.getOrDefault(emptyList())
         val user = Process.myUserHandle()
-        val serial = userManager?.getSerialNumberForUser(user) ?: 0L
+        val serial = serialOf(user)
         return resolved.mapNotNull { it.toEntry(user, serial) }
     }
+
+    private fun serialOf(user: UserHandle): Long =
+        runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull() ?: 0L
 
     /**
      * Cold stream that emits once per install/removal/change of a launchable app (FR-002). Backed by a
@@ -82,6 +94,7 @@ class InstalledAppsRepository(context: Context) {
      * leak and no cost when nothing observes it. Emits bare signals (not deltas): the collector re-queries
      * [loadApps], which is the single source of truth and already de-dups/sorts.
      */
+    @OptIn(FlowPreview::class)
     fun appChanges(): Flow<Unit> = callbackFlow {
         val callback = object : LauncherApps.Callback() {
             override fun onPackageAdded(packageName: String?, user: UserHandle?) { trySend(Unit) }
@@ -96,14 +109,16 @@ class InstalledAppsRepository(context: Context) {
         }
         launcherApps.registerCallback(callback)
         awaitClose { launcherApps.unregisterCallback(callback) }
-    }
+    }.debounce(APP_CHANGE_DEBOUNCE_MS)
 
     /** Start an app's main activity. Returns false on failure (FR-003 keeps focus, shows a message). */
     fun launch(entry: AppEntry): Boolean = runCatching {
         launcherApps.startMainActivity(entry.component, entry.user, null, null)
-    }.recoverCatching {
+    }.recoverCatching { error ->
         // Leanback-only apps aren't always startable via LauncherApps' main-activity path; fall back
-        // to their explicit leanback launch intent.
+        // to their explicit leanback launch intent. startActivity runs in our own profile, so never use
+        // it for a work-profile entry (it would fail or open the personal copy of the app).
+        if (entry.user != Process.myUserHandle()) throw error
         appContext.startActivity(
             Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
@@ -117,7 +132,7 @@ class InstalledAppsRepository(context: Context) {
         launcherApps.startAppDetailsActivity(entry.component, entry.user, null, null)
     }.isSuccess
 
-    private fun LauncherActivityInfo.toEntry(): AppEntry {
+    private fun LauncherActivityInfo.toEntry(serial: Long): AppEntry {
         val icon = runCatching {
             getBadgedIcon(0).toBitmap(width = ICON_PX, height = ICON_PX).asImageBitmap()
         }.getOrNull()
@@ -126,7 +141,7 @@ class InstalledAppsRepository(context: Context) {
             packageName = applicationInfo.packageName,
             component = componentName,
             user = user,
-            userSerial = userManager?.getSerialNumberForUser(user) ?: 0L,
+            userSerial = serial,
             icon = icon,
         )
     }
@@ -154,6 +169,9 @@ class InstalledAppsRepository(context: Context) {
     private companion object {
         /** Downsample icons to a bounded size (FR-013 memory-bounded art, NFR-002). */
         const val ICON_PX = 128
+
+        /** One app update fires several callbacks; wait for the burst to settle before reloading. */
+        const val APP_CHANGE_DEBOUNCE_MS = 500L
     }
 }
 

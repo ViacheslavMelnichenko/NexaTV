@@ -89,7 +89,8 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.action == ACTION_SHOW_HOME) showHomeSignal.value++
+        // As the real default HOME the system delivers ACTION_MAIN + CATEGORY_HOME instead.
+        if (intent.action == ACTION_SHOW_HOME || intent.hasCategory(Intent.CATEGORY_HOME)) showHomeSignal.value++
     }
 
     companion object {
