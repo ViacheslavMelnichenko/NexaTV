@@ -1,9 +1,11 @@
 // NexaTV — :app module. Licensed under the Apache License, Version 2.0.
 import com.google.protobuf.gradle.id
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    // Kotlin itself is AGP 9's built-in Kotlin (ADR-0014); this adds only the Compose compiler.
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
     // Proto DataStore codegen (ADR-0008): compiles src/main/proto into Java-lite classes.
     alias(libs.plugins.protobuf)
@@ -19,6 +21,13 @@ detekt {
     config.setFrom(rootProject.files("config/detekt/detekt.yml"))
     autoCorrect = false
 }
+// detekt 1.23.x runs its own embedded Kotlin compiler and refuses a newer one on its classpath, so
+// keep the detekt configuration on the version it was built against (the project itself uses [kotlin]).
+configurations.matching { it.name == "detekt" }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") useVersion(libs.versions.detektKotlin.get())
+    }
+}
 
 // Release versioning (ADR-0003 D5). CI passes -PversionName/-PversionCode derived from the git tag;
 // local/dev and CI non-release builds fall back to the in-file defaults so they always build.
@@ -27,7 +36,8 @@ val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt
 
 android {
     namespace = "com.nexatv.launcher"
-    compileSdk = 34
+    // compileSdk follows the androidx libraries (ADR-0014); the runtime target stays API 34 below.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.nexatv.launcher"
@@ -92,16 +102,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-        // Strong skipping: tiles/rows holding AppEntry (unstable ComponentName) can skip recomposition
-        // on unrelated state changes (minute tick, menus). Opt-in on Compose compiler 1.5.x; the
-        // default from Kotlin 2.0's Compose plugin onwards.
-        freeCompilerArgs += listOf(
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:experimentalStrongSkipping=true",
-        )
-    }
 
     buildFeatures {
         compose = true
@@ -109,10 +109,6 @@ android {
         // default in AGP 8; enable only this one field, nothing else depends on it.
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
@@ -120,6 +116,11 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
+}
+
+kotlin {
+    // Strong skipping is on by default with the Kotlin Compose compiler plugin (Kotlin 2.0+).
+    compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 }
 
 // Protobuf-lite codegen for Proto DataStore (ADR-0008). Lite runtime keeps the APK small

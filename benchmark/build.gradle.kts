@@ -5,15 +5,16 @@
 // release build — it exists only to produce numbers and the profile. Every task here is
 // device-gated: it needs a connected TCL (see README.md). The baselineprofile plugin wires this
 // module's output into :app and manages the matching build variants on both sides.
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.test)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.baselineprofile)
 }
 
 android {
     namespace = "com.nexatv.benchmark"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         // Matches the single device target (TCL Android TV OS 14, API 34 — ADR-0002).
@@ -26,11 +27,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
 
     // This test APK instruments the launcher; self-instrumenting keeps both in one process group.
     targetProjectPath = ":app"
     experimentalProperties["android.experimental.self-instrumenting"] = true
+}
+
+kotlin {
+    compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 }
 
 // Generate the profile from a connected device (no managed/Gradle-Managed-Device emulator for TV).
