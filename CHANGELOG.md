@@ -6,6 +6,8 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-24
+
 ### Changed
 - App tile names use a smaller 15sp label (`labelMedium`), so common names fit on one line.
 - The toolchain and dependencies were refreshed (ADR-0014): Gradle 9.9, AGP 9.5 with built-in Kotlin,
