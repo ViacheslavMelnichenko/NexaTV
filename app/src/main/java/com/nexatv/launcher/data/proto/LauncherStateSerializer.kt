@@ -18,8 +18,8 @@ import java.io.OutputStream
 /**
  * Proto DataStore serializer for [LauncherStateProto] (ADR-0008). The default value is the
  * empty proto, so a first launch (or a reset store) reads as "no favorites" rather than failing.
- * A parse failure surfaces as [CorruptionException], which DataStore handles per its corruption
- * policy instead of crashing the app.
+ * A parse failure surfaces as [CorruptionException]; the store's ReplaceFileCorruptionHandler
+ * (LauncherStateStore) then resets it to defaults instead of crashing the app.
  */
 object LauncherStateSerializer : Serializer<LauncherStateProto> {
 

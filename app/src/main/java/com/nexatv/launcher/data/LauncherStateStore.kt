@@ -11,6 +11,7 @@ package com.nexatv.launcher.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStore
 import com.nexatv.launcher.data.proto.LauncherStateProto
 import com.nexatv.launcher.data.proto.LauncherStateSerializer
@@ -24,4 +25,7 @@ import com.nexatv.launcher.data.proto.LauncherStateSerializer
 internal val Context.launcherStateStore: DataStore<LauncherStateProto> by dataStore(
     fileName = "launcher_state.pb",
     serializer = LauncherStateSerializer,
+    // A truncated/corrupt file (e.g. power loss mid-write) must not crash-loop the HOME app: reset to
+    // defaults instead of letting CorruptionException reach every collector.
+    corruptionHandler = ReplaceFileCorruptionHandler { LauncherStateProto.getDefaultInstance() },
 )
