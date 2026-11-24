@@ -54,10 +54,12 @@ jobs:
           fi
           echo "ABI OK: no forbidden native libraries."
 
-      - name: APK size budget (debug <= 30 MB)
+      # 45 MB: since Compose 1.13 the debug-only ui-tooling pulls material3 + navigationevent
+      # (~16 MB unminified). Release APKs don't carry it; their 20 MB budget is enforced at release.
+      - name: APK size budget (debug <= 45 MB)
         run: |
           APK=app/build/outputs/apk/debug/app-debug.apk
-          SIZE=$(stat -c%s "$APK"); MAX=$((30 * 1024 * 1024))
+          SIZE=$(stat -c%s "$APK"); MAX=$((45 * 1024 * 1024))
           echo "Debug APK size: $SIZE bytes (budget $MAX). Release budget is tighter (enforced at release)."
           [ "$SIZE" -le "$MAX" ] || { echo "::error::APK exceeds size budget"; exit 1; }
 
