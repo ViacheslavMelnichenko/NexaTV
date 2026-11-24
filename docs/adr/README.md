@@ -36,6 +36,7 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0012](./ADR-0012-tile-icon-and-label.md) | Tiles revert to a square icon over a label | **Accepted** (2026-10-21) — supersedes ADR-0011; restores the FR-013 square-icon-over-label tile, deletes the `AppEntry.banner`/`loadBanner` path, resets S/M/L tokens to portrait (80×100/96×120/128×156) so four favorites fit the row; unmasked-adaptive-icon look accepted, icon normalisation a later optional follow-up |
 
 | [ADR-0013](./ADR-0013-adaptive-backgrounds.md) | Optional adaptive backgrounds and isolated Preview APK | Implemented for preview; real-TV performance acceptance pending |
+| [ADR-0014](./ADR-0014-toolchain-refresh.md) | Toolchain and dependency refresh (AGP 9, Kotlin 2.4, compileSdk 37.1) | Proposed — CI, then on-device acceptance |
 
 ## Planned / potential ADRs
 
