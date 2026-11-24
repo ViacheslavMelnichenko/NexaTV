@@ -103,7 +103,8 @@ internal fun AppTile(
 
     // Keep text on the shared, couch-readable typography scale rather than introducing a hard-coded
     // component-local size. The icon remains the primary cue; muted colour provides hierarchy.
-    val labelStyle = MaterialTheme.typography.labelLarge
+    // labelMedium (not labelLarge) so common app names fit on one line instead of wrapping to two.
+    val labelStyle = MaterialTheme.typography.labelMedium
 
     Column(
         modifier = modifier
