@@ -1,7 +1,8 @@
 # `:benchmark` — performance harness (device-gated)
 
 This module measures `:app` on the **real TCL**; it never ships in a release and has no JVM/CI
-lane. Everything here needs a connected device (ADR-0002 target: Android TV OS 14 / API 34).
+lane. Everything here needs a connected device (ADR-0002 target: Android TV OS 14 / API 34; the module
+compiles against SDK 36, see ADR-0014).
 
 It does two jobs:
 
@@ -10,20 +11,20 @@ It does two jobs:
 - **Baseline Profile** (`BaselineProfileGenerator`) — records the hot startup path so it is
   AOT-compiled on first run instead of JIT-warmed.
 
-## Why it is scaffolded but not yet run
+## Status
 
-The code compiles in the normal build, but the numbers and the generated profile only exist after a
-run **on the device**. Per the project rules, on-device verification is an owner step — so this is
-wired and buildable, and the actual run is deferred until the TCL is attached.
+The code compiles in the normal build. The numbers and the generated profile exist only after a run
+**on the device**, which is an owner step. The 2026-10-20 baseline is recorded in
+[ROADMAP.md](../project/ROADMAP.md#performance-baseline-2026-10-20-tcl-g08).
 
 ## Running it (when the TCL is connected)
 
 ```bash
 # Generate app/src/main/baseline-prof.txt from the device, then it is bundled automatically.
-./tools/gradle-8.9/bin/gradle.bat :app:generateBaselineProfile --no-daemon
+./gradlew :app:generateBaselineProfile
 
 # Startup + frame-timing numbers (results print to the build output / are saved as JSON).
-./tools/gradle-8.9/bin/gradle.bat :benchmark:connectedBenchmarkAndroidTest --no-daemon
+./gradlew :benchmark:connectedBenchmarkAndroidTest
 ```
 
 ## Notes specific to a launcher
@@ -39,7 +40,9 @@ genuine, confirmable foreground transition. `MainActivity` also calls `reportFul
 `ReportDrawnWhen`) once the grid replaces the initial Loading state, so `timeToFullDisplay` reflects a
 usable Home, not just the first empty frame.
 
-## Status (2026-10-20): harness works, automated install does not
+## Known issue: automated install
+
+Open since 2026-10-20: the harness works, but the automated install does not.
 
 On the dev TCL the installed HOME is the **debug** build `com.nexatv.launcher.debug`, while the
 benchmark measures the **release** app id `com.nexatv.launcher`. The `com.android.test` connected task

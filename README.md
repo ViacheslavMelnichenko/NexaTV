@@ -22,28 +22,27 @@ real device.
 - **Live app list** — apps appear and disappear as they are installed or removed
   (`LauncherApps.Callback`).
 - **States** — Loading, Empty, and launch-error handling.
-- **Favorites** — pin / unpin / reorder (built; final on-device visual check still
-  pending).
+- **Favorites** — pin / unpin / reorder from a long-press OK context menu.
 - **Screens** — Home plus a dedicated **All apps** grid.
 - **Home widgets** — clock, calendar, and weather (ADR-0010).
 - **Theming** — four dark themes (Pastel Dark, OLED Black, Amber Ember, Magenta
   Noir) and three tile sizes (Small / Medium / Large), persisted and applied live.
+- **Adaptive backgrounds** — optional river-city landscape that follows time of day
+  and weather, with blur/dimming and optional rain/snow (ADR-0013, opt-in under
+  Settings → Background).
 - **Persistence** — settings and favorites stored via Proto DataStore (ADR-0008).
 - **Design System** — semantic `NexaColorScheme`, focusable `AppTile`,
   `SectionHeader`, and a debug-only component gallery.
 
-## Adaptive background preview
+## Preview app
 
-The `codex/adaptive-background` branch adds an optional river-city landscape with 16 time/weather
-variants, smooth transitions, blur/dimming controls and optional subtle rain/snow. Existing regular
-installations keep their theme background until enabled in Settings → Background.
-
-**NexaTV Preview** is a separate app with separate settings/favorites. It opens from the TV app list
-and does not claim HOME or include the accessibility override. Download the APK artifact from the
-branch's **Preview APK** Actions run, or build `./gradlew :app:assemblePreview` with JDK 17 / SDK 34.
-See [installation and device checks](docs/testing/ADAPTIVE-BACKGROUND-PREVIEW.md),
-[architecture](docs/adr/ADR-0013-adaptive-backgrounds.md) and
-[artwork provenance](docs/design/BACKGROUND-ARTWORK.md). Real-TV performance verification is pending.
+**NexaTV Preview** is a separate app (`.preview` package) with its own settings and favorites. It opens from
+the TV app list, does not claim HOME and has no accessibility override, so new visuals can be tried
+without touching the installed launcher. Builds come from the **Preview APK** workflow (`codex/**`
+branches, and prerelease `vX.Y.Z-preview.N` tags). See
+[installation and device checks](docs/testing/ADAPTIVE-BACKGROUND-PREVIEW.md),
+[ADR-0013](docs/adr/ADR-0013-adaptive-backgrounds.md) and
+[artwork provenance](docs/design/BACKGROUND-ARTWORK.md).
 
 ## Screenshots
 
@@ -65,27 +64,33 @@ and the change can be undone at any time. Verified on the real TCL.
 ## Build & tech
 
 - **Stack** — Kotlin + Jetpack Compose for TV, `minSdk`/`targetSdk` API 34,
-  `armeabi-v7a` (32-bit).
+  `armeabi-v7a` (32-bit). Toolchain versions are pinned in
+  [`gradle/libs.versions.toml`](gradle/libs.versions.toml); the current set and its rationale are in
+  [ADR-0014](docs/adr/ADR-0014-toolchain-refresh.md).
+- **Local build** — JDK 17+ and Android SDK platform 37.1: `./gradlew assembleDebug`.
 - **CI** (`.github/workflows/ci.yml`) — assemble, Android Lint, unit tests,
-  detekt, ABI assert, APK-size budget, and gitleaks secret scan.
-- **Release** (`.github/workflows/release.yml`, ADR-0003) — a tag-driven pipeline
-  builds, signs, verifies, and publishes a GitHub Release. Validated end-to-end
-  with the real signing key; no public release is cut yet (next is `v0.1.0`).
-- Architecture decisions live in [`docs/adr/`](docs/adr/).
+  detekt, ABI assert, APK-size budget, and gitleaks secret scan
+  ([gates and budgets](docs/testing/TEST-PLAN.md#ci-gates-githubworkflowsciyml-adr-0003)).
+- **Release** (`.github/workflows/release.yml`, ADR-0003) — pushing a `vX.Y.Z` tag
+  builds, signs, verifies, and publishes a GitHub Release. Releases are listed in the
+  [CHANGELOG](CHANGELOG.md) and on [GitHub Releases](https://github.com/ViacheslavMelnichenko/NexaTV/releases).
 
 ## Docs
 
 | Document | Purpose |
 |----------|---------|
+| [project/ROADMAP.md](project/ROADMAP.md) | Milestone status, pending owner checks, open/deferred work. |
 | [CHANGELOG.md](CHANGELOG.md) | Release notes and change history. |
-| [docs/adr/](docs/adr/) | Architecture Decision Records. |
-| [docs/product/PRD.md](docs/product/PRD.md) | Product requirements. |
-| [docs/design/DESIGN-SYSTEM.md](docs/design/DESIGN-SYSTEM.md) | Design system and tokens. |
-| [docs/technical/ADB.md](docs/technical/ADB.md) | ADB reference. |
-| [docs/technical/ANDROID-TV.md](docs/technical/ANDROID-TV.md) | Android TV device and launcher notes. |
-| [docs/testing/TEST-PLAN.md](docs/testing/TEST-PLAN.md) | Test plan. |
-| [project/MILESTONES.md](project/MILESTONES.md) | Milestones. |
-| [project/BACKLOG.md](project/BACKLOG.md) | Backlog. |
+| [docs/adr/](docs/adr/README.md) | Architecture Decision Records (index). |
+| [docs/product/PRD.md](docs/product/PRD.md) | Product requirements (FR/NFR). |
+| [docs/design/DESIGN-SYSTEM.md](docs/design/DESIGN-SYSTEM.md) | Design system, tokens and interaction rules. |
+| [docs/design/BACKGROUND-ARTWORK.md](docs/design/BACKGROUND-ARTWORK.md) | Background artwork provenance. |
+| [docs/technical/ANDROID-TV.md](docs/technical/ANDROID-TV.md) | TCL device audit and on-device evidence. |
+| [docs/technical/ADB.md](docs/technical/ADB.md) | ADB reference, updates and rollback. |
+| [docs/testing/TEST-PLAN.md](docs/testing/TEST-PLAN.md) | Test layers, CI gates, manual TV scenarios, traceability. |
+| [docs/testing/ADAPTIVE-BACKGROUND-PREVIEW.md](docs/testing/ADAPTIVE-BACKGROUND-PREVIEW.md) | Preview app install and device checks. |
+| [benchmark/README.md](benchmark/README.md) | Performance harness (Macrobenchmark, Baseline Profile). |
+| [AGENTS.md](AGENTS.md) | Rules for AI agents working in this repo. |
 
 ## License
 

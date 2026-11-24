@@ -2,7 +2,8 @@
 
 ## Status
 
-**Accepted** — 2026-10-20. (Implements PRD FR-001 and the FR-015 pre-Home prompt; depends on
+**Accepted** — 2026-10-20. **Superseded in part by [ADR-0007](./ADR-0007-home-override-accessibility.md)**
+(the become-Home mechanism) on firmware that blocks `ROLE_HOME`. (Implements PRD FR-001 and the FR-015 pre-Home prompt; depends on
 [ADR-0004](./ADR-0004-app-enumeration-visibility.md), which couples full app visibility to holding
 `ROLE_HOME`. Accepted under the owner's standing delegation on non-blocking choices: the mechanism is
 forced by platform policy and the project's device-safety stance, so there is no genuine owner trade-off to

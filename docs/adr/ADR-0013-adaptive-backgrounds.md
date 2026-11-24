@@ -1,6 +1,6 @@
 # ADR-0013 — Optional adaptive backgrounds and an isolated preview app
 
-Date: 2026-10-21. Status: Implemented for preview; real-TV performance acceptance pending.
+Date: 2026-10-21. Status: Accepted. Shipped in v0.3.0; real-TV performance acceptance pending.
 
 ## Context
 

@@ -1,6 +1,12 @@
 # NexaTV — Product Requirements Document (PRD)
 
-> **Status:** Draft v2 for review — 2026-10-20. v2 folds in the critics-panel gap review (6 expert lenses):
+> **Status:** Living baseline (v2, 2026-10-20). Later changes are recorded as ADR amendments rather than
+> edits here. NFR-021/NFR-006 are amended by ADR-0010 (`INTERNET` for weather only). NFR-012 toolchain
+> versions are in ADR-0014. FR-005 categories are deferred. Delivery status is in
+> [ROADMAP.md](../../project/ROADMAP.md); per-requirement verification is in
+> [TEST-PLAN.md](../testing/TEST-PLAN.md).
+>
+> Draft v2 for review — 2026-10-20. v2 folds in the critics-panel gap review (6 expert lenses):
 > added a Delivery/CI-CD, a Design-System, an Accessibility, a Permissions, and a
 > Testability/Observability/DoD section, plus FR-011..FR-017 and NFR-008..NFR-023.
 > Authored after Phase 0 research, ADR-0001 (greenfield, permissive), ADR-0002 (Kotlin + Jetpack
@@ -101,7 +107,7 @@ direct Android APIs, Apache-2.0 licensed, no Flutter.
 | FR-007 | Simple settings | P0 | Yes | A settings screen reachable by remote lets the user change at least one real preference (e.g. layout/sort or favorites management) and open the system "set default Home" flow. | ☐ |
 | FR-008 | Persistence of user configuration | P0 | Yes | Favorites, ordering, and settings survive app restart **and** TV reboot (local storage; no cloud/account). | ☐ |
 | FR-009 | Reliable startup (incl. after reboot) | P0 | Yes | NexaTV cold-starts to an interactive, focused Home within the NFR-001 budget; after a TV reboot it comes up as Home (when set as default) without crash/ANR; if app discovery is slow, UI appears first and populates progressively. Relies on the system auto-starting Home after boot; **does not declare `RECEIVE_BOOT_COMPLETED`** (avoids low-RAM overhead). | ☐ |
-| FR-010+ | Post-MVP catch-all: app reordering, recents, Continue Watching, clock, weather, backgrounds, OLED screensaver, media/NAS/Jellyfin/Plex/Kodi, Home Assistant, notifications, input shortcuts, decorative animation | P1–P2 | No | Specified separately when scheduled (§14 / MILESTONES M5+). | ☐ |
+| FR-010+ | Post-MVP catch-all: app reordering, recents, Continue Watching, clock, weather, backgrounds, OLED screensaver, media/NAS/Jellyfin/Plex/Kodi, Home Assistant, notifications, input shortcuts, decorative animation | P1–P2 | No | Specified separately when scheduled (§14 / ROADMAP M5+). | ☐ |
 | FR-011 | Measurable, always-obvious focus | P0 | Yes (MVP-blocking) | The focused tile shows **≥2 simultaneous signals** from {scale ≥1.08×; focus ring ≥4 dp at ≥3:1 contrast; elevation/brightness lift}. The indicator is ≥3:1 against **both** the element and the page background. Focus settles ≤150 ms after a D-pad press. Verified on-device from ~3 m on a 55″ panel. (Makes G2/FR-006 measurable.) | ☐ |
 | FR-012 | Safe area / overscan | P0 | Yes (MVP-blocking) | All interactive content and focus rings stay within a ≥5% safe area (~48 dp top/bottom, 64 dp left/right @1080p); row content never bleeds into the physical edge. Acceptance: on the real TCL the first and last item of every row and their focus ring are fully visible. | ☐ |
 | FR-013 | Canonical app tile & art selection | P1 | Yes (MVP look) | One canonical tile (fixed aspect + shape + inner padding + background token). Deterministic art order: banner → adaptive icon → icon → generated monogram placeholder (label + pastel accent). Labels 1 line with ellipsis. Images downsampled to tile size; memory-bounded cache (supports NFR-002). Acceptance: a mix of ≥10 real apps (banners, icon-only, one art-less) renders uniformly with no crop/blur/empty tiles. | ☐ |
@@ -180,7 +186,7 @@ tokens, stable signing key, monotonic `versionCode`, `allowBackup=false`, no `IN
 
 ## 14. Future roadmap
 
-Post-MVP capabilities (FR-010+, FR-017) are sequenced in [MILESTONES.md](../../project/MILESTONES.md):
+Post-MVP capabilities (FR-010+, FR-017) are sequenced in [ROADMAP.md](../../project/ROADMAP.md):
 polished TV UX (M5), configuration/customization (M6), media/NAS integrations (M7), advanced integrations —
 Home Assistant, weather, notifications, screensaver (M8). Costly-but-deferred items (self-hosted perf
 runner, SBOM/vuln scan, in-app updater, second test rig) are documented now and built later.
@@ -246,7 +252,7 @@ runner, SBOM/vuln scan, in-app updater, second test rig) are documented now and 
 **Definition of Done & traceability (process, MVP).** An FR is Done only when it has: (1) an objective
 acceptance criterion, (2) ≥1 automated test or a documented manual test, (3) a recorded passing run. Soft
 criteria are rewritten measurably (done in §7 for FR-002/FR-005). An FR×Test matrix lives in
-`docs/testing/TRACEABILITY.md`.
+`docs/testing/TEST-PLAN.md` (traceability section).
 
 **D-pad test method (doc-now).** An instrumented test injects `DPAD_*`/`BACK`/`CENTER` across each screen
 and asserts a focused node after every event; a scripted path visits every top-level row and returns (no

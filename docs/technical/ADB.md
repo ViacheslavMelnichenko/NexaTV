@@ -1,8 +1,7 @@
 # ADB — Android Debug Bridge Reference (for NexaTV)
 
-> **Status:** ☐ Template. ADB is a first-class development tool for this project. The user is new to ADB,
-> so entries should be clear but technically accurate. Record **real** observed output as evidence; never
-> invent output. **Never commit pairing codes, device IPs, or ports** — those are runtime data.
+> Reference for working with the TCL over ADB. Record **real** observed output as evidence; never invent
+> output. **Never commit pairing codes, device IPs or ports.** Those are runtime data.
 
 ## What ADB is
 
@@ -11,12 +10,10 @@ query packages, and launch activities. Over a TV we use **wireless debugging** (
 
 ## Development host
 
-- OS: **Windows 11** (per environment). Shell used here: Git Bash.
-- ADB install status: **Installed** (FACT, 2026-10-20). Android Debug Bridge 1.0.41 / platform-tools **37.0.1**.
-  - Installed via `winget install --id Google.PlatformTools -e --source winget`.
-  - Binary: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe\platform-tools\adb.exe`
-  - winget modified PATH and added an `adb` alias, but the alias is not usable from the current Git Bash
-    session; invoke adb by full path (or restart the shell to pick up the new PATH).
+Any OS with Google **platform-tools** (`adb`) on `PATH`. For example, on macOS use
+`brew install --cask android-platform-tools`; on Windows use
+`winget install --id Google.PlatformTools -e`. The project was first set up on Windows with
+platform-tools 37.0.1. Builds need JDK 17+ and Android SDK platform 37.1 (ADR-0014).
 
 ## Connection workflow (wireless)
 
@@ -51,10 +48,10 @@ query packages, and launch activities. Over a TV we use **wireless debugging** (
 
 > Record the actual audited values in [ANDROID-TV.md](./ANDROID-TV.md).
 
-## Commands reserved for later (NOT in early read-only phase)
+## Commands that modify the device
 
-`pm install` / `pm uninstall`, `am start` (launching our activity), changing default HOME. These modify
-the device — follow the device-safety rules before using any of them.
+`pm install` / `pm uninstall`, `am start` and changing the default HOME all modify the device. Follow the
+device-safety rules (AGENTS.md rule 3) before using any of them.
 
 ## Updating NexaTV on the TV
 
@@ -68,9 +65,3 @@ Updates are sideloaded (ADR-0003 D7). The signed APK comes from the GitHub Relea
 
 > The release build is **minified (R8)**; always run the on-device smoke test before trusting a new
 > version (the manual on-device gate is described in `.github/workflows/release.yml`).
-
-## Command log (evidence)
-
-| Date | Command | Observed output (summary) |
-|------|---------|---------------------------|
-| _TBD_ | _TBD_ | _TBD_ |

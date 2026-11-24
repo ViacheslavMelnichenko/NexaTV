@@ -34,9 +34,8 @@ Proposed / Accepted / Superseded / Rejected
 | [ADR-0010](./ADR-0010-weather-widget-network.md) | Home weather widget & the first outbound network call | **Accepted** (2026-10-20) — **amends NFR-021**: adds `INTERNET` for weather only (no telemetry/other network); Open-Meteo (keyless, no secret); `HttpURLConnection`+`org.json` (no new dep); fixed Wrocław coords (no GPS); lazy, fail-soft off the cold-start path |
 | [ADR-0011](./ADR-0011-tile-art-banner-first.md) | Uniform 16:9 tile art — banner first | **Superseded** by [ADR-0012](./ADR-0012-tile-icon-and-label.md) (2026-10-21) — the banner grid read as "wide plates" on the TCL and overflowed the favorites row; reverted. Analysis kept for the record |
 | [ADR-0012](./ADR-0012-tile-icon-and-label.md) | Tiles revert to a square icon over a label | **Accepted** (2026-10-21) — supersedes ADR-0011; restores the FR-013 square-icon-over-label tile, deletes the `AppEntry.banner`/`loadBanner` path, resets S/M/L tokens to portrait (80×100/96×120/128×156) so four favorites fit the row; unmasked-adaptive-icon look accepted, icon normalisation a later optional follow-up |
-
-| [ADR-0013](./ADR-0013-adaptive-backgrounds.md) | Optional adaptive backgrounds and isolated Preview APK | Implemented for preview; real-TV performance acceptance pending |
-| [ADR-0014](./ADR-0014-toolchain-refresh.md) | Toolchain and dependency refresh (AGP 9, Kotlin 2.4, compileSdk 37.1) | Proposed — CI, then on-device acceptance |
+| [ADR-0013](./ADR-0013-adaptive-backgrounds.md) | Optional adaptive backgrounds and isolated Preview APK | **Accepted** (2026-10-21) — 16 bundled WebP scenes by time/weather, off-main decode, released while Home is hidden; separate `.preview` app. Shipped in v0.3.0; real-TV performance acceptance pending |
+| [ADR-0014](./ADR-0014-toolchain-refresh.md) | Toolchain and dependency refresh | **Accepted** (2026-11-24) — Gradle 9.9, AGP 9.5 built-in Kotlin, Kotlin 2.4 + Compose plugin, compileSdk 37.1 (min/target 34), Compose BOM 2026.11, protobuf 4; CI green, on-device re-measure pending |
 
 ## Planned / potential ADRs
 
@@ -45,7 +44,9 @@ CI/CD, signing & release (ADR-0003) · "Glass"/translucency (ADR-0005) ·
 Launcher HOME strategy (ADR-0006 — registration & pre-Home prompt; ADR-0007 — accessibility override after
 on-device validation showed Google TV blocks `ROLE_HOME` replacement) · Persistence (ADR-0008 — Proto DataStore).
 
-Resolved (M5): Configuration architecture (ADR-0009 — settings as additive Proto DataStore state, accepted).
+Resolved: Configuration architecture (ADR-0009 — settings as additive Proto DataStore state). ADR-0009
+says it "opens M5". That label predates the re-plan in [ROADMAP](../../project/ROADMAP.md), where settings and
+theming were delivered ahead of the deferred M5/M6.
 
 Still open / potential:
 

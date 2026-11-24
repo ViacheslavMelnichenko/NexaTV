@@ -12,7 +12,7 @@ and the first shared components exist **before** the launcher UI (M2). Two hard 
 1. **Screens never hardcode color, spacing, or radius.** They read tokens through `NexaTheme`.
 2. **A theme is one object.** Adding a theme later means supplying another `NexaColorScheme` instance —
    no screen changes. This is what makes the later *theme-switch* step a drop-in. See
-   [`ADR`s and the Theming epic in the backlog](../../project/BACKLOG.md).
+   [ADRs](../adr/README.md) (ADR-0009 settings, ADR-0012 tiles) and the [roadmap](../../project/ROADMAP.md).
 
 ## Architecture
 
@@ -62,7 +62,9 @@ TV screens need generous margins (overscan + 10-foot viewing); `screenMargin` is
 ### Typography (`NexaTypography`, tv-material `Typography`)
 
 Overridden slots guarantee readable body text at 10 feet (NFR-016, **body ≥ 18sp**):
-`bodyLarge 20sp` · `bodyMedium 18sp` · `labelLarge 18sp`. All other slots keep tv-material defaults.
+`bodyLarge 20sp` · `bodyMedium 18sp` · `labelLarge 18sp` · `labelMedium 15sp`. All other slots keep
+tv-material defaults. `labelMedium` is reserved for **app-tile names**: a secondary cue under the icon,
+sized so typical names fit on one line. It is a label, not body text, so the 18sp body floor does not apply.
 
 ## Components
 
@@ -72,26 +74,28 @@ Located in `ui/components/`. Each is `internal`, token-driven, and ships with `@
 
 A row/section title (`headlineMedium`, `onSurface`). Used to label groups of tiles.
 
-### `AppTile(label, onClick)`
+### `AppTile(label, icon, …)`
 
-The focusable building block of the launcher.
+The focusable building block of the launcher: a square app icon over a one/two-line label (ADR-0012).
+Apps without art fall back to a monogram.
 
-- **Focus treatment is the contract:** when focused it raises to `surfaceVariant` and draws a 3dp
-  `focusRing` border; unfocused it sits on `surface` with a 1dp `surfaceVariant` hairline. The ring **is**
-  the affordance — `indication = null` disables the Material ripple (wrong idiom for a D-pad).
-- Focus is tracked via the `clickable` `MutableInteractionSource` (`collectIsFocusedAsState`), so DPAD
-  focus/click come from one source of truth.
-- Size is passed by the caller (via `modifier`), because tile dimensions are a layout concern of each
-  screen, not of the component.
+- **Focus treatment is the contract.** When focused or being moved, the tile gets a 3dp ring
+  (`focusRing`, or `accent` while moving). It also gets an accent-tinted surface, scales to 1.05 and
+  casts a ring-tinted glow. At rest it sits on `surfaceVariant` with a 1dp hairline.
+  `indication = null` disables the Material ripple, the wrong idiom for a D-pad.
+- **OK handling.** A short OK launches. A long OK (system long-press timeout) opens the context menu.
+  An OK key-up without its key-down is ignored.
+- **Size is passed by the caller** through the S/M/L tile tokens (`TileSizes`, ADR-0009/0012). Tile
+  dimensions belong to each screen's layout, not to the component.
 
 ## Home layout & remote interaction (M4)
 
 Owner decisions (2026-10-20), binding for the Home screen and every per-item action:
 
-- **Favorites live in their own row.** The Home screen is a **"Обране" (Favorites) row** above the full
-  **"Усі застосунки"** grid (Google TV / FLauncher idiom). Favorites are always within reach and initial
-  focus lands in that row; the separation is explicit rather than pinned-first-in-grid. Favorites are an
-  *ordered* set (ADR-0008) and render in the user's pin/reorder order.
+- **Favorites live in their own row.** Home shows the widgets and the **"Обране" (Favorites) row**. The
+  full grid is a separate **"Усі застосунки" (All apps)** screen reached from the top bar. Initial focus
+  lands in the favorites row and returns there after an unpin. Favorites are an *ordered* set (ADR-0008)
+  and render in the user's pin/reorder order.
 - **The remote has no "Menu" button, so long-press OK is the context-action trigger** — this is the single
   interaction model for *all* per-item actions across the launcher, not just favorites:
   - **Short OK = the primary action** (launch the app). Never repurpose short OK for anything else — it is

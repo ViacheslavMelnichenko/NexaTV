@@ -6,6 +6,29 @@ versioning follows [SemVer](https://semver.org/) (ADR-0003 D5).
 
 ## [Unreleased]
 
+### Changed
+- App tile names use a smaller 15sp label (`labelMedium`), so common names fit on one line.
+- The toolchain and dependencies were refreshed (ADR-0014): Gradle 9.9, AGP 9.5 with built-in Kotlin,
+  Kotlin 2.4 with the Compose compiler plugin, compileSdk 37.1 (min/target 34), Compose BOM 2026.11,
+  tv-material 1.1, DataStore 1.3 and protobuf 4.
+- The CI debug APK budget was raised to 45 MB. This is only because debug-only `ui-tooling` grew; the
+  release budget is unchanged at 20 MB.
+- Documentation was consolidated: `project/ROADMAP.md` replaces MILESTONES/BACKLOG, and TEST-PLAN now
+  includes traceability.
+
+### Fixed
+- A corrupt or truncated launcher state file now resets to defaults instead of crash-looping Home.
+- App-catalogue reloads are debounced and survive system-service failures, and the grid is fully reloaded
+  after NexaTV regains Home.
+- Pressing OK to finish a reorder no longer opens the context menu.
+- Focus returns to the favorites row after an unpin, and the context menu reliably takes focus.
+- A real HOME press resets navigation when NexaTV is the default Home.
+- Work-profile apps never fall back to a personal-profile launch.
+
+### Validation
+- CI is green on `main` (build, Lint, unit tests, detekt, ABI and size gates).
+- No TCL on-device check yet.
+
 ## [0.3.2] - 2026-10-28
 
 ### Fixed

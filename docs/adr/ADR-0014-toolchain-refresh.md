@@ -1,6 +1,7 @@
 # ADR-0014 — Toolchain and dependency refresh
 
-Date: 2026-11-24. Status: Proposed — CI green required, then on-device acceptance on the TCL.
+Date: 2026-11-24. Status: Accepted. CI is green on `main`; on-device smoke test and performance re-measure
+on the TCL are pending.
 
 ## Context
 

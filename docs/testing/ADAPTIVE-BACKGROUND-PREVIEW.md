@@ -36,7 +36,7 @@ Published previews are also available under GitHub Releases as prereleases with 
 APK is copied from that run, with its checksum and this guide. These assets are independent of the
 30-day Actions artifact retention. Preview tags do not invoke the production signing job.
 
-Local build with JDK 17 and Android SDK 34:
+Local build with JDK 17+ and Android SDK platform 37.1 (ADR-0014):
 
 ```sh
 ./gradlew :app:assemblePreview :app:lintPreview :app:testPreviewUnitTest detekt
