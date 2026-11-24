@@ -92,7 +92,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
+    kotlinOptions {
+        jvmTarget = "17"
+        // Strong skipping: tiles/rows holding AppEntry (unstable ComponentName) can skip recomposition
+        // on unrelated state changes (minute tick, menus). Opt-in on Compose compiler 1.5.x; the
+        // default from Kotlin 2.0's Compose plugin onwards.
+        freeCompilerArgs += listOf(
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:experimentalStrongSkipping=true",
+        )
+    }
 
     buildFeatures {
         compose = true

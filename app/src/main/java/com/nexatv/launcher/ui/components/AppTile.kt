@@ -103,7 +103,8 @@ internal fun AppTile(
 
     // Keep text on the shared, couch-readable typography scale rather than introducing a hard-coded
     // component-local size. The icon remains the primary cue; muted colour provides hierarchy.
-    val labelStyle = MaterialTheme.typography.labelLarge
+    // labelMedium (not labelLarge) so common app names fit on one line instead of wrapping to two.
+    val labelStyle = MaterialTheme.typography.labelMedium
 
     Column(
         modifier = modifier
@@ -188,6 +189,9 @@ private fun Modifier.okClickable(
                 true
             }
             native.action == AndroidKeyEvent.ACTION_UP -> {
+                // An UP without our DOWN (e.g. the OK that committed a reorder, or focus moving mid-press)
+                // would otherwise measure against 0 and always read as a long-press.
+                if (okDownAt == 0L) return@onKeyEvent true
                 val held = native.eventTime - okDownAt
                 okDownAt = 0L
                 if (held >= longPressMs) onLongClick() else onClick()

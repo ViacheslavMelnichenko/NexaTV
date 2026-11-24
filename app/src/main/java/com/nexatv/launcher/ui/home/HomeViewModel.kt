@@ -21,13 +21,13 @@ import com.nexatv.launcher.data.ThemeChoice
 import com.nexatv.launcher.data.TileSize
 import com.nexatv.launcher.data.resolveFavorites
 import com.nexatv.launcher.data.toFavoriteKey
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -96,10 +96,10 @@ class HomeViewModel(
     init {
         refresh()
         // Keep the grid live: re-evaluate whenever an app is installed/removed/changed (FR-002).
-        // collectLatest cancels an in-flight reload if another change arrives, so a burst of callbacks
+        // appChanges() is debounced, and reload() cancels any in-flight load, so a burst of callbacks
         // (one app update fires several) coalesces into a single, up-to-date load.
         viewModelScope.launch {
-            repository.appChanges().collectLatest { reload() }
+            repository.appChanges().collect { reload() }
         }
         // Keep favorites live: a pin/unpin/reorder updates the "Обране" row without reloading the grid.
         viewModelScope.launch {
@@ -151,11 +151,26 @@ class HomeViewModel(
         reloadJob?.cancel()
         reloadJob = viewModelScope.launch {
             if (!isEffectivelyHome()) {
+                // Package events while not Home are not reflected in the cache, so force a full load
+                // once NexaTV becomes Home again instead of re-projecting a stale list.
+                hasLoaded = false
                 _state.value = HomeUiState.NeedsHomeRole
                 return@launch
             }
-            cachedApps = repository.loadApps()
-            hasLoaded = true
+            // A binder failure (SecurityException, a dead system service) must not crash the HOME app:
+            // keep the last good catalogue; if nothing loaded yet, hasLoaded stays false so the next
+            // resume retries the full load.
+            val apps = try {
+                repository.loadApps()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: RuntimeException) {
+                null
+            }
+            if (apps != null) {
+                cachedApps = apps
+                hasLoaded = true
+            }
             emitApps()
         }
     }

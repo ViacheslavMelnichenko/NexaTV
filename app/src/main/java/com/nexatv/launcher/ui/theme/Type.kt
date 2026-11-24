@@ -25,4 +25,6 @@ internal val NexaTypography: Typography = Typography(
     bodyLarge = TextStyle(fontSize = 20.sp, lineHeight = 28.sp),
     bodyMedium = TextStyle(fontSize = 18.sp, lineHeight = 26.sp),
     labelLarge = TextStyle(fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium),
+    // App-tile names: a secondary cue under the icon, sized so typical names fit on a single line.
+    labelMedium = TextStyle(fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium),
 )
