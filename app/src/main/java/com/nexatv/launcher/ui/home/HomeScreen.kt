@@ -170,6 +170,8 @@ private fun AppsContent(
     var menuTarget by remember { mutableStateOf<AppEntry?>(null) }
     var reorder by remember { mutableStateOf<ReorderSession?>(null) }
     val favoritesFocus = remember { FocusRequester() }
+    // Set when a favorite is unpinned from Home: its tile (which held focus) leaves the row.
+    var refocusFavorites by remember { mutableStateOf(false) }
     val failedTemplate = stringResource(R.string.home_launch_failed)
     val favoriteKeys = remember(favorites) { favorites.map { it.toFavoriteKey() }.toSet() }
 
@@ -233,7 +235,11 @@ private fun AppsContent(
         AppContextMenu(
             app = target,
             isFavorite = key in favoriteKeys,
-            onToggleFavorite = { actions.onToggleFavorite(target); menuTarget = null },
+            onToggleFavorite = {
+                if (key in favoriteKeys) refocusFavorites = true
+                actions.onToggleFavorite(target)
+                menuTarget = null
+            },
             onMove = {
                 val index = favorites.indexOfFirst { it.toFavoriteKey() == key }
                 if (index >= 0) reorder = ReorderSession(index, index)
@@ -248,6 +254,13 @@ private fun AppsContent(
     // With no favorites there is nothing to focus here; the top-bar buttons take the first press.
     LaunchedEffect(favoritesPresent) {
         if (favoritesPresent) runCatching { favoritesFocus.requestFocus() }
+    }
+    // Unpinning disposes the focused tile; put focus back on the row instead of letting it drift.
+    LaunchedEffect(favorites.size) {
+        if (refocusFavorites) {
+            refocusFavorites = false
+            if (favoritesPresent) runCatching { favoritesFocus.requestFocus() }
+        }
     }
     // FR-014: launch errors are shown in-UI (focus-preserving) and auto-dismiss.
     LaunchedEffect(launchError) {
@@ -406,8 +419,9 @@ private fun FavoritesRow(
         horizontalArrangement = Arrangement.spacedBy(NexaTheme.spacing.md, Alignment.CenterHorizontally),
         modifier = Modifier
             .fillMaxWidth()
-            // Returning to Home lands focus back on the last-focused favorite (parity with the All-apps
-            // grid), falling back to the first tile — not an unpredictable bounce to favorite #1.
+            // When focus re-enters the row (e.g. back from the top bar or a dialog) it lands on the
+            // last-focused favorite, falling back to the first tile. Navigating to All apps/Settings
+            // leaves composition, so returning from those screens starts at the first tile.
             .focusRestorer { firstFocus }
             .then(
                 if (reorder != null) {

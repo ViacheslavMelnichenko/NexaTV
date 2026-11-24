@@ -78,9 +78,11 @@ internal fun AppContextMenu(
                 MenuAction(stringResource(R.string.home_menu_app_info), onAppInfo)
                 MenuAction(stringResource(R.string.home_menu_cancel), onDismiss)
             }
+            // Inside the Dialog: its content composes in a separate window, so only here is the
+            // first action guaranteed to be attached when focus is requested.
+            LaunchedEffect(Unit) { runCatching { firstAction.requestFocus() } }
         }
     }
-    LaunchedEffect(Unit) { runCatching { firstAction.requestFocus() } }
 }
 
 /** A full-width, D-pad-focusable row in the context menu. */

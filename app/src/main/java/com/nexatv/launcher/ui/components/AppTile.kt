@@ -189,6 +189,9 @@ private fun Modifier.okClickable(
                 true
             }
             native.action == AndroidKeyEvent.ACTION_UP -> {
+                // An UP without our DOWN (e.g. the OK that committed a reorder, or focus moving mid-press)
+                // would otherwise measure against 0 and always read as a long-press.
+                if (okDownAt == 0L) return@onKeyEvent true
                 val held = native.eventTime - okDownAt
                 okDownAt = 0L
                 if (held >= longPressMs) onLongClick() else onClick()
