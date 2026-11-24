@@ -17,7 +17,7 @@ update rather than minor bumps only.
   - Kotlin 2.4.21, with Compose compiled by the Kotlin Compose compiler plugin at the same version.
     Strong skipping is therefore on by default.
 - **SDK levels:**
-  - `compileSdk` 36.
+  - `compileSdk` 37.1 for `:app` (required by Compose 1.13); 36 for `:benchmark`.
   - `minSdk` and `targetSdk` stay at 34. The single device target is unchanged (ADR-0002), and runtime
     behavior changes of newer target levels are not taken on in this step.
 - **Libraries:**
@@ -36,7 +36,7 @@ update rather than minor bumps only.
 
 ## Consequences
 
-- No local build step changes for contributors other than needing JDK 17+ and SDK platform 36.
+- No local build step changes for contributors other than needing JDK 17+ and SDK platform 37.1.
 - Revisit the detekt pin when detekt 2.0 is stable.
 - Performance NFRs (startup, frame timing) must be re-measured on the TCL with the `:benchmark` module
   before the next release, since both the Compose runtime and compiler changed.

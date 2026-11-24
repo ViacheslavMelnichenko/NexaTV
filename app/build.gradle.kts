@@ -37,7 +37,10 @@ val releaseVersionCode = (project.findProperty("versionCode") as String?)?.toInt
 android {
     namespace = "com.nexatv.launcher"
     // compileSdk follows the androidx libraries (ADR-0014); the runtime target stays API 34 below.
-    compileSdk = 36
+    // Compose 1.13 (BOM 2026.11) requires compiling against API 37.1.
+    compileSdk {
+        version = release(37) { minorApiLevel = 1 }
+    }
 
     defaultConfig {
         applicationId = "com.nexatv.launcher"
