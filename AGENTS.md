@@ -17,8 +17,12 @@ when it matters:
 
 1. **Phase discipline & autonomy.** M1 (Foundation), M2 (minimal launcher), M3 (HOME via the
    accessibility override), the Design System, Theming, and the CI + release pipeline are **done and
-   verified on the real TCL**. The project is now in **M4 — Application Discovery**; M5–M8 are deferred
-   (owner paused — do not start them). Keep work coherent within the current milestone, but **do not gate
+   verified on the real TCL**. **M4 — Application Discovery** is done at its core (basic categories are
+   deferred), adaptive backgrounds shipped in v0.3.0, and the toolchain was refreshed (ADR-0014). There is
+   **no active milestone**: current work is maintenance (fixes, hardening, docs, dependency upkeep) plus the
+   owner-pending on-device checks listed in [`project/ROADMAP.md`](project/ROADMAP.md), the single source
+   for status. M5–M8 and categories are deferred (owner paused — do not start them). Keep each change
+   coherent and scoped, but **do not gate
    on an explicit "go" for obvious, low-risk next steps** — continue automatically from one task to the
    next. **Stop and ask only** when a decision is non-trivial or owner-dependent, when a step needs the
    owner's verification (e.g. a visual or on-device check), or when an observed result contradicts
@@ -44,6 +48,8 @@ when it matters:
 
 - Small, coherent commits (`docs:`, `feat:`, `fix:`, …). No unrelated work bundled together.
 - Plain, human-authored commit messages. No AI attribution trailers.
+- Work directly on `main`; do not create feature branches or pull requests (owner's instruction,
+  2026-11-24). The owner pushes `main`.
 
 ## Working agreement
 
